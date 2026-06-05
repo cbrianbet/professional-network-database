@@ -51,6 +51,22 @@
 
   .topbar-btn:hover { opacity: 0.92; transform: translateY(-1px); }
 
+  .existing-record-prompt {
+    max-width: 900px;
+    margin: 0 auto 1.5rem;
+    padding: 1rem 1.25rem;
+    border-radius: 18px;
+    background: rgba(217, 223, 235, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .existing-record-message {
+    color: #0f172a;
+    font-size: 0.95rem;
+  }
+
   .page-body {
     max-width: 900px;
     margin: 0 auto;
@@ -332,6 +348,12 @@
         <p>Please fill in your details carefully. All information is kept strictly confidential and used solely for professional engagement purposes.</p>
       </div>
     </div>
+    <div id="existingRecordPrompt" class="existing-record-prompt" style="display:none;">
+      <div class="existing-record-message">
+        We found a saved registration for you. Click below to load your existing record for editing.
+      </div>
+      <button id="loadExistingMemberBtn" type="button" class="topbar-btn">Load existing registration</button>
+    </div>
     <div class="page-body">
 <div class="page-body">
   <div class="progress-bar-wrap">
@@ -547,6 +569,7 @@ document.addEventListener('click', (e) => {
 <script>
   const authToken = localStorage.getItem('authToken');
   let currentMemberId = null;
+  let cachedMemberRecord = null;
 
   async function fetchCurrentUser() {
     try {
@@ -562,8 +585,9 @@ document.addEventListener('click', (e) => {
     }
   }
 
-  async function fetchMemberRecord() {
+  async function fetchMemberRecord(user) {
     try {
+      if (!user || user.role === 'admin') return null;
       const res = await fetch('/api/members', {
         headers: { Authorization: `Bearer ${authToken}` },
       });
@@ -611,16 +635,30 @@ document.addEventListener('click', (e) => {
     if (user) {
       const heroName = document.querySelector('.hero h2');
       if (heroName) heroName.textContent = `Welcome, ${user.name}`;
-      const emailInput = document.querySelector('input[name="email"]');
-      if (emailInput) emailInput.value = user.email;
       const nameNode = document.getElementById('authUserName');
       if (nameNode) nameNode.textContent = user.name;
       const logoutButton = document.getElementById('logoutButton');
       if (logoutButton) logoutButton.addEventListener('click', logout);
     }
 
-    const member = await fetchMemberRecord();
-    if (member) fillMemberForm(member);
+    const member = await fetchMemberRecord(user);
+    if (member) {
+      cachedMemberRecord = member;
+      const prompt = document.getElementById('existingRecordPrompt');
+      if (prompt) prompt.style.display = 'flex';
+    }
+
+    const loadBtn = document.getElementById('loadExistingMemberBtn');
+    if (loadBtn) {
+      loadBtn.addEventListener('click', () => {
+        if (cachedMemberRecord) {
+          fillMemberForm(cachedMemberRecord);
+          const prompt = document.getElementById('existingRecordPrompt');
+          if (prompt) prompt.style.display = 'none';
+        }
+      });
+    }
+
     wireDataFormEvents();
     updateProgress();
   }

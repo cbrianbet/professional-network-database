@@ -106,6 +106,8 @@ body{
 
 /* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.page-content{max-width:1200px;margin:2rem auto;padding:0 1.5rem;flex:1}
+.hidden{display:none}
 
 /* TOPBAR */
 .topbar{
@@ -151,8 +153,61 @@ body{
 .topbar-btn:hover{opacity:0.88;transform:translateY(-1px)}
 .topbar-btn svg{width:14px;height:14px}
 
+.auth-navbar{
+  width:100%;display:flex;align-items:center;justify-content:space-between;
+  gap:1rem;padding:1rem 2rem;background:rgba(11,15,20,0.95);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.auth-brand{font-family:var(--font-head);font-size:1rem;font-weight:800;color:var(--gold);letter-spacing:0.08em;}
+.auth-links{display:flex;gap:0.75rem;flex-wrap:wrap}
+.auth-links a{color:var(--text);text-decoration:none;padding:0.65rem 0.9rem;border-radius:8px;border:1px solid transparent;transition:all 0.18s;}
+.auth-links a:hover{border-color:rgba(255,255,255,0.12);background:rgba(255,255,255,0.03);}
+.auth-user{display:flex;align-items:center;gap:0.75rem;color:var(--muted);font-size:0.88rem;}
+.auth-user button{background:transparent;border:1px solid rgba(255,255,255,0.08);color:var(--text);padding:0.55rem 0.9rem;border-radius:8px;cursor:pointer;}
+.auth-user button:hover{background:rgba(255,255,255,0.05);}
+
 /* CONTENT */
 .content{padding:2rem;overflow-y:auto;flex:1}
+.hidden{display:none}
+
+/* FORM + ADMIN SECTION */
+.page-body{padding:2rem 0}
+.hero{background:linear-gradient(100deg,#1a2a3a 0%,#0f1923 60%,#1a3028 100%);padding:2.75rem 2rem 2rem;color:#f8fafc;position:relative;overflow:hidden;border-radius:24px;margin-bottom:1.75rem}
+.hero::before{content:'';position:absolute;right:-80px;top:-80px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(201,149,42,0.14) 0%,transparent 70%)}
+.hero-inner{position:relative;max-width:720px}
+.hero-tag{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(201,149,42,0.15);border:1px solid rgba(201,149,42,0.35);color:rgba(232,184,75,0.95);font-size:0.78rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.28rem 0.85rem;border-radius:100px;margin-bottom:1rem}
+.hero h2{font-family:var(--font-head);font-size:clamp(1.9rem,4vw,2.4rem);line-height:1.05;margin-bottom:0.8rem}
+.hero p{font-size:0.95rem;color:rgba(232,237,243,0.82);line-height:1.7;max-width:620px}
+.form-section{background:var(--surface);border:1px solid var(--border);border-radius:20px;margin-bottom:1.25rem;overflow:hidden}
+.section-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.15rem 1.3rem;cursor:pointer;background:rgba(255,255,255,0.03)}
+.section-header.open{background:rgba(212,168,67,0.08)}
+.section-num{width:32px;height:32px;border-radius:12px;background:rgba(212,168,67,0.12);display:grid;place-items:center;color:var(--gold);font-weight:700}
+.section-title{font-weight:700;color:var(--text)}
+.section-chevron{font-size:1rem;color:var(--muted)}
+.section-body{display:none;padding:1.25rem 1.3rem 1.35rem}
+.section-body.open{display:block}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.field{display:flex;flex-direction:column;gap:0.4rem}
+.field label{font-size:0.78rem;color:var(--muted);font-weight:600}
+.field input,.field select,.field textarea{border:1px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);padding:0.9rem 1rem;font:inherit;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
+.field.has-error input,.field.has-error select,.field.has-error textarea{border-color:rgba(224,90,107,0.7)}
+.err-msg{font-size:0.72rem;color:#fb7185;min-height:1.1rem}
+.submit-btn{display:inline-flex;align-items:center;gap:0.55rem;padding:0.9rem 1.25rem;border-radius:14px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0b0f14;font-weight:700;cursor:pointer;transition:transform 0.18s,opacity 0.18s;margin-top:1rem}
+.submit-btn:hover{transform:translateY(-1px)}
+.tag-pill{display:inline-flex;align-items:center;gap:0.35rem;padding:0.35rem 0.65rem;border-radius:999px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);color:var(--text);font-size:0.82rem}
+.tag-pill button{background:none;border:none;color:var(--text);cursor:pointer;font-size:1rem;line-height:1}
+.admin-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.5rem;}
+.admin-controls{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin-bottom:1rem}
+.admin-error{color:#fb7185;margin-top:0.5rem;display:none}
+.admin-table{width:100%;border-collapse:collapse;margin-top:1rem}
+.admin-table th,.admin-table td{padding:0.95rem 1rem;border-bottom:1px solid var(--border);}
+.admin-table th{font-size:0.72rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
+.admin-table td{color:var(--text)}
+.admin-table select, .admin-table button{border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:0.6rem 0.75rem;outline:none}
+.admin-table button.update{background:var(--gold);color:#0b0f14;border:none;cursor:pointer}
+.admin-table button.update:hover{opacity:0.9}
+@media(max-width:900px){.field-grid{grid-template-columns:1fr}.hero{padding:2rem 1.25rem}.topbar{flex-wrap:wrap}} 
 
 /* KPI CARDS */
 .kpi-grid{
@@ -434,70 +489,13 @@ tbody td{
   .content{padding:1rem}
 }
 </style>
+<link rel="stylesheet" href="shared-layout.css">
 </head>
 <body>
-<div class="layout">
-
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-mark">
-      <div class="logo-dot">PD</div>
-      <span class="logo-name">ProDatabank</span>
-    </div>
-    <div class="logo-sub">Admin Console</div>
-  </div>
-  <nav class="nav">
-    <div class="nav-label">Main</div>
-    <button class="nav-item active">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard <span class="nav-badge">16</span>
-    </button>
-    <button class="nav-item" onclick="alert('Link to registration form')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-      All Members
-    </button>
-    <button class="nav-item" onclick="alert('Employment tracking module')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
-      Employment
-    </button>
-    <button class="nav-item" onclick="alert('Education analytics')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-      Education
-    </button>
-    <div class="nav-label">System</div>
-    <button class="nav-item" onclick="alert('Export CSV / Excel')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Export Data
-    </button>
-    <button class="nav-item" onclick="alert('Settings panel')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      Settings
-    </button>
-  </nav>
-  <div class="sidebar-footer">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-    Encrypted &amp; Secure
-  </div>
-</aside>
-
-<!-- MAIN AREA -->
-<div class="main">
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="page-title">Dashboard</div>
-    <div class="topbar-search">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="searchInput" placeholder="Search members…" oninput="filterTable()">
-    </div>
-    <button class="topbar-btn" onclick="window.open('professionals-databank.html','_blank')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Add Member
-    </button>
-  </div>
-
-  <!-- CONTENT -->
-  <div class="content">
+<div id="shared-shell"></div>
+<template id="dashboard-content">
+  <div class="page-content">
+    <div class="content">
 
     <!-- KPI CARDS -->
     <div class="kpi-grid" id="kpiGrid"></div>
@@ -573,40 +571,65 @@ tbody td{
     </div>
 
   </div>
-</div>
-</div>
-
-<!-- DETAIL MODAL -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal" id="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modalTitle">Member Details</div>
-      <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('show')">✕</button>
-    </div>
-    <div class="modal-body" id="modalBody"></div>
+  <div id="registerSection" class="hidden"></div>
+  <div id="adminSection" class="hidden"></div>
   </div>
-</div>
 
+  <!-- DETAIL MODAL -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">Member Details</div>
+        <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('show')">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+</template>
+<script src="shared-layout.js"></script>
 <script>
 // ===================== DATA =====================
-const MEMBERS = [
-  {id:1,name:"Brian Otieno Mwangi",phone:"0712 345 678",email:"brian.otieno@gmail.com",age:28,nationalId:"28765432",subLocation:"Mathare, Nairobi",education:"Bachelor's Degree",formFourYear:2013,kcse:"B+",institution:"University of Nairobi",course:"BSc Computer Science",graduation:2017,status:"Employed (Full-time)",employer:"Safaricom PLC",career:"Software Engineer",skills:["Python","React","SQL","Docker"]},
-  {id:2,name:"Faith Wanjiku Kamau",phone:"0723 456 789",email:"faith.wanjiku@yahoo.com",age:24,nationalId:"34123456",subLocation:"Westlands, Nairobi",education:"Diploma",formFourYear:2017,kcse:"C+",institution:"Kenya Institute of Management",course:"Business Administration",graduation:2021,status:"On Internship",employer:"Equity Bank",career:"Business Analyst",skills:["Excel","Data Analysis","Communication"]},
-  {id:3,name:"James Kipkoech Rotich",phone:"0734 567 890",email:"james.kipkoech@outlook.com",age:32,nationalId:"21987654",subLocation:"Eldoret East",education:"Master's Degree",formFourYear:2009,kcse:"A-",institution:"Moi University",course:"MBA Finance",graduation:2018,status:"Self-employed / Business Owner",employer:"Rotich Agri-Solutions",career:"Entrepreneur",skills:["Agribusiness","Finance","Leadership","Swahili"]},
-  {id:4,name:"Mercy Achieng Odhiambo",phone:"0745 678 901",email:"mercy.achieng@gmail.com",age:26,nationalId:"37234567",subLocation:"Kisumu Central",education:"Bachelor's Degree",formFourYear:2015,kcse:"B",institution:"Maseno University",course:"BSc Nursing",graduation:2020,status:"Employed (Full-time)",employer:"Aga Khan Hospital",career:"Registered Nurse",skills:["Patient Care","Clinical Skills","Swahili","EMR Systems"]},
-  {id:5,name:"Peter Muthoni Karanja",phone:"0756 789 012",email:"peter.muthoni@gmail.com",age:23,nationalId:"40345678",subLocation:"Thika Town",education:"Certificate",formFourYear:2018,kcse:"C",institution:"Kenya Technical Trainers College",course:"Electrical Engineering",graduation:2022,status:"Unemployed (Actively Seeking)",employer:"",career:"Electrician",skills:["Wiring","Solar Installation","Safety Compliance"]},
-  {id:6,name:"Sandra Nekesa Wafula",phone:"0767 890 123",email:"sandra.nekesa@gmail.com",age:27,nationalId:"35456789",subLocation:"Kakamega North",education:"Bachelor's Degree",formFourYear:2014,kcse:"A",institution:"Egerton University",course:"BSc Agriculture",graduation:2019,status:"Active Application",employer:"",career:"Agronomist",skills:["GIS","Crop Science","Research","French"]},
-  {id:7,name:"Daniel Muriithi Njeru",phone:"0778 901 234",email:"daniel.njeru@hotmail.com",age:35,nationalId:"18567890",subLocation:"Meru Town",education:"Higher National Diploma (HND)",formFourYear:2007,kcse:"B-",institution:"Kenya Polytechnic",course:"Civil Engineering",graduation:2012,status:"Employed (Full-time)",employer:"Kenya National Highways Authority",career:"Civil Engineer",skills:["AutoCAD","Structural Design","Project Management"]},
-  {id:8,name:"Grace Wairimu Gitau",phone:"0789 012 345",email:"grace.wairimu@gmail.com",age:22,nationalId:"42678901",subLocation:"Kiambu East",education:"Diploma",formFourYear:2019,kcse:"C+",institution:"Zetech University",course:"Information Technology",graduation:2022,status:"On Voluntary / Community Service",employer:"iHub Nairobi",career:"IT Support",skills:["Networking","Help Desk","HTML","CSS"]},
-  {id:9,name:"Collins Omondi Ajwang",phone:"0790 123 456",email:"collins.omondi@gmail.com",age:29,nationalId:"29789012",subLocation:"Homa Bay",education:"Bachelor's Degree",formFourYear:2012,kcse:"B+",institution:"Technical University of Kenya",course:"BSc Mechanical Engineering",graduation:2017,status:"Shortlisted",employer:"",career:"Mechanical Engineer",skills:["SolidWorks","MATLAB","Welding","AutoCAD"]},
-  {id:10,name:"Lydia Chebet Koech",phone:"0701 234 567",email:"lydia.chebet@gmail.com",age:25,nationalId:"38890123",subLocation:"Bomet Central",education:"Bachelor's Degree",formFourYear:2016,kcse:"A-",institution:"Kenyatta University",course:"BEd Science",graduation:2021,status:"Employed (Part-time)",employer:"Riara Group of Schools",career:"Science Teacher",skills:["Biology","Chemistry","Lesson Planning","Kiswahili"]},
-  {id:11,name:"Victor Kiprotich Sang",phone:"0702 345 678",email:"victor.sang@gmail.com",age:31,nationalId:"23901234",subLocation:"Nandi Hills",education:"Bachelor's Degree",formFourYear:2010,kcse:"B",institution:"Moi University",course:"BSc Biochemistry",graduation:2015,status:"Unemployed (Actively Seeking)",employer:"",career:"Laboratory Technician",skills:["PCR","Microscopy","Research","Report Writing"]},
-  {id:12,name:"Irene Awuor Nyakundi",phone:"0703 456 789",email:"irene.awuor@gmail.com",age:33,nationalId:"20012345",subLocation:"Migori Town",education:"Master's Degree",formFourYear:2008,kcse:"A",institution:"University of Nairobi",course:"MA Development Studies",graduation:2017,status:"Employed (Full-time)",employer:"USAID Kenya",career:"Development Officer",skills:["M&E","Project Management","SPSS","Grant Writing"]},
-  {id:13,name:"Edwin Njenga Kamande",phone:"0704 567 890",email:"edwin.njenga@gmail.com",age:20,nationalId:"44123456",subLocation:"Gatanga, Murang'a",education:"Certificate",formFourYear:2021,kcse:"C-",institution:"Nairobi Aviation College",course:"Tourism Management",graduation:2023,status:"Active Application",employer:"",career:"Tour Guide",skills:["English","French","Geography","Customer Service"]},
-  {id:14,name:"Pauline Auma Onyango",phone:"0705 678 901",email:"pauline.auma@gmail.com",age:30,nationalId:"25234567",subLocation:"Kisumu West",education:"Diploma",formFourYear:2011,kcse:"C+",institution:"Kisumu Polytechnic",course:"Secretarial Studies",graduation:2014,status:"Employed (Full-time)",employer:"County Government Kisumu",career:"Administrative Officer",skills:["MS Office","Typing","Filing","Communication"]},
-  {id:15,name:"Moses Mutuku Mwangangi",phone:"0706 789 012",email:"moses.mutuku@gmail.com",age:27,nationalId:"34345678",subLocation:"Machakos Town",education:"Bachelor's Degree",formFourYear:2014,kcse:"B-",institution:"South Eastern Kenya University",course:"BSc Information Systems",graduation:2019,status:"Attended Interview",employer:"",career:"Systems Analyst",skills:["Python","Power BI","SQL","Networking"]},
-  {id:16,name:"Vivian Chepkoech Bett",phone:"0707 890 123",email:"vivian.bett@gmail.com",age:24,nationalId:"39456789",subLocation:"Kericho Town",education:"Diploma",formFourYear:2017,kcse:"B",institution:"Kenya Medical Training College",course:"Clinical Medicine",graduation:2021,status:"On Internship",employer:"Kericho County Referral Hospital",career:"Clinical Officer",skills:["Diagnosis","Patient Care","BLS","Record Keeping"]},
-];
+const MEMBERS = [];
+
+function normalizeMember(row) {
+  return {
+    id: row.id,
+    name: row.name || '',
+    phone: row.phone || '',
+    email: row.email || '',
+    age: row.age || 0,
+    nationalId: row.national_id || '',
+    subLocation: row.sub_location || '',
+    education: row.education || '',
+    formFourYear: row.form_four_year || '',
+    kcse: row.kcse || '',
+    institution: row.institution || '',
+    course: row.course || '',
+    graduation: row.graduation || '',
+    status: row.status || 'Pending',
+    employer: row.employer || '',
+    career: row.career || '',
+    skills: Array.isArray(row.skills) ? row.skills : [],
+  };
+}
+
+async function loadMembers() {
+  const token = localStorage.getItem('authToken');
+  if (!token) return;
+  try {
+    const response = await fetch('/api/members', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Unable to load members');
+    const data = await response.json();
+    MEMBERS.splice(0, MEMBERS.length, ...(data.members || []).map(normalizeMember));
+    filtered = [...MEMBERS];
+  } catch (err) {
+    console.error('Member load failed', err);
+    MEMBERS.splice(0, MEMBERS.length);
+    filtered = [...MEMBERS];
+  }
+}
 
 // ===================== COLOUR HELPERS =====================
 const AVATARCOLORS=[["#d4a843","#0b0f14"],["#2ec4b6","#0b0f14"],["#e05a6b","#fff"],["#4a9eff","#0b0f14"],["#b478ff","#0b0f14"],["#ffa53c","#0b0f14"],["#3db07a","#0b0f14"],["#e87c5a","#0b0f14"]];
@@ -632,15 +655,421 @@ function shortStatus(s){
 let filtered=[...MEMBERS], sortKey='name', sortDir=1, page=1;
 const PER_PAGE=8;
 
-// ===================== INIT =====================
-window.onload=()=>{
+// Auth is handled by `shared-layout.js` (renderProtectedPage/loadCurrentUser)
+
+// ===================== PAGE ROUTING =====================
+const PAGE_CONFIGS = {
+  dashboard: { title: 'Dashboard', init: initDashboardPage },
+  register: { title: 'Member Registration', init: initRegisterPage },
+  admin: { title: 'Admin console', init: initAdminPage },
+};
+let pageState = { dashboardInitialized: false, registerRendered: false, adminRendered: false };
+
+function setActiveNav(page) {
+  const expectedFile = `${page}.html`;
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const dr = item.getAttribute('data-route') || item.getAttribute('href') || '';
+    const isActive = dr === expectedFile || dr === `#${page}` || dr.endsWith(expectedFile);
+    item.classList.toggle('active', isActive);
+  });
+}
+
+async function showPage(page) {
+  const sectionMap = {
+    dashboard: 'dashboardSection',
+    register: 'registerSection',
+    admin: 'adminSection',
+  };
+
+  Object.entries(sectionMap).forEach(([key, id]) => {
+    document.getElementById(id).classList.toggle('hidden', key !== page);
+  });
+
+  const topbarSearch = document.querySelector('.topbar-search');
+  if (topbarSearch) topbarSearch.style.display = page === 'dashboard' ? 'flex' : 'none';
+
+  const pageTitle = document.getElementById('pageTitle');
+  if (pageTitle) pageTitle.textContent = PAGE_CONFIGS[page].title;
+
+  if (page === 'register' && !pageState.registerRendered) {
+    renderRegisterSection();
+    pageState.registerRendered = true;
+  }
+  if (page === 'admin' && !pageState.adminRendered) {
+    renderAdminSection();
+    pageState.adminRendered = true;
+  }
+
+  await PAGE_CONFIGS[page].init();
+}
+
+async function renderByHash() {
+  const raw = window.location.hash.replace('#', '');
+  const page = PAGE_CONFIGS[raw] ? raw : 'dashboard';
+  if (window.location.hash !== `#${page}`) {
+    history.replaceState(null, '', `#${page}`);
+  }
+  setActiveNav(page);
+  await showPage(page);
+}
+
+async function initDashboardPage() {
+  await loadMembers();
   buildKPI();
   buildEmploymentChart();
   buildDonut();
   buildSkillsCloud();
   buildCareerFilter();
   filterTable();
-};
+}
+
+function renderRegisterSection() {
+  const container = document.getElementById('registerSection');
+  if (!container) return;
+  container.innerHTML = `
+    <div class="page-body">
+      <div class="hero">
+        <div class="hero-inner">
+          <div class="hero-tag"><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg> Member Registration</div>
+          <h2>Welcome${window.currentUser ? ', ' + window.currentUser.name : ''}</h2>
+          <p>Fill in your professional details once. You can update your member profile anytime from this panel.</p>
+        </div>
+      </div>
+      <form id="dataForm" novalidate>
+        <div class="form-section">
+          <div class="section-header open" onclick="toggleSection(this)">
+            <div class="section-num">1</div>
+            <span class="section-title">Personal Information</span>
+            <span class="section-chevron">▾</span>
+          </div>
+          <div class="section-body open">
+            <div class="field-grid">
+              <div class="field span-2"><label>Full Name <span class="req">*</span></label><input name="fullName" required><span class="err-msg"></span></div>
+              <div class="field"><label>Phone Number <span class="req">*</span></label><input name="phone" required><span class="err-msg"></span></div>
+              <div class="field"><label>Email Address <span class="req">*</span></label><input name="email" type="email" required><span class="err-msg"></span></div>
+              <div class="field"><label>Age</label><input name="age" type="number" min="16" max="80"></div>
+              <div class="field"><label>National ID</label><input name="nationalId"></div>
+              <div class="field"><label>Sub-location</label><input name="subLocation"></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="section-header open" onclick="toggleSection(this)">
+            <div class="section-num">2</div>
+            <span class="section-title">Education</span>
+            <span class="section-chevron">▾</span>
+          </div>
+          <div class="section-body open">
+            <div class="field-grid">
+              <div class="field"><label>Highest level</label><select name="educationLevel"><option value="">Select</option><option>Bachelor's Degree</option><option>Diploma</option><option>Certificate</option><option>Master's Degree</option></select></div>
+              <div class="field"><label>Form four year</label><input name="formFourYear" type="number" min="1990" max="2030"></div>
+              <div class="field"><label>KCSE grade</label><select name="kcseGrade"><option value="">Select</option><option>A</option><option>B+</option><option>B</option><option>C+</option><option>C</option></select></div>
+              <div class="field"><label>Institution</label><input name="institution"></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="section-header open" onclick="toggleSection(this)">
+            <div class="section-num">3</div>
+            <span class="section-title">Employment</span>
+            <span class="section-chevron">▾</span>
+          </div>
+          <div class="section-body open">
+            <div class="field-grid">
+              <div class="field"><label>Employment status</label><select name="employmentStatus" onchange="toggleEmployerField(this)"><option value="">Select</option><option>Employed (Full-time)</option><option>Unemployed (Actively Seeking)</option><option>On Internship</option><option>Self-employed / Business Owner</option></select></div>
+              <div class="field" id="employerFieldWrap"><label>Employer / Business</label><input name="employer"></div>
+              <div class="field"><label>Career</label><input name="career"></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="section-header open" onclick="toggleSection(this)">
+            <div class="section-num">4</div>
+            <span class="section-title">Skills</span>
+            <span class="section-chevron">▾</span>
+          </div>
+          <div class="section-body open">
+            <div class="field-grid">
+              <div class="field span-2"><label>Add a skill</label><div style="display:flex;gap:0.75rem"><input id="skillInput" placeholder="Type and press Add"><button type="button" class="submit-btn" onclick="addSkill()">Add</button></div></div>
+            </div>
+            <div id="tagsDisplay" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.85rem"></div>
+            <input type="hidden" id="skillsHidden" name="skills">
+          </div>
+        </div>
+        <button type="submit" id="submitBtn" class="submit-btn">Submit Registration</button>
+      </form>
+    </div>`;
+  configureRegisterControls();
+}
+
+function configureRegisterControls() {
+  const form = document.getElementById('dataForm');
+  const inputs = Array.from(form.querySelectorAll('input, select'));
+  let registerSkills = [];
+  let currentMemberId = null;
+
+  function renderTags() {
+    document.getElementById('tagsDisplay').innerHTML = registerSkills.map((skill, index) =>
+      `<span class="tag-pill">${skill}<button type="button" onclick="removeRegisterSkill(${index})">×</button></span>`
+    ).join('');
+    document.getElementById('skillsHidden').value = registerSkills.join(',');
+  }
+
+  window.addSkill = function() {
+    const input = document.getElementById('skillInput');
+    const value = input.value.trim();
+    if (!value || registerSkills.includes(value)) return;
+    registerSkills.push(value);
+    input.value = '';
+    renderTags();
+  };
+  window.removeRegisterSkill = function(index) {
+    registerSkills.splice(index, 1);
+    renderTags();
+  };
+
+  window.toggleSection = function(header) {
+    const body = header.nextElementSibling;
+    const isOpen = body.classList.contains('open');
+    header.classList.toggle('open', !isOpen);
+    body.classList.toggle('open', !isOpen);
+  };
+
+  window.toggleEmployerField = function(select) {
+    const wrap = document.getElementById('employerFieldWrap');
+    const show = ['Employed (Full-time)', 'Self-employed / Business Owner', 'On Internship'].includes(select.value);
+    wrap.style.opacity = show ? '1' : '0.45';
+  };
+
+  function fillMemberForm(member) {
+    if (!member) return;
+    currentMemberId = member.id;
+    inputs.forEach(input => {
+      const name = input.name;
+      if (!name) return;
+      const key = {
+        fullName: 'name', nationalId: 'national_id', subLocation: 'sub_location', formFourYear: 'form_four_year', kcseGrade: 'kcse', graduationYear: 'graduation', employmentStatus: 'status', career: 'career', employer: 'employer'
+      }[name] || name;
+      input.value = member[key] || '';
+    });
+    registerSkills = Array.isArray(member.skills) ? [...member.skills] : [];
+    renderTags();
+    document.getElementById('submitBtn').textContent = 'Update Record';
+  }
+
+  async function fetchMemberRecord() {
+    const token = localStorage.getItem('authToken');
+    const res = await fetch('/api/members', { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) return null;
+    const body = await res.json();
+    return (body.members && body.members[0]) || null;
+  }
+
+  async function refreshMember() {
+    const member = await fetchMemberRecord();
+    if (member) fillMemberForm(member);
+  }
+
+  inputs.forEach(input => {
+    input.addEventListener('blur', () => validateField(input));
+    input.addEventListener('input', () => { if (input.classList.contains('invalid')) validateField(input); });
+  });
+
+  function validateField(input) {
+    const field = input.closest('.field');
+    if (!field) return true;
+    let valid = true;
+    if (input.required && !input.value.trim()) valid = false;
+    if (input.type === 'email' && input.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) valid = false;
+    input.classList.toggle('invalid', !valid);
+    field.classList.toggle('has-error', !valid);
+    return valid;
+  }
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const values = {};
+    let formValid = true;
+    inputs.forEach(input => {
+      if (!validateField(input)) formValid = false;
+      values[input.name] = input.value.trim();
+    });
+    if (!formValid) return;
+    const payload = {
+      name: values.fullName,
+      phone: values.phone,
+      email: values.email,
+      age: values.age ? Number(values.age) : null,
+      nationalId: values.nationalId,
+      subLocation: values.subLocation,
+      education: values.educationLevel,
+      formFourYear: values.formFourYear ? Number(values.formFourYear) : null,
+      kcse: values.kcseGrade,
+      institution: values.institution,
+      course: values.course,
+      graduation: values.graduationYear ? Number(values.graduationYear) : null,
+      status: values.employmentStatus,
+      employer: values.employer,
+      career: values.career,
+      skills: registerSkills,
+    };
+    const token = localStorage.getItem('authToken');
+    const method = currentMemberId ? 'PATCH' : 'POST';
+    const url = currentMemberId ? `/api/members/${currentMemberId}` : '/api/members';
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving…';
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || 'Save failed');
+      submitBtn.textContent = 'Saved';
+      setTimeout(() => submitBtn.textContent = currentMemberId ? 'Update Record' : 'Submit Registration', 1200);
+      await refreshMember();
+    } catch (err) {
+      alert(err.message || 'Unable to save profile');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  if (window.currentUser) {
+    const nameInput = document.querySelector('input[name="fullName"]');
+    const emailInput = document.querySelector('input[name="email"]');
+    if (nameInput && !nameInput.value) nameInput.value = window.currentUser.name || '';
+    if (emailInput && !emailInput.value) emailInput.value = window.currentUser.email || '';
+  }
+
+  refreshMember();
+}
+
+async function initRegisterPage() {
+  if (!pageState.registerRendered) return;
+}
+
+function renderAdminSection() {
+  const container = document.getElementById('adminSection');
+  if (!container) return;
+  container.innerHTML = `
+    <div class="page-body">
+      <div class="admin-card">
+        <div class="admin-controls">
+          <div id="statusText">Loading users...</div>
+          <div id="adminError" class="admin-error"></div>
+        </div>
+        <table class="admin-table" id="usersTable" style="display:none">
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>`;
+  fetchUsers();
+}
+
+async function fetchUsers() {
+  const token = localStorage.getItem('authToken');
+  try {
+    const res = await fetch('/api/admin/users', {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.error || 'Unable to load users');
+    renderUsers(body.users || []);
+  } catch (err) {
+    const statusText = document.getElementById('statusText');
+    const adminError = document.getElementById('adminError');
+    if (statusText) statusText.textContent = 'Unable to load users.';
+    if (adminError) {
+      adminError.textContent = err.message;
+      adminError.style.display = 'block';
+    }
+  }
+}
+
+function renderUsers(users) {
+  const statusText = document.getElementById('statusText');
+  const table = document.getElementById('usersTable');
+  const tbody = document.querySelector('#usersTable tbody');
+  if (!tbody || !table) return;
+  if (statusText) statusText.textContent = `${users.length} registered users`;
+  tbody.innerHTML = users.map(user => {
+    const statuses = ['active', 'pending', 'disabled'].map(value => `<option value="${value}" ${user.status===value ? 'selected' : ''}>${value}</option>`).join('');
+    const roles = ['user', 'admin'].map(value => `<option value="${value}" ${user.role===value ? 'selected' : ''}>${value}</option>`).join('');
+    return `<tr>
+      <td>${user.name}</td>
+      <td>${user.email}</td>
+      <td><select aria-label="Role" data-user-id="${user.id}" data-field="role">${roles}</select></td>
+      <td><select aria-label="Status" data-user-id="${user.id}" data-field="status">${statuses}</select></td>
+      <td><button class="update" data-user-id="${user.id}">Update</button></td>
+    </tr>`;
+  }).join('');
+  table.style.display = 'table';
+  tbody.querySelectorAll('button.update').forEach(button => {
+    button.addEventListener('click', updateUser);
+  });
+}
+
+async function updateUser(event) {
+  const button = event.currentTarget;
+  const userId = button.dataset.userId;
+  const row = button.closest('tr');
+  const role = row.querySelector('select[data-field="role"]').value;
+  const status = row.querySelector('select[data-field="status"]').value;
+  const token = localStorage.getItem('authToken');
+  try {
+    const res = await fetch(`/api/admin/users/${userId}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role, status }),
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.error || 'Update failed');
+    button.textContent = 'Saved';
+    setTimeout(() => { button.textContent = 'Update'; }, 1200);
+  } catch (err) {
+    const adminError = document.getElementById('adminError');
+    if (adminError) {
+      adminError.textContent = `Failed to update user: ${err.message}`;
+      adminError.style.display = 'block';
+    }
+  }
+}
+
+async function initAdminPage() {
+  if (!pageState.adminRendered) return;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // Mount the dashboard content into the shared shell
+  await renderProtectedPage({
+    title: 'Dashboard',
+    activeHref: 'dashboard.html',
+    contentHtml: document.getElementById('dashboard-content').innerHTML,
+    topbarHtml: `
+      <div class="topbar-actions">
+        <div class="topbar-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Search members…" oninput="filterTable()" />
+        </div>
+        <button class="topbar-btn" type="button" onclick="window.location.hash='register'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Member
+        </button>
+      </div>
+    `,
+    onMount: async () => {
+      await initDashboardPage();
+      window.addEventListener('hashchange', renderByHash);
+      await renderByHash();
+    }
+  });
+});
 
 // ===================== KPI =====================
 function buildKPI(){
@@ -840,6 +1269,24 @@ function openModal(id){
   document.getElementById('modalOverlay').classList.add('show');
 }
 function closeModal(e){if(e.target===document.getElementById('modalOverlay')) document.getElementById('modalOverlay').classList.remove('show')}
+// route sidebar buttons that use `data-route`
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest && e.target.closest('.nav-item[data-route]');
+  if (btn) {
+    const route = btn.getAttribute('data-route');
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    btn.classList.add('active');
+    if (route) {
+      const target = route.startsWith('#') ? route : (route.startsWith('/') ? route : '/' + route);
+      window.location.href = target;
+    }
+  }
+  const topBtn = e.target.closest && e.target.closest('.topbar-btn[data-route]');
+  if (topBtn) {
+    const r = topBtn.getAttribute('data-route');
+    if (r) window.location.href = r.startsWith('/') ? r : '/' + r;
+  }
+});
 </script>
 </body>
 </html>

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Professionals Databank</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared-layout.css">
 <style>
   :root {
     --ink: #0f1923;
@@ -34,92 +35,30 @@
       radial-gradient(ellipse at 90% 100%, rgba(61,107,94,0.08) 0%, transparent 55%);
   }
 
-  /* ---- HEADER ---- */
-  .site-header {
-    background: var(--ink);
-    color: var(--paper);
-    padding: 0 clamp(1.5rem, 5vw, 4rem);
-    display: flex;
+  .topbar-btn {
+    display: inline-flex;
     align-items: center;
-    gap: 1.5rem;
-    height: 72px;
-    position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 2px 16px rgba(15,25,35,0.22);
-  }
-  .header-badge {
-    width: 42px; height: 42px;
-    border-radius: 50%;
+    gap: 0.45rem;
+    padding: 0.65rem 1rem;
+    border-radius: 12px;
+    border: none;
     background: linear-gradient(135deg, var(--gold), var(--gold-light));
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem; font-weight: 700;
-    color: var(--ink);
-    flex-shrink: 0;
-  }
-  .header-text h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.15rem;
-    letter-spacing: 0.01em;
-    color: var(--paper);
-  }
-  .header-text p {
-    font-size: 0.72rem;
-    color: var(--mist);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-top: 1px;
-  }
-  .header-secure {
-    margin-left: auto;
-    display: flex; align-items: center; gap: 0.45rem;
-    font-size: 0.72rem;
-    color: var(--gold-light);
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-  }
-  .header-secure svg { width: 14px; height: 14px; }
-
-  /* ---- HERO BAND ---- */
-  .hero {
-    background: linear-gradient(100deg, #1a2a3a 0%, #0f1923 60%, #1a3028 100%);
-    padding: 3rem clamp(1.5rem, 5vw, 4rem) 2.5rem;
-    color: var(--paper);
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute;
-    right: -80px; top: -80px;
-    width: 340px; height: 340px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(201,149,42,0.13) 0%, transparent 70%);
-  }
-  .hero-inner { max-width: 780px; position: relative; z-index: 1; }
-  .hero-tag {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    background: rgba(201,149,42,0.15);
-    border: 1px solid rgba(201,149,42,0.35);
-    color: var(--gold-light);
-    font-size: 0.73rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0.28rem 0.75rem;
-    border-radius: 100px;
-    margin-bottom: 1rem;
-  }
-  .hero h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    color: #0b0f14;
     font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 0.7rem;
+    cursor: pointer;
+    transition: opacity 0.18s, transform 0.18s;
   }
-  .hero p {
-    font-size: 0.95rem;
-    color: rgba(245,240,232,0.65);
-    max-width: 560px;
-    line-height: 1.7;
+
+  .topbar-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+
+  .page-body {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem) 5rem;
+  }
+
+  @media (max-width: 900px) {
+    .page-body { padding: 1.5rem 1rem 3rem; }
   }
 
   /* ---- MAIN LAYOUT ---- */
@@ -381,33 +320,19 @@
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
-<header class="site-header">
-  <div class="header-badge">PD</div>
-  <div class="header-text">
-    <h1>Professionals Databank</h1>
-    <p>Secure Member Registry</p>
-  </div>
-  <div class="header-secure">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-    Protected &amp; Confidential
-  </div>
-</header>
-
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-inner">
-    <div class="hero-tag">
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
-      New Registration
+  <div id="shared-shell"></div>
+  <template id="page-body-template">
+    <div class="hero">
+      <div class="hero-inner">
+        <div class="hero-tag">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
+          New Registration
+        </div>
+        <h2>Welcome</h2>
+        <p>Please fill in your details carefully. All information is kept strictly confidential and used solely for professional engagement purposes.</p>
+      </div>
     </div>
-    <h2>Welcome, Brian</h2>
-    <p>Please fill in your details carefully. All information is kept strictly confidential and used solely for professional engagement purposes.</p>
-  </div>
-</div>
-
-<!-- FORM BODY -->
+    <div class="page-body">
 <div class="page-body">
   <div class="progress-bar-wrap">
     <div class="progress-bar" id="progressBar"></div>
@@ -589,6 +514,8 @@
 
   </form>
 </div>
+  </div>
+</div>
 
 <!-- SUCCESS MODAL -->
 <div class="success-overlay" id="successOverlay">
@@ -599,9 +526,181 @@
     <button class="success-close" onclick="resetForm()">Register Another</button>
   </div>
 </div>
+</template>
 
+<script src="shared-layout.js"></script>
 <script>
-  // ---- SECTION TOGGLE ----
+// route sidebar / navbar buttons that have `data-route`
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest && e.target.closest('.nav-item[data-route]');
+  if (btn) {
+    const route = btn.getAttribute('data-route');
+    if (route) window.location.href = route;
+  }
+  const topBtn = e.target.closest && e.target.closest('.topbar-btn[data-route]');
+  if (topBtn) {
+    const r = topBtn.getAttribute('data-route');
+    if (r) window.location.href = r;
+  }
+});
+</script>
+<script>
+  const authToken = localStorage.getItem('authToken');
+  let currentMemberId = null;
+
+  async function fetchCurrentUser() {
+    try {
+      const res = await fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      if (!res.ok) throw new Error('Unauthorized');
+      const payload = await res.json();
+      return payload.user;
+    } catch (err) {
+      localStorage.removeItem('authToken');
+      window.location.href = 'login.html';
+    }
+  }
+
+  async function fetchMemberRecord() {
+    try {
+      const res = await fetch('/api/members', {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      if (!res.ok) throw new Error('Unable to load member record');
+      const payload = await res.json();
+      return (payload.members && payload.members[0]) || null;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  }
+
+  function fillMemberForm(member) {
+    if (!member) return;
+    currentMemberId = member.id;
+    document.querySelector('input[name="fullName"]').value = member.name || '';
+    document.querySelector('input[name="phone"]').value = member.phone || '';
+    document.querySelector('input[name="email"]').value = member.email || '';
+    document.querySelector('input[name="age"]').value = member.age || '';
+    document.querySelector('input[name="nationalId"]').value = member.national_id || '';
+    document.querySelector('input[name="subLocation"]').value = member.sub_location || '';
+    document.querySelector('select[name="educationLevel"]').value = member.education || '';
+    document.querySelector('input[name="formFourYear"]').value = member.form_four_year || '';
+    document.querySelector('select[name="kcseGrade"]').value = member.kcse || '';
+    document.querySelector('input[name="institution"]').value = member.institution || '';
+    document.querySelector('input[name="course"]').value = member.course || '';
+    document.querySelector('input[name="graduationYear"]').value = member.graduation || '';
+    document.querySelector('select[name="employmentStatus"]').value = member.status || '';
+    document.querySelector('input[name="employer"]').value = member.employer || '';
+    document.querySelector('input[name="career"]').value = member.career || '';
+    skills.length = 0;
+    if (Array.isArray(member.skills)) {
+      member.skills.forEach(skill => {
+        if (skill && !skills.includes(skill)) skills.push(skill);
+      });
+    }
+    renderTags();
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) submitBtn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Update Record';
+    toggleEmployerField(document.querySelector('select[name="employmentStatus"]'));
+  }
+
+  async function initDataFormPage() {
+    const user = await fetchCurrentUser();
+    if (user) {
+      const heroName = document.querySelector('.hero h2');
+      if (heroName) heroName.textContent = `Welcome, ${user.name}`;
+      const emailInput = document.querySelector('input[name="email"]');
+      if (emailInput) emailInput.value = user.email;
+      const nameNode = document.getElementById('authUserName');
+      if (nameNode) nameNode.textContent = user.name;
+      const logoutButton = document.getElementById('logoutButton');
+      if (logoutButton) logoutButton.addEventListener('click', logout);
+    }
+
+    const member = await fetchMemberRecord();
+    if (member) fillMemberForm(member);
+    wireDataFormEvents();
+    updateProgress();
+  }
+
+  function wireDataFormEvents() {
+    const form = document.getElementById('dataForm');
+    if (!form) return;
+
+    form.addEventListener('input', updateProgress);
+    form.querySelectorAll('input, select, textarea').forEach(el => {
+      el.addEventListener('blur', () => validateField(el));
+      el.addEventListener('input', () => { if (el.classList.contains('invalid')) validateField(el); });
+    });
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      document.querySelectorAll('.section-body').forEach(b => b.classList.add('open'));
+      document.querySelectorAll('.section-header').forEach(h => h.classList.add('open'));
+
+      let allValid = true;
+      this.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+        if (!validateField(el)) allValid = false;
+      });
+
+      if (!allValid) {
+        const firstErr = this.querySelector('.invalid');
+        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const formData = new FormData(this);
+      const payload = {
+        name: formData.get('fullName').trim(),
+        phone: formData.get('phone').trim(),
+        email: formData.get('email').trim(),
+        age: Number(formData.get('age')) || null,
+        nationalId: formData.get('nationalId').trim(),
+        subLocation: formData.get('subLocation').trim(),
+        education: formData.get('educationLevel'),
+        formFourYear: Number(formData.get('formFourYear')) || null,
+        kcse: formData.get('kcseGrade'),
+        institution: formData.get('institution').trim(),
+        course: formData.get('course').trim(),
+        graduation: Number(formData.get('graduationYear')) || null,
+        status: formData.get('employmentStatus'),
+        employer: formData.get('employer').trim(),
+        career: formData.get('career').trim(),
+        skills,
+      };
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg> Submitting…';
+      const method = currentMemberId ? 'PATCH' : 'POST';
+      const endpoint = currentMemberId ? `/api/members/${currentMemberId}` : '/api/members';
+
+      try {
+        const response = await fetch(endpoint, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify(payload),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Submission failed');
+        document.getElementById('successOverlay').classList.add('show');
+      } catch (err) {
+        alert(err.message || 'Unable to submit registration');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = currentMemberId
+          ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Update Record'
+          : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Submit Registration';
+      }
+    });
+  }
+
   function toggleSection(header) {
     const body = header.nextElementSibling;
     const isOpen = body.classList.contains('open');
@@ -609,7 +708,6 @@
     body.classList.toggle('open', !isOpen);
   }
 
-  // ---- PROGRESS ----
   const allInputs = () => document.querySelectorAll('#dataForm input:not([type=hidden]), #dataForm select, #dataForm textarea');
   function updateProgress() {
     const inputs = allInputs();
@@ -618,16 +716,13 @@
     const pct = Math.round((filled / inputs.length) * 100);
     document.getElementById('progressBar').style.width = pct + '%';
   }
-  document.getElementById('dataForm').addEventListener('input', updateProgress);
 
-  // ---- EMPLOYER FIELD ----
   function toggleEmployerField(sel) {
     const showFor = ['Employed (Full-time)', 'Employed (Part-time)', 'Self-employed / Business Owner', 'On Internship', 'On Attachment'];
     const show = showFor.includes(sel.value);
     document.getElementById('employerFieldWrap').style.opacity = show ? '1' : '0.45';
   }
 
-  // ---- SKILLS TAGS ----
   const skills = [];
   function addSkill() {
     const input = document.getElementById('skillInput');
@@ -650,7 +745,6 @@
     document.getElementById('skillsHidden').value = skills.join(', ');
   }
 
-  // ---- VALIDATION ----
   function validateField(input) {
     const field = input.closest('.field');
     if (!field) return true;
@@ -663,52 +757,16 @@
     return valid;
   }
 
-  document.getElementById('dataForm').querySelectorAll('input, select, textarea').forEach(el => {
-    el.addEventListener('blur', () => validateField(el));
-    el.addEventListener('input', () => { if (el.classList.contains('invalid')) validateField(el); });
-  });
-
-  // ---- SUBMIT ----
-  document.getElementById('dataForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    // Open all sections to validate
-    document.querySelectorAll('.section-body').forEach(b => b.classList.add('open'));
-    document.querySelectorAll('.section-header').forEach(h => h.classList.add('open'));
-
-    let allValid = true;
-    this.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
-      if (!validateField(el)) allValid = false;
+  async function renderThisPage() {
+    renderProtectedPage({
+      title: 'Member Registration',
+      activeHref: 'data-form.html',
+      contentHtml: document.getElementById('page-body-template').innerHTML,
+      onMount: initDataFormPage,
     });
-
-    if (!allValid) {
-      const firstErr = this.querySelector('.invalid');
-      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
-
-    // Simulate submission
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg> Submitting…';
-
-    setTimeout(() => {
-      document.getElementById('successOverlay').classList.add('show');
-      btn.disabled = false;
-      btn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Submit Registration';
-    }, 1200);
-  });
-
-  function resetForm() {
-    document.getElementById('dataForm').reset();
-    document.getElementById('successOverlay').classList.remove('show');
-    skills.length = 0;
-    renderTags();
-    document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
-    document.querySelectorAll('.has-error').forEach(el => el.classList.remove('has-error'));
-    document.getElementById('progressBar').style.width = '0%';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  document.addEventListener('DOMContentLoaded', renderThisPage);
 </script>
 </body>
 </html>

@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Professionals Databank — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0f14;
+  --surface: #131920;
+  --surface2: #1a2330;
+  --border: rgba(255,255,255,0.07);
+  --gold: #d4a843;
+  --gold2: #f0c96a;
+  --teal: #2ec4b6;
+  --rose: #e05a6b;
+  --sky: #4a9eff;
+  --text: #e8edf3;
+  --muted: #6b7d8f;
+  --dim: #3a4a5c;
+  --radius: 12px;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--dim);border-radius:3px}
+
+/* ===== LAYOUT ===== */
+.layout{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{
+  width:220px;flex-shrink:0;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;
+  overflow-y:auto;
+  z-index:50;
+}
+.sidebar-logo{
+  padding:1.5rem 1.25rem 1rem;
+  border-bottom:1px solid var(--border);
+}
+.logo-mark{
+  display:flex;align-items:center;gap:0.6rem;
+  margin-bottom:0.3rem;
+}
+.logo-dot{
+  width:28px;height:28px;border-radius:8px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-size:0.75rem;font-weight:800;
+  color:#0b0f14;
+}
+.logo-name{font-family:var(--font-head);font-size:0.95rem;font-weight:700;color:var(--text)}
+.logo-sub{font-size:0.68rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
+
+.nav{padding:1rem 0.75rem;flex:1}
+.nav-label{
+  font-size:0.63rem;color:var(--muted);
+  letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.75rem 0.5rem 0.4rem;
+}
+.nav-item{
+  display:flex;align-items:center;gap:0.65rem;
+  padding:0.6rem 0.75rem;
+  border-radius:8px;
+  font-size:0.83rem;font-weight:500;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all 0.18s;
+  margin-bottom:2px;
+  border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:rgba(212,168,67,0.12);color:var(--gold);border:1px solid rgba(212,168,67,0.2)}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.nav-badge{
+  margin-left:auto;
+  background:var(--gold);color:#0b0f14;
+  font-size:0.62rem;font-weight:700;
+  padding:1px 6px;border-radius:100px;
+}
+
+.sidebar-footer{
+  padding:1rem 1.25rem;
+  border-top:1px solid var(--border);
+  font-size:0.72rem;color:var(--muted);
+  display:flex;align-items:center;gap:0.5rem;
+}
+.sidebar-footer svg{width:13px;height:13px;color:var(--teal)}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* TOPBAR */
+.topbar{
+  display:flex;align-items:center;gap:1rem;
+  padding:1rem 2rem;
+  border-bottom:1px solid var(--border);
+  background:rgba(11,15,20,0.8);
+  backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:40;
+}
+.page-title{
+  font-family:var(--font-head);
+  font-size:1.25rem;font-weight:700;
+  color:var(--text);
+}
+.topbar-search{
+  margin-left:auto;
+  display:flex;align-items:center;gap:0.5rem;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:0.5rem 0.9rem;
+  width:260px;
+  transition:border-color 0.2s,width 0.3s;
+}
+.topbar-search:focus-within{border-color:var(--gold);width:320px}
+.topbar-search svg{width:14px;height:14px;color:var(--muted);flex-shrink:0}
+.topbar-search input{
+  background:none;border:none;outline:none;
+  font-family:var(--font-body);font-size:0.83rem;
+  color:var(--text);width:100%;
+}
+.topbar-search input::placeholder{color:var(--muted)}
+.topbar-btn{
+  display:flex;align-items:center;gap:0.45rem;
+  padding:0.5rem 1rem;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#0b0f14;border:none;border-radius:8px;
+  font-family:var(--font-body);font-size:0.8rem;font-weight:600;
+  cursor:pointer;white-space:nowrap;
+  transition:opacity 0.18s,transform 0.18s;
+}
+.topbar-btn:hover{opacity:0.88;transform:translateY(-1px)}
+.topbar-btn svg{width:14px;height:14px}
+
+/* CONTENT */
+.content{padding:2rem;overflow-y:auto;flex:1}
+
+/* KPI CARDS */
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:1rem;
+  margin-bottom:2rem;
+}
+.kpi-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.25rem 1.5rem;
+  position:relative;
+  overflow:hidden;
+  transition:transform 0.2s,border-color 0.2s;
+  animation:fadeUp 0.4s ease both;
+}
+.kpi-card:hover{transform:translateY(-3px);border-color:rgba(212,168,67,0.3)}
+.kpi-card::before{
+  content:'';position:absolute;inset:0;
+  opacity:0.04;
+}
+.kpi-card.gold::before{background:linear-gradient(135deg,var(--gold),transparent)}
+.kpi-card.teal::before{background:linear-gradient(135deg,var(--teal),transparent)}
+.kpi-card.rose::before{background:linear-gradient(135deg,var(--rose),transparent)}
+.kpi-card.sky::before{background:linear-gradient(135deg,var(--sky),transparent)}
+.kpi-icon{
+  width:36px;height:36px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:0.9rem;font-size:1rem;
+}
+.kpi-card.gold .kpi-icon{background:rgba(212,168,67,0.15);color:var(--gold)}
+.kpi-card.teal .kpi-icon{background:rgba(46,196,182,0.12);color:var(--teal)}
+.kpi-card.rose .kpi-icon{background:rgba(224,90,107,0.12);color:var(--rose)}
+.kpi-card.sky .kpi-icon{background:rgba(74,158,255,0.12);color:var(--sky)}
+.kpi-val{
+  font-family:var(--font-head);font-size:2rem;font-weight:800;
+  line-height:1;margin-bottom:0.3rem;
+}
+.kpi-label{font-size:0.75rem;color:var(--muted);font-weight:500}
+.kpi-delta{
+  margin-top:0.6rem;font-size:0.72rem;font-weight:600;
+  display:flex;align-items:center;gap:0.25rem;
+}
+.kpi-delta.up{color:var(--teal)}.kpi-delta.down{color:var(--rose)}
+
+/* CHARTS ROW */
+.charts-row{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:1rem;
+  margin-bottom:2rem;
+}
+@media(max-width:1000px){.charts-row{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.charts-row{grid-template-columns:1fr}}
+
+.chart-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.25rem 1.5rem;
+  animation:fadeUp 0.5s ease both;
+}
+.chart-title{
+  font-family:var(--font-head);font-size:0.88rem;font-weight:700;
+  color:var(--text);margin-bottom:1.1rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.chart-sub{font-size:0.7rem;color:var(--muted);font-weight:400;font-family:var(--font-body)}
+
+/* BAR CHART */
+.bar-chart{display:flex;flex-direction:column;gap:0.55rem}
+.bar-row{display:flex;align-items:center;gap:0.75rem}
+.bar-label{font-size:0.72rem;color:var(--muted);width:100px;flex-shrink:0;text-align:right}
+.bar-track{flex:1;background:rgba(255,255,255,0.05);border-radius:100px;height:8px;overflow:hidden}
+.bar-fill{height:100%;border-radius:100px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.bar-val{font-size:0.72rem;color:var(--muted);width:28px;text-align:right;flex-shrink:0}
+
+/* DONUT */
+.donut-wrap{display:flex;align-items:center;gap:1.25rem}
+.donut-svg{flex-shrink:0}
+.donut-legend{display:flex;flex-direction:column;gap:0.45rem;flex:1}
+.legend-item{display:flex;align-items:center;gap:0.5rem;font-size:0.73rem;color:var(--muted)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.legend-val{margin-left:auto;font-weight:600;color:var(--text)}
+
+/* SKILLS CLOUD */
+.skills-cloud{display:flex;flex-wrap:wrap;gap:0.4rem}
+.skill-tag{
+  padding:0.28rem 0.65rem;
+  border-radius:100px;
+  font-size:0.72rem;font-weight:500;
+  border:1px solid;
+  transition:transform 0.15s;cursor:default;
+}
+.skill-tag:hover{transform:scale(1.06)}
+
+/* FILTERS */
+.filters-bar{
+  display:flex;align-items:center;flex-wrap:wrap;gap:0.75rem;
+  margin-bottom:1.25rem;
+}
+.filter-select{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:0.5rem 2rem 0.5rem 0.85rem;
+  font-family:var(--font-body);font-size:0.8rem;color:var(--text);
+  outline:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7d8f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 0.7rem center;
+  appearance:none;transition:border-color 0.2s;
+}
+.filter-select:focus{border-color:var(--gold)}
+.filter-count{
+  margin-left:auto;font-size:0.78rem;color:var(--muted);
+}
+.filter-count span{color:var(--gold);font-weight:600}
+
+/* TABLE */
+.table-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  animation:fadeUp 0.6s ease both;
+}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{
+  padding:0.85rem 1rem;
+  text-align:left;
+  font-size:0.7rem;
+  font-weight:600;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--muted);
+  background:var(--surface2);
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;cursor:pointer;user-select:none;
+  transition:color 0.15s;
+}
+thead th:hover{color:var(--gold)}
+thead th .sort-icon{margin-left:4px;opacity:0.4;font-size:0.7rem}
+thead th.sorted .sort-icon{opacity:1;color:var(--gold)}
+tbody tr{
+  border-bottom:1px solid var(--border);
+  transition:background 0.15s;
+  animation:fadeUp 0.3s ease both;
+}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--surface2)}
+tbody td{
+  padding:0.85rem 1rem;
+  font-size:0.82rem;
+  color:var(--text);
+  white-space:nowrap;
+}
+.avatar{
+  width:32px;height:32px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:0.72rem;font-weight:700;
+  flex-shrink:0;
+}
+.cell-name{display:flex;align-items:center;gap:0.65rem}
+.cell-name-text{font-weight:500}
+.cell-name-sub{font-size:0.7rem;color:var(--muted)}
+
+.status-pill{
+  display:inline-flex;align-items:center;gap:0.3rem;
+  padding:0.22rem 0.65rem;
+  border-radius:100px;
+  font-size:0.7rem;font-weight:600;
+  white-space:nowrap;
+}
+.status-pill::before{
+  content:'';width:5px;height:5px;border-radius:50%;
+  background:currentColor;opacity:0.8;
+}
+.pill-employed{background:rgba(46,196,182,0.12);color:var(--teal);border:1px solid rgba(46,196,182,0.2)}
+.pill-unemployed{background:rgba(224,90,107,0.12);color:var(--rose);border:1px solid rgba(224,90,107,0.2)}
+.pill-intern{background:rgba(212,168,67,0.12);color:var(--gold);border:1px solid rgba(212,168,67,0.2)}
+.pill-application{background:rgba(74,158,255,0.12);color:var(--sky);border:1px solid rgba(74,158,255,0.2)}
+.pill-shortlisted{background:rgba(180,120,255,0.12);color:#b478ff;border:1px solid rgba(180,120,255,0.2)}
+.pill-voluntary{background:rgba(255,165,60,0.12);color:#ffa53c;border:1px solid rgba(255,165,60,0.2)}
+
+.edu-badge{
+  display:inline-block;
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:0.18rem 0.55rem;
+  font-size:0.7rem;color:var(--muted);
+}
+
+/* ROW ACTIONS */
+.row-actions{display:flex;gap:0.35rem}
+.row-btn{
+  padding:0.3rem 0.6rem;
+  border-radius:6px;border:1px solid var(--border);
+  background:none;color:var(--muted);
+  font-family:var(--font-body);font-size:0.72rem;
+  cursor:pointer;transition:all 0.15s;
+}
+.row-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--gold)}
+
+/* PAGINATION */
+.pagination{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:0.75rem;
+  padding:1rem 1.25rem;
+  border-top:1px solid var(--border);
+  background:var(--surface2);
+}
+.page-info{font-size:0.75rem;color:var(--muted)}
+.page-btns{display:flex;gap:0.3rem}
+.page-btn{
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  border-radius:6px;border:1px solid var(--border);
+  background:none;color:var(--muted);
+  font-family:var(--font-body);font-size:0.8rem;font-weight:600;
+  cursor:pointer;transition:all 0.15s;
+}
+.page-btn:hover{background:var(--surface);color:var(--text)}
+.page-btn.active{background:var(--gold);color:#0b0f14;border-color:var(--gold)}
+
+/* MODAL */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(11,15,20,0.85);
+  backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;
+  padding:1rem;
+}
+.modal-overlay.show{display:flex}
+.modal{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  width:100%;max-width:560px;
+  max-height:90vh;overflow-y:auto;
+  animation:popIn 0.3s cubic-bezier(.175,.885,.32,1.275);
+}
+.modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.25rem 1.5rem;
+  border-bottom:1px solid var(--border);
+}
+.modal-title{font-family:var(--font-head);font-size:1rem;font-weight:700}
+.modal-close{
+  width:30px;height:30px;border-radius:6px;
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--muted);font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;
+}
+.modal-close:hover{color:var(--text);border-color:var(--rose)}
+.modal-body{padding:1.5rem}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.detail-item label{font-size:0.68rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:0.2rem}
+.detail-item p{font-size:0.85rem;color:var(--text);font-weight:500}
+.detail-section-title{
+  font-family:var(--font-head);font-size:0.8rem;font-weight:700;
+  color:var(--gold);
+  letter-spacing:0.05em;text-transform:uppercase;
+  margin:1.25rem 0 0.75rem;
+  padding-bottom:0.4rem;
+  border-bottom:1px solid rgba(212,168,67,0.15);
+}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{display:none}
+  .topbar{padding:1rem}
+  .content{padding:1rem}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-dot">PD</div>
+      <span class="logo-name">ProDatabank</span>
+    </div>
+    <div class="logo-sub">Admin Console</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Main</div>
+    <button class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard <span class="nav-badge">16</span>
+    </button>
+    <button class="nav-item" onclick="alert('Link to registration form')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      All Members
+    </button>
+    <button class="nav-item" onclick="alert('Employment tracking module')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+      Employment
+    </button>
+    <button class="nav-item" onclick="alert('Education analytics')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      Education
+    </button>
+    <div class="nav-label">System</div>
+    <button class="nav-item" onclick="alert('Export CSV / Excel')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export Data
+    </button>
+    <button class="nav-item" onclick="alert('Settings panel')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    Encrypted &amp; Secure
+  </div>
+</aside>
+
+<!-- MAIN AREA -->
+<div class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="page-title">Dashboard</div>
+    <div class="topbar-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="Search members…" oninput="filterTable()">
+    </div>
+    <button class="topbar-btn" onclick="window.open('professionals-databank.html','_blank')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Member
+    </button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <!-- CHARTS -->
+    <div class="charts-row">
+      <!-- Employment Status Chart -->
+      <div class="chart-card">
+        <div class="chart-title">Employment Status <span class="chart-sub">Distribution</span></div>
+        <div class="bar-chart" id="employmentChart"></div>
+      </div>
+      <!-- Education Level Donut -->
+      <div class="chart-card">
+        <div class="chart-title">Education Levels <span class="chart-sub">Breakdown</span></div>
+        <div class="donut-wrap">
+          <svg class="donut-svg" width="100" height="100" viewBox="0 0 100 100" id="donutSvg"></svg>
+          <div class="donut-legend" id="donutLegend"></div>
+        </div>
+      </div>
+      <!-- Top Skills -->
+      <div class="chart-card">
+        <div class="chart-title">Top Skills <span class="chart-sub">Most common</span></div>
+        <div class="skills-cloud" id="skillsCloud"></div>
+      </div>
+    </div>
+
+    <!-- FILTERS + TABLE -->
+    <div class="filters-bar">
+      <select class="filter-select" id="filterStatus" onchange="filterTable()">
+        <option value="">All Statuses</option>
+        <option>Employed (Full-time)</option>
+        <option>Unemployed (Actively Seeking)</option>
+        <option>On Internship</option>
+        <option>Active Application</option>
+        <option>Shortlisted</option>
+        <option>On Voluntary / Community Service</option>
+        <option>Self-employed / Business Owner</option>
+      </select>
+      <select class="filter-select" id="filterEdu" onchange="filterTable()">
+        <option value="">All Education Levels</option>
+        <option>Bachelor's Degree</option>
+        <option>Diploma</option>
+        <option>Master's Degree</option>
+        <option>Certificate</option>
+      </select>
+      <select class="filter-select" id="filterCareer" onchange="filterTable()">
+        <option value="">All Careers</option>
+      </select>
+      <div class="filter-count">Showing <span id="rowCount">0</span> members</div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortTable('name')">Member <span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('career')">Career <span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('education')">Education <span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('status')">Status <span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('age')">Age <span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('location')">Sub-Location <span class="sort-icon">↕</span></th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <div class="page-info" id="pageInfo"></div>
+        <div class="page-btns" id="pageBtns"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Member Details</div>
+      <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const MEMBERS = [
+  {id:1,name:"Brian Otieno Mwangi",phone:"0712 345 678",email:"brian.otieno@gmail.com",age:28,nationalId:"28765432",subLocation:"Mathare, Nairobi",education:"Bachelor's Degree",formFourYear:2013,kcse:"B+",institution:"University of Nairobi",course:"BSc Computer Science",graduation:2017,status:"Employed (Full-time)",employer:"Safaricom PLC",career:"Software Engineer",skills:["Python","React","SQL","Docker"]},
+  {id:2,name:"Faith Wanjiku Kamau",phone:"0723 456 789",email:"faith.wanjiku@yahoo.com",age:24,nationalId:"34123456",subLocation:"Westlands, Nairobi",education:"Diploma",formFourYear:2017,kcse:"C+",institution:"Kenya Institute of Management",course:"Business Administration",graduation:2021,status:"On Internship",employer:"Equity Bank",career:"Business Analyst",skills:["Excel","Data Analysis","Communication"]},
+  {id:3,name:"James Kipkoech Rotich",phone:"0734 567 890",email:"james.kipkoech@outlook.com",age:32,nationalId:"21987654",subLocation:"Eldoret East",education:"Master's Degree",formFourYear:2009,kcse:"A-",institution:"Moi University",course:"MBA Finance",graduation:2018,status:"Self-employed / Business Owner",employer:"Rotich Agri-Solutions",career:"Entrepreneur",skills:["Agribusiness","Finance","Leadership","Swahili"]},
+  {id:4,name:"Mercy Achieng Odhiambo",phone:"0745 678 901",email:"mercy.achieng@gmail.com",age:26,nationalId:"37234567",subLocation:"Kisumu Central",education:"Bachelor's Degree",formFourYear:2015,kcse:"B",institution:"Maseno University",course:"BSc Nursing",graduation:2020,status:"Employed (Full-time)",employer:"Aga Khan Hospital",career:"Registered Nurse",skills:["Patient Care","Clinical Skills","Swahili","EMR Systems"]},
+  {id:5,name:"Peter Muthoni Karanja",phone:"0756 789 012",email:"peter.muthoni@gmail.com",age:23,nationalId:"40345678",subLocation:"Thika Town",education:"Certificate",formFourYear:2018,kcse:"C",institution:"Kenya Technical Trainers College",course:"Electrical Engineering",graduation:2022,status:"Unemployed (Actively Seeking)",employer:"",career:"Electrician",skills:["Wiring","Solar Installation","Safety Compliance"]},
+  {id:6,name:"Sandra Nekesa Wafula",phone:"0767 890 123",email:"sandra.nekesa@gmail.com",age:27,nationalId:"35456789",subLocation:"Kakamega North",education:"Bachelor's Degree",formFourYear:2014,kcse:"A",institution:"Egerton University",course:"BSc Agriculture",graduation:2019,status:"Active Application",employer:"",career:"Agronomist",skills:["GIS","Crop Science","Research","French"]},
+  {id:7,name:"Daniel Muriithi Njeru",phone:"0778 901 234",email:"daniel.njeru@hotmail.com",age:35,nationalId:"18567890",subLocation:"Meru Town",education:"Higher National Diploma (HND)",formFourYear:2007,kcse:"B-",institution:"Kenya Polytechnic",course:"Civil Engineering",graduation:2012,status:"Employed (Full-time)",employer:"Kenya National Highways Authority",career:"Civil Engineer",skills:["AutoCAD","Structural Design","Project Management"]},
+  {id:8,name:"Grace Wairimu Gitau",phone:"0789 012 345",email:"grace.wairimu@gmail.com",age:22,nationalId:"42678901",subLocation:"Kiambu East",education:"Diploma",formFourYear:2019,kcse:"C+",institution:"Zetech University",course:"Information Technology",graduation:2022,status:"On Voluntary / Community Service",employer:"iHub Nairobi",career:"IT Support",skills:["Networking","Help Desk","HTML","CSS"]},
+  {id:9,name:"Collins Omondi Ajwang",phone:"0790 123 456",email:"collins.omondi@gmail.com",age:29,nationalId:"29789012",subLocation:"Homa Bay",education:"Bachelor's Degree",formFourYear:2012,kcse:"B+",institution:"Technical University of Kenya",course:"BSc Mechanical Engineering",graduation:2017,status:"Shortlisted",employer:"",career:"Mechanical Engineer",skills:["SolidWorks","MATLAB","Welding","AutoCAD"]},
+  {id:10,name:"Lydia Chebet Koech",phone:"0701 234 567",email:"lydia.chebet@gmail.com",age:25,nationalId:"38890123",subLocation:"Bomet Central",education:"Bachelor's Degree",formFourYear:2016,kcse:"A-",institution:"Kenyatta University",course:"BEd Science",graduation:2021,status:"Employed (Part-time)",employer:"Riara Group of Schools",career:"Science Teacher",skills:["Biology","Chemistry","Lesson Planning","Kiswahili"]},
+  {id:11,name:"Victor Kiprotich Sang",phone:"0702 345 678",email:"victor.sang@gmail.com",age:31,nationalId:"23901234",subLocation:"Nandi Hills",education:"Bachelor's Degree",formFourYear:2010,kcse:"B",institution:"Moi University",course:"BSc Biochemistry",graduation:2015,status:"Unemployed (Actively Seeking)",employer:"",career:"Laboratory Technician",skills:["PCR","Microscopy","Research","Report Writing"]},
+  {id:12,name:"Irene Awuor Nyakundi",phone:"0703 456 789",email:"irene.awuor@gmail.com",age:33,nationalId:"20012345",subLocation:"Migori Town",education:"Master's Degree",formFourYear:2008,kcse:"A",institution:"University of Nairobi",course:"MA Development Studies",graduation:2017,status:"Employed (Full-time)",employer:"USAID Kenya",career:"Development Officer",skills:["M&E","Project Management","SPSS","Grant Writing"]},
+  {id:13,name:"Edwin Njenga Kamande",phone:"0704 567 890",email:"edwin.njenga@gmail.com",age:20,nationalId:"44123456",subLocation:"Gatanga, Murang'a",education:"Certificate",formFourYear:2021,kcse:"C-",institution:"Nairobi Aviation College",course:"Tourism Management",graduation:2023,status:"Active Application",employer:"",career:"Tour Guide",skills:["English","French","Geography","Customer Service"]},
+  {id:14,name:"Pauline Auma Onyango",phone:"0705 678 901",email:"pauline.auma@gmail.com",age:30,nationalId:"25234567",subLocation:"Kisumu West",education:"Diploma",formFourYear:2011,kcse:"C+",institution:"Kisumu Polytechnic",course:"Secretarial Studies",graduation:2014,status:"Employed (Full-time)",employer:"County Government Kisumu",career:"Administrative Officer",skills:["MS Office","Typing","Filing","Communication"]},
+  {id:15,name:"Moses Mutuku Mwangangi",phone:"0706 789 012",email:"moses.mutuku@gmail.com",age:27,nationalId:"34345678",subLocation:"Machakos Town",education:"Bachelor's Degree",formFourYear:2014,kcse:"B-",institution:"South Eastern Kenya University",course:"BSc Information Systems",graduation:2019,status:"Attended Interview",employer:"",career:"Systems Analyst",skills:["Python","Power BI","SQL","Networking"]},
+  {id:16,name:"Vivian Chepkoech Bett",phone:"0707 890 123",email:"vivian.bett@gmail.com",age:24,nationalId:"39456789",subLocation:"Kericho Town",education:"Diploma",formFourYear:2017,kcse:"B",institution:"Kenya Medical Training College",course:"Clinical Medicine",graduation:2021,status:"On Internship",employer:"Kericho County Referral Hospital",career:"Clinical Officer",skills:["Diagnosis","Patient Care","BLS","Record Keeping"]},
+];
+
+// ===================== COLOUR HELPERS =====================
+const AVATARCOLORS=[["#d4a843","#0b0f14"],["#2ec4b6","#0b0f14"],["#e05a6b","#fff"],["#4a9eff","#0b0f14"],["#b478ff","#0b0f14"],["#ffa53c","#0b0f14"],["#3db07a","#0b0f14"],["#e87c5a","#0b0f14"]];
+function avatarColor(i){return AVATARCOLORS[i%AVATARCOLORS.length]}
+function initials(name){return name.split(' ').slice(0,2).map(w=>w[0]).join('')}
+
+const STATUS_PILL={
+  "Employed (Full-time)":"pill-employed","Employed (Part-time)":"pill-employed",
+  "Unemployed (Actively Seeking)":"pill-unemployed","Unemployed (Not Seeking)":"pill-unemployed",
+  "On Internship":"pill-intern","On Attachment":"pill-intern",
+  "Active Application":"pill-application","Attended Interview":"pill-application",
+  "Shortlisted":"pill-shortlisted",
+  "On Voluntary / Community Service":"pill-voluntary",
+  "Self-employed / Business Owner":"pill-employed",
+};
+function pillClass(s){return STATUS_PILL[s]||"pill-application"}
+function shortStatus(s){
+  const map={"Employed (Full-time)":"Employed FT","Employed (Part-time)":"Employed PT","Unemployed (Actively Seeking)":"Unemployed","On Voluntary / Community Service":"Voluntary","Self-employed / Business Owner":"Self-employed","Active Application":"Applying","Attended Interview":"Interviewed"};
+  return map[s]||s;
+}
+
+// ===================== STATE =====================
+let filtered=[...MEMBERS], sortKey='name', sortDir=1, page=1;
+const PER_PAGE=8;
+
+// ===================== INIT =====================
+window.onload=()=>{
+  buildKPI();
+  buildEmploymentChart();
+  buildDonut();
+  buildSkillsCloud();
+  buildCareerFilter();
+  filterTable();
+};
+
+// ===================== KPI =====================
+function buildKPI(){
+  const total=MEMBERS.length;
+  const employed=MEMBERS.filter(m=>m.status.startsWith('Employed')||m.status==='Self-employed / Business Owner').length;
+  const seeking=MEMBERS.filter(m=>m.status.includes('Unemployed')||m.status.includes('Application')||m.status==='Shortlisted'||m.status.includes('Interview')).length;
+  const interns=MEMBERS.filter(m=>m.status.includes('Internship')||m.status.includes('Attachment')).length;
+  const kpis=[
+    {label:"Total Members",val:total,icon:"👥",cls:"gold",delta:"+3 this month",up:true},
+    {label:"Employed",val:employed,icon:"💼",cls:"teal",delta:`${Math.round(employed/total*100)}% of total`,up:true},
+    {label:"Seeking Work",val:seeking,icon:"🔍",cls:"rose",delta:`${Math.round(seeking/total*100)}% of total`,up:false},
+    {label:"Interns / Attachees",val:interns,icon:"🎓",cls:"sky",delta:"Active placements",up:true},
+  ];
+  document.getElementById('kpiGrid').innerHTML=kpis.map((k,i)=>`
+    <div class="kpi-card ${k.cls}" style="animation-delay:${i*0.08}s">
+      <div class="kpi-icon">${k.icon}</div>
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-delta ${k.up?'up':'down'}">${k.up?'▲':'▼'} ${k.delta}</div>
+    </div>`).join('');
+}
+
+// ===================== EMPLOYMENT BAR CHART =====================
+function buildEmploymentChart(){
+  const counts={};
+  MEMBERS.forEach(m=>{counts[m.status]=(counts[m.status]||0)+1});
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  const max=sorted[0][1];
+  const colors=[getComputedStyle(document.documentElement).getPropertyValue('--gold').trim(),
+    'var(--teal)','var(--sky)','var(--rose)','#b478ff','#ffa53c','#3db07a'];
+  document.getElementById('employmentChart').innerHTML=sorted.map(([s,v],i)=>`
+    <div class="bar-row">
+      <div class="bar-label">${shortStatus(s)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${v/max*100}%;background:${colors[i%colors.length]}"></div></div>
+      <div class="bar-val">${v}</div>
+    </div>`).join('');
+  // Animate bars in
+  setTimeout(()=>document.querySelectorAll('.bar-fill').forEach(b=>b.style.transitionDuration='1.2s'),50);
+}
+
+// ===================== DONUT =====================
+function buildDonut(){
+  const counts={};
+  MEMBERS.forEach(m=>{counts[m.education]=(counts[m.education]||0)+1});
+  const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const total=MEMBERS.length;
+  const colors=['var(--gold)','var(--teal)','var(--sky)','var(--rose)','#b478ff','#ffa53c'];
+  let offset=0;
+  const r=38,cx=50,cy=50,circ=2*Math.PI*r;
+  let paths='';
+  entries.forEach(([label,val],i)=>{
+    const pct=val/total;
+    const dash=pct*circ;
+    paths+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${colors[i%colors.length]}" stroke-width="14" stroke-dasharray="${dash} ${circ-dash}" stroke-dashoffset="${-offset*circ}" transform="rotate(-90 ${cx} ${cy})" opacity="0.85"/>`;
+    offset+=pct;
+  });
+  document.getElementById('donutSvg').innerHTML=`<circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="14"/>${paths}<text x="50" y="54" text-anchor="middle" font-size="11" font-family="Syne,sans-serif" font-weight="700" fill="#e8edf3">${total}</text>`;
+  document.getElementById('donutLegend').innerHTML=entries.slice(0,5).map(([l,v],i)=>`
+    <div class="legend-item"><div class="legend-dot" style="background:${colors[i%colors.length]}"></div>${l.replace("'s Degree"," Deg.").replace(" National Diploma","  HND")} <span class="legend-val">${v}</span></div>`).join('');
+}
+
+// ===================== SKILLS CLOUD =====================
+function buildSkillsCloud(){
+  const counts={};
+  MEMBERS.forEach(m=>m.skills.forEach(s=>{counts[s]=(counts[s]||0)+1}));
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,18);
+  const max=sorted[0][1];
+  const colors=[['rgba(212,168,67,0.15)','var(--gold)','rgba(212,168,67,0.3)'],
+    ['rgba(46,196,182,0.12)','var(--teal)','rgba(46,196,182,0.25)'],
+    ['rgba(74,158,255,0.12)','var(--sky)','rgba(74,158,255,0.25)'],
+    ['rgba(224,90,107,0.12)','var(--rose)','rgba(224,90,107,0.25)'],
+    ['rgba(180,120,255,0.12)','#b478ff','rgba(180,120,255,0.25)']];
+  document.getElementById('skillsCloud').innerHTML=sorted.map(([s,v],i)=>{
+    const [bg,col,border]=colors[i%colors.length];
+    const sz=0.68+v/max*0.2;
+    return `<span class="skill-tag" style="background:${bg};color:${col};border-color:${border};font-size:${sz}rem">${s} <strong>${v}</strong></span>`;
+  }).join('');
+}
+
+// ===================== CAREER FILTER =====================
+function buildCareerFilter(){
+  const careers=[...new Set(MEMBERS.map(m=>m.career))].sort();
+  const sel=document.getElementById('filterCareer');
+  careers.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o)});
+}
+
+// ===================== FILTER + SORT =====================
+function filterTable(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const st=document.getElementById('filterStatus').value;
+  const ed=document.getElementById('filterEdu').value;
+  const ca=document.getElementById('filterCareer').value;
+  filtered=MEMBERS.filter(m=>{
+    const txt=(m.name+m.career+m.skills.join(' ')+m.subLocation+m.institution).toLowerCase();
+    return (!q||txt.includes(q))&&(!st||m.status===st)&&(!ed||m.education===ed)&&(!ca||m.career===ca);
+  });
+  page=1;
+  renderTable();
+}
+
+function sortTable(key){
+  const keyMap={name:'name',career:'career',education:'education',status:'status',age:'age',location:'subLocation'};
+  const k=keyMap[key];
+  if(sortKey===k) sortDir*=-1; else{sortKey=k;sortDir=1}
+  filtered.sort((a,b)=>{
+    const av=a[k],bv=b[k];
+    if(typeof av==='number') return (av-bv)*sortDir;
+    return av.localeCompare(bv)*sortDir;
+  });
+  document.querySelectorAll('thead th').forEach(th=>{th.classList.remove('sorted');th.querySelector('.sort-icon').textContent='↕'});
+  const idx={name:0,career:1,education:2,status:3,age:4,subLocation:5}[k];
+  if(idx!==undefined){
+    const th=document.querySelectorAll('thead th')[idx];
+    th.classList.add('sorted');
+    th.querySelector('.sort-icon').textContent=sortDir===1?'↑':'↓';
+  }
+  renderTable();
+}
+
+// ===================== RENDER TABLE =====================
+function renderTable(){
+  document.getElementById('rowCount').textContent=filtered.length;
+  const total=filtered.length;
+  const pages=Math.ceil(total/PER_PAGE)||1;
+  if(page>pages) page=pages;
+  const slice=filtered.slice((page-1)*PER_PAGE, page*PER_PAGE);
+
+  document.getElementById('tableBody').innerHTML=slice.map((m,i)=>{
+    const [bg,fg]=avatarColor(m.id);
+    return `<tr style="animation-delay:${i*0.04}s">
+      <td><div class="cell-name">
+        <div class="avatar" style="background:${bg};color:${fg}">${initials(m.name)}</div>
+        <div><div class="cell-name-text">${m.name}</div><div class="cell-name-sub">${m.email}</div></div>
+      </div></td>
+      <td>${m.career}</td>
+      <td><span class="edu-badge">${m.education.replace("Bachelor's Degree","B. Degree").replace("Master's Degree","M. Degree").replace("Higher National Diploma (HND)","HND")}</span></td>
+      <td><span class="status-pill ${pillClass(m.status)}">${shortStatus(m.status)}</span></td>
+      <td>${m.age}</td>
+      <td>${m.subLocation}</td>
+      <td><div class="row-actions">
+        <button class="row-btn" onclick="openModal(${m.id})">View</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('pageInfo').textContent=`${(page-1)*PER_PAGE+1}–${Math.min(page*PER_PAGE,total)} of ${total}`;
+
+  let pbhtml='';
+  if(page>1) pbhtml+=`<button class="page-btn" onclick="goPage(${page-1})">‹</button>`;
+  for(let p=1;p<=pages;p++){
+    if(pages<=7||p===1||p===pages||Math.abs(p-page)<=1)
+      pbhtml+=`<button class="page-btn ${p===page?'active':''}" onclick="goPage(${p})">${p}</button>`;
+    else if(Math.abs(p-page)===2) pbhtml+=`<button class="page-btn" style="pointer-events:none">…</button>`;
+  }
+  if(page<pages) pbhtml+=`<button class="page-btn" onclick="goPage(${page+1})">›</button>`;
+  document.getElementById('pageBtns').innerHTML=pbhtml;
+}
+function goPage(p){page=p;renderTable();document.querySelector('.table-card').scrollIntoView({behavior:'smooth',block:'nearest'})}
+
+// ===================== MODAL =====================
+function openModal(id){
+  const m=MEMBERS.find(x=>x.id===id);
+  const [bg,fg]=avatarColor(m.id);
+  document.getElementById('modalTitle').textContent=m.name;
+  document.getElementById('modalBody').innerHTML=`
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem">
+      <div class="avatar" style="width:52px;height:52px;font-size:1.1rem;border-radius:12px;background:${bg};color:${fg}">${initials(m.name)}</div>
+      <div>
+        <div style="font-family:var(--font-head);font-size:1rem;font-weight:700">${m.name}</div>
+        <div style="font-size:0.8rem;color:var(--muted)">${m.career} &nbsp;·&nbsp; ${m.email}</div>
+        <div style="margin-top:0.35rem"><span class="status-pill ${pillClass(m.status)}">${shortStatus(m.status)}</span></div>
+      </div>
+    </div>
+    <div class="detail-section-title">Personal Details</div>
+    <div class="detail-grid">
+      <div class="detail-item"><label>Phone</label><p>${m.phone}</p></div>
+      <div class="detail-item"><label>Age</label><p>${m.age} years</p></div>
+      <div class="detail-item"><label>National ID</label><p>${m.nationalId}</p></div>
+      <div class="detail-item"><label>Sub-Location</label><p>${m.subLocation}</p></div>
+    </div>
+    <div class="detail-section-title">Education</div>
+    <div class="detail-grid">
+      <div class="detail-item"><label>Highest Level</label><p>${m.education}</p></div>
+      <div class="detail-item"><label>Institution</label><p>${m.institution}</p></div>
+      <div class="detail-item"><label>Course Studied</label><p>${m.course}</p></div>
+      <div class="detail-item"><label>Graduation Year</label><p>${m.graduation}</p></div>
+      <div class="detail-item"><label>Form 4 Year</label><p>${m.formFourYear}</p></div>
+      <div class="detail-item"><label>KCSE Grade</label><p>${m.kcse}</p></div>
+    </div>
+    <div class="detail-section-title">Employment</div>
+    <div class="detail-grid">
+      <div class="detail-item"><label>Employment Status</label><p>${m.status}</p></div>
+      <div class="detail-item"><label>Employer / Business</label><p>${m.employer||'—'}</p></div>
+    </div>
+    <div class="detail-section-title">Skills & Talents</div>
+    <div class="skills-cloud">${m.skills.map((s,i)=>{const[bg2,col,border]=[['rgba(212,168,67,0.15)','var(--gold)','rgba(212,168,67,0.3)'],['rgba(46,196,182,0.12)','var(--teal)','rgba(46,196,182,0.25)'],['rgba(74,158,255,0.12)','var(--sky)','rgba(74,158,255,0.25)'],['rgba(224,90,107,0.12)','var(--rose)','rgba(224,90,107,0.25)']];const c=[bg2,col,border]=([['rgba(212,168,67,0.15)','var(--gold)','rgba(212,168,67,0.3)'],['rgba(46,196,182,0.12)','var(--teal)','rgba(46,196,182,0.25)'],['rgba(74,158,255,0.12)','var(--sky)','rgba(74,158,255,0.25)'],['rgba(224,90,107,0.12)','var(--rose)','rgba(224,90,107,0.25)']])[i%4];return`<span class="skill-tag" style="background:${c[0]};color:${c[1]};border-color:${c[2]}">${s}</span>`}).join('')}</div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(e){if(e.target===document.getElementById('modalOverlay')) document.getElementById('modalOverlay').classList.remove('show')}
+</script>
+</body>
+</html>

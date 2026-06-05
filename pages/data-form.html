@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Professionals Databank</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f1923;
+    --paper: #f5f0e8;
+    --cream: #ede7d9;
+    --gold: #c9952a;
+    --gold-light: #e8b84b;
+    --rust: #8b3a2a;
+    --sage: #3d6b5e;
+    --mist: #8a9aab;
+    --white: #ffffff;
+    --error: #c0392b;
+    --success: #27ae60;
+    --shadow: 0 4px 24px rgba(15,25,35,0.10);
+    --radius: 10px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 0%, rgba(201,149,42,0.10) 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 100%, rgba(61,107,94,0.08) 0%, transparent 55%);
+  }
+
+  /* ---- HEADER ---- */
+  .site-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0 clamp(1.5rem, 5vw, 4rem);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    height: 72px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 16px rgba(15,25,35,0.22);
+  }
+  .header-badge {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+  .header-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    letter-spacing: 0.01em;
+    color: var(--paper);
+  }
+  .header-text p {
+    font-size: 0.72rem;
+    color: var(--mist);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  .header-secure {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 0.45rem;
+    font-size: 0.72rem;
+    color: var(--gold-light);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+  .header-secure svg { width: 14px; height: 14px; }
+
+  /* ---- HERO BAND ---- */
+  .hero {
+    background: linear-gradient(100deg, #1a2a3a 0%, #0f1923 60%, #1a3028 100%);
+    padding: 3rem clamp(1.5rem, 5vw, 4rem) 2.5rem;
+    color: var(--paper);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    right: -80px; top: -80px;
+    width: 340px; height: 340px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,149,42,0.13) 0%, transparent 70%);
+  }
+  .hero-inner { max-width: 780px; position: relative; z-index: 1; }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(201,149,42,0.15);
+    border: 1px solid rgba(201,149,42,0.35);
+    color: var(--gold-light);
+    font-size: 0.73rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.28rem 0.75rem;
+    border-radius: 100px;
+    margin-bottom: 1rem;
+  }
+  .hero h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.7rem;
+  }
+  .hero p {
+    font-size: 0.95rem;
+    color: rgba(245,240,232,0.65);
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  /* ---- MAIN LAYOUT ---- */
+  .page-body {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem) 5rem;
+  }
+
+  /* ---- PROGRESS ---- */
+  .progress-bar-wrap {
+    background: var(--cream);
+    border-radius: 100px;
+    height: 5px;
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 100px;
+    width: 0%;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ---- SECTIONS ---- */
+  .form-section {
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.75rem;
+    overflow: hidden;
+    border: 1px solid rgba(15,25,35,0.07);
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.75rem;
+    background: var(--ink);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .section-header:hover { background: #1a2a3a; }
+  .section-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--paper);
+    letter-spacing: 0.01em;
+  }
+  .section-chevron {
+    margin-left: auto;
+    color: var(--mist);
+    transition: transform 0.3s;
+    font-size: 1.1rem;
+  }
+  .section-header.open .section-chevron { transform: rotate(180deg); }
+  .section-body {
+    padding: 1.75rem;
+    display: none;
+    animation: fadeSlide 0.25s ease;
+  }
+  .section-body.open { display: block; }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- GRID ---- */
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    gap: 1.25rem 1.5rem;
+  }
+  .field-grid .span-2 { grid-column: span 2; }
+  @media (max-width: 540px) { .field-grid .span-2 { grid-column: span 1; } }
+
+  /* ---- FIELDS ---- */
+  .field { display: flex; flex-direction: column; gap: 0.42rem; }
+  .field label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #4a5568;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .field label .req { color: var(--rust); margin-left: 2px; }
+
+  .field input,
+  .field select,
+  .field textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1.5px solid #ddd5c8;
+    border-radius: var(--radius);
+    padding: 0.7rem 0.95rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    width: 100%;
+    appearance: none;
+  }
+  .field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    padding-right: 2.2rem;
+    cursor: pointer;
+  }
+  .field textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--gold);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(201,149,42,0.15);
+  }
+  .field input.invalid,
+  .field select.invalid { border-color: var(--error); box-shadow: 0 0 0 3px rgba(192,57,43,0.12); }
+  .field .hint { font-size: 0.73rem; color: var(--mist); margin-top: 0.1rem; }
+  .field .err-msg { font-size: 0.73rem; color: var(--error); margin-top: 0.1rem; display: none; }
+  .field.has-error .err-msg { display: block; }
+
+  /* skills tags */
+  .skills-input-wrap {
+    display: flex; gap: 0.5rem; align-items: flex-start; flex-wrap: wrap;
+  }
+  .skills-input-wrap input { flex: 1; min-width: 120px; }
+  .tag-btn {
+    padding: 0.38rem 0.75rem;
+    background: var(--ink); color: var(--paper);
+    border: none; border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem; cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.18s;
+  }
+  .tag-btn:hover { background: var(--sage); }
+  .tags-display {
+    display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem;
+  }
+  .tag-pill {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    background: var(--cream);
+    border: 1px solid #ddd5c8;
+    border-radius: 100px;
+    padding: 0.25rem 0.6rem 0.25rem 0.75rem;
+    font-size: 0.78rem; color: var(--ink);
+  }
+  .tag-pill button {
+    background: none; border: none; cursor: pointer;
+    color: var(--mist); font-size: 0.9rem; line-height: 1;
+    padding: 0; transition: color 0.15s;
+  }
+  .tag-pill button:hover { color: var(--rust); }
+
+  /* ---- SUBMIT ---- */
+  .form-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem;
+    margin-top: 2rem;
+    padding: 1.5rem 1.75rem;
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(15,25,35,0.07);
+  }
+  .footer-note {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 0.78rem; color: var(--mist);
+  }
+  .footer-note svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  .submit-btn {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--ink);
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.85rem 2.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 16px rgba(201,149,42,0.35);
+    transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s;
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,149,42,0.40); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ---- SUCCESS ---- */
+  .success-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(15,25,35,0.65);
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .success-overlay.show { display: flex; }
+  .success-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 3rem 2.5rem;
+    max-width: 420px; width: 90%;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(15,25,35,0.25);
+    animation: popIn 0.4s cubic-bezier(.175,.885,.32,1.275);
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .success-icon {
+    width: 68px; height: 68px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--sage), #4f9980);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+  }
+  .success-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    margin-bottom: 0.6rem;
+    color: var(--ink);
+  }
+  .success-card p { color: var(--mist); font-size: 0.92rem; line-height: 1.6; }
+  .success-close {
+    margin-top: 1.75rem;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--ink); color: var(--paper);
+    border: none; border-radius: var(--radius);
+    padding: 0.75rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .success-close:hover { background: var(--sage); }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 600px) {
+    .form-footer { flex-direction: column-reverse; align-items: stretch; }
+    .submit-btn { justify-content: center; }
+    .section-body { padding: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-badge">PD</div>
+  <div class="header-text">
+    <h1>Professionals Databank</h1>
+    <p>Secure Member Registry</p>
+  </div>
+  <div class="header-secure">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    Protected &amp; Confidential
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
+      New Registration
+    </div>
+    <h2>Welcome, Brian</h2>
+    <p>Please fill in your details carefully. All information is kept strictly confidential and used solely for professional engagement purposes.</p>
+  </div>
+</div>
+
+<!-- FORM BODY -->
+<div class="page-body">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <form id="dataForm" novalidate>
+
+    <!-- SECTION 1: Personal Information -->
+    <div class="form-section">
+      <div class="section-header open" onclick="toggleSection(this)">
+        <div class="section-num">1</div>
+        <span class="section-title">Personal Information</span>
+        <span class="section-chevron">▾</span>
+      </div>
+      <div class="section-body open">
+        <div class="field-grid">
+          <div class="field span-2">
+            <label>Full Name <span class="req">*</span></label>
+            <input type="text" name="fullName" placeholder="e.g. Jane Wanjiku Mwangi" required>
+            <span class="err-msg">Full name is required</span>
+          </div>
+          <div class="field">
+            <label>Phone Number <span class="req">*</span></label>
+            <input type="tel" name="phone" placeholder="e.g. 0712 345 678" required>
+            <span class="err-msg">Valid phone number required</span>
+          </div>
+          <div class="field">
+            <label>Email Address <span class="req">*</span></label>
+            <input type="email" name="email" placeholder="name@example.com" required>
+            <span class="err-msg">Valid email address required</span>
+          </div>
+          <div class="field">
+            <label>Age <span class="req">*</span></label>
+            <input type="number" name="age" placeholder="e.g. 28" min="16" max="80" required>
+            <span class="err-msg">Please enter a valid age</span>
+          </div>
+          <div class="field">
+            <label>National ID No. <span class="req">*</span></label>
+            <input type="text" name="nationalId" placeholder="e.g. 12345678" required maxlength="9">
+            <span class="err-msg">National ID is required</span>
+          </div>
+          <div class="field">
+            <label>Sub-Location</label>
+            <input type="text" name="subLocation" placeholder="e.g. Kamulu, Nairobi">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: Education -->
+    <div class="form-section">
+      <div class="section-header open" onclick="toggleSection(this)">
+        <div class="section-num">2</div>
+        <span class="section-title">Education Background</span>
+        <span class="section-chevron">▾</span>
+      </div>
+      <div class="section-body open">
+        <div class="field-grid">
+          <div class="field">
+            <label>Highest Educational Level <span class="req">*</span></label>
+            <select name="educationLevel" required>
+              <option value="" disabled selected>— Select level —</option>
+              <option>Primary (KCPE)</option>
+              <option>Secondary (KCSE)</option>
+              <option>Certificate</option>
+              <option>Diploma</option>
+              <option>Higher National Diploma (HND)</option>
+              <option>Bachelor's Degree</option>
+              <option>Postgraduate Diploma</option>
+              <option>Master's Degree</option>
+              <option>PhD / Doctorate</option>
+            </select>
+            <span class="err-msg">Please select education level</span>
+          </div>
+          <div class="field">
+            <label>Year Completed Form Four</label>
+            <input type="number" name="formFourYear" placeholder="e.g. 2015" min="1990" max="2030">
+          </div>
+          <div class="field">
+            <label>KCSE Grade</label>
+            <select name="kcseGrade">
+              <option value="" disabled selected>— Select grade —</option>
+              <option>A (Plain)</option>
+              <option>A- (Minus)</option>
+              <option>B+ (Plus)</option>
+              <option>B (Plain)</option>
+              <option>B- (Minus)</option>
+              <option>C+ (Plus)</option>
+              <option>C (Plain)</option>
+              <option>C- (Minus)</option>
+              <option>D+ (Plus)</option>
+              <option>D (Plain)</option>
+              <option>D- (Minus)</option>
+              <option>E</option>
+              <option>X (Absent)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tertiary Institution Attended</label>
+            <input type="text" name="institution" placeholder="e.g. University of Nairobi">
+          </div>
+          <div class="field">
+            <label>Course Studied <span class="req">*</span></label>
+            <input type="text" name="course" placeholder="e.g. BSc. Computer Science" required>
+            <span class="err-msg">Course is required</span>
+          </div>
+          <div class="field">
+            <label>Year of Graduation</label>
+            <input type="number" name="graduationYear" placeholder="e.g. 2020" min="1990" max="2030">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Employment -->
+    <div class="form-section">
+      <div class="section-header open" onclick="toggleSection(this)">
+        <div class="section-num">3</div>
+        <span class="section-title">Employment & Career</span>
+        <span class="section-chevron">▾</span>
+      </div>
+      <div class="section-body open">
+        <div class="field-grid">
+          <div class="field span-2">
+            <label>Current Employment Status <span class="req">*</span></label>
+            <select name="employmentStatus" required onchange="toggleEmployerField(this)">
+              <option value="" disabled selected>— Select status —</option>
+              <option>Employed (Full-time)</option>
+              <option>Employed (Part-time)</option>
+              <option>Self-employed / Business Owner</option>
+              <option>On Internship</option>
+              <option>On Attachment</option>
+              <option>On Voluntary / Community Service</option>
+              <option>Active Application</option>
+              <option>Shortlisted</option>
+              <option>Attended Interview</option>
+              <option>Awaiting Results</option>
+              <option>Unemployed (Actively Seeking)</option>
+              <option>Unemployed (Not Seeking)</option>
+              <option>Student</option>
+              <option>Retired</option>
+            </select>
+            <span class="err-msg">Please select employment status</span>
+          </div>
+          <div class="field" id="employerFieldWrap">
+            <label>Employer / Business Name</label>
+            <input type="text" name="employer" placeholder="e.g. Kenya Power Ltd" id="employerField">
+            <span class="hint">Fill if currently employed or self-employed</span>
+          </div>
+          <div class="field">
+            <label>Career / Profession <span class="req">*</span></label>
+            <input type="text" name="career" placeholder="e.g. Software Engineer" required>
+            <span class="err-msg">Career field is required</span>
+          </div>
+          <div class="field span-2">
+            <label>Skills &amp; Talents</label>
+            <div class="skills-input-wrap">
+              <input type="text" id="skillInput" placeholder="Type a skill and press Add…" onkeydown="if(event.key==='Enter'){event.preventDefault();addSkill()}">
+              <button type="button" class="tag-btn" onclick="addSkill()">+ Add</button>
+            </div>
+            <div class="tags-display" id="tagsDisplay"></div>
+            <input type="hidden" name="skills" id="skillsHidden">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="form-footer">
+      <div class="footer-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Data is encrypted and stored securely. Fields marked <strong style="color:var(--rust);margin:0 3px;">*</strong> are required.
+      </div>
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Submit Registration
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-icon">✓</div>
+    <h3>Registration Complete</h3>
+    <p>Your details have been securely submitted to the Professionals Databank. You will be contacted for engagement opportunities.</p>
+    <button class="success-close" onclick="resetForm()">Register Another</button>
+  </div>
+</div>
+
+<script>
+  // ---- SECTION TOGGLE ----
+  function toggleSection(header) {
+    const body = header.nextElementSibling;
+    const isOpen = body.classList.contains('open');
+    header.classList.toggle('open', !isOpen);
+    body.classList.toggle('open', !isOpen);
+  }
+
+  // ---- PROGRESS ----
+  const allInputs = () => document.querySelectorAll('#dataForm input:not([type=hidden]), #dataForm select, #dataForm textarea');
+  function updateProgress() {
+    const inputs = allInputs();
+    let filled = 0;
+    inputs.forEach(el => { if (el.value.trim()) filled++; });
+    const pct = Math.round((filled / inputs.length) * 100);
+    document.getElementById('progressBar').style.width = pct + '%';
+  }
+  document.getElementById('dataForm').addEventListener('input', updateProgress);
+
+  // ---- EMPLOYER FIELD ----
+  function toggleEmployerField(sel) {
+    const showFor = ['Employed (Full-time)', 'Employed (Part-time)', 'Self-employed / Business Owner', 'On Internship', 'On Attachment'];
+    const show = showFor.includes(sel.value);
+    document.getElementById('employerFieldWrap').style.opacity = show ? '1' : '0.45';
+  }
+
+  // ---- SKILLS TAGS ----
+  const skills = [];
+  function addSkill() {
+    const input = document.getElementById('skillInput');
+    const val = input.value.trim();
+    if (!val || skills.includes(val)) { input.value = ''; return; }
+    skills.push(val);
+    renderTags();
+    input.value = '';
+    input.focus();
+  }
+  function removeSkill(idx) {
+    skills.splice(idx, 1);
+    renderTags();
+  }
+  function renderTags() {
+    const wrap = document.getElementById('tagsDisplay');
+    wrap.innerHTML = skills.map((s, i) =>
+      `<span class="tag-pill">${s}<button type="button" onclick="removeSkill(${i})" title="Remove">×</button></span>`
+    ).join('');
+    document.getElementById('skillsHidden').value = skills.join(', ');
+  }
+
+  // ---- VALIDATION ----
+  function validateField(input) {
+    const field = input.closest('.field');
+    if (!field) return true;
+    let valid = true;
+    if (input.required && !input.value.trim()) valid = false;
+    if (input.type === 'email' && input.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) valid = false;
+    if (input.type === 'tel' && input.value && !/^[\d\s\+\-]{7,15}$/.test(input.value)) valid = false;
+    input.classList.toggle('invalid', !valid);
+    field.classList.toggle('has-error', !valid);
+    return valid;
+  }
+
+  document.getElementById('dataForm').querySelectorAll('input, select, textarea').forEach(el => {
+    el.addEventListener('blur', () => validateField(el));
+    el.addEventListener('input', () => { if (el.classList.contains('invalid')) validateField(el); });
+  });
+
+  // ---- SUBMIT ----
+  document.getElementById('dataForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Open all sections to validate
+    document.querySelectorAll('.section-body').forEach(b => b.classList.add('open'));
+    document.querySelectorAll('.section-header').forEach(h => h.classList.add('open'));
+
+    let allValid = true;
+    this.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(el => {
+      if (!validateField(el)) allValid = false;
+    });
+
+    if (!allValid) {
+      const firstErr = this.querySelector('.invalid');
+      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    // Simulate submission
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg> Submitting…';
+
+    setTimeout(() => {
+      document.getElementById('successOverlay').classList.add('show');
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Submit Registration';
+    }, 1200);
+  });
+
+  function resetForm() {
+    document.getElementById('dataForm').reset();
+    document.getElementById('successOverlay').classList.remove('show');
+    skills.length = 0;
+    renderTags();
+    document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+    document.querySelectorAll('.has-error').forEach(el => el.classList.remove('has-error'));
+    document.getElementById('progressBar').style.width = '0%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>

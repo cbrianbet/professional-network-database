@@ -373,7 +373,7 @@
         <div class="field-grid">
           <div class="field span-2">
             <label>Full Name <span class="req">*</span></label>
-            <input type="text" name="fullName" placeholder="e.g. Jane Wanjiku Mwangi" required>
+            <input type="text" name="fullName" placeholder="e.g. Jane Chepkoech" required>
             <span class="err-msg">Full name is required</span>
           </div>
           <div class="field">
@@ -398,7 +398,7 @@
           </div>
           <div class="field">
             <label>Sub-Location</label>
-            <input type="text" name="subLocation" placeholder="e.g. Kamulu, Nairobi">
+            <input type="text" name="subLocation" placeholder="e.g. Chemilil, Kibisem">
           </div>
         </div>
       </div>
@@ -641,6 +641,24 @@ document.addEventListener('click', (e) => {
       if (logoutButton) logoutButton.addEventListener('click', logout);
     }
 
+    // If admin navigated here to edit a member, load that record
+    try {
+      const editId = sessionStorage.getItem('editMemberId');
+      if (editId && user && user.role === 'admin') {
+        const res = await fetch(`/api/members/${encodeURIComponent(editId)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+        if (res.ok) {
+          const body = await res.json();
+          if (body.member) {
+            fillMemberForm(body.member);
+            sessionStorage.removeItem('editMemberId');
+            wireDataFormEvents();
+            updateProgress();
+            return;
+          }
+        }
+      }
+    } catch (e) { /* ignore and continue to normal flow */ }
+
     const member = await fetchMemberRecord(user);
     if (member) {
       cachedMemberRecord = member;
@@ -661,6 +679,20 @@ document.addEventListener('click', (e) => {
 
     wireDataFormEvents();
     updateProgress();
+    // If user is not admin, hide the submit button (view-only)
+    try {
+      if (user && user.role !== 'admin') {
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) submitBtn.style.display = 'none';
+        const footer = document.querySelector('.form-footer');
+        if (footer) {
+          const note = document.createElement('div');
+          note.className = 'footer-note';
+          note.textContent = 'View-only access: contact an admin to create or modify records.';
+          footer.insertBefore(note, footer.firstChild);
+        }
+      }
+    } catch(e){}
   }
 
   function wireDataFormEvents() {
@@ -744,6 +776,14 @@ document.addEventListener('click', (e) => {
     const isOpen = body.classList.contains('open');
     header.classList.toggle('open', !isOpen);
     body.classList.toggle('open', !isOpen);
+  }
+  
+  function resetForm() {
+    document.getElementById('dataForm').reset();
+    skills.length = 0;
+    renderTags();
+    document.getElementById('successOverlay').classList.remove('show');
+    updateProgress();
   }
 
   const allInputs = () => document.querySelectorAll('#dataForm input:not([type=hidden]), #dataForm select, #dataForm textarea');

@@ -47,7 +47,7 @@ async function initDatabase() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS members (
       id SERIAL PRIMARY KEY,
-      user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       name TEXT NOT NULL,
       phone TEXT NOT NULL,
       email TEXT NOT NULL,
@@ -68,7 +68,6 @@ async function initDatabase() {
     );
   `);
 
-  await pool.query('CREATE UNIQUE INDEX IF NOT EXISTS members_user_id_unique ON members(user_id);');
 
   if (ADMIN_EMAIL && ADMIN_PASSWORD) {
     const result = await pool.query('SELECT id FROM users WHERE email = $1', [ADMIN_EMAIL.toLowerCase()]);
@@ -322,12 +321,13 @@ app.post('/api/members', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Missing required member fields' });
     }
 
+    // Only admins may create member records through this endpoint.
+    // Regular users are no longer allowed to create member records (they can only view).
     if (req.user.role !== 'admin') {
-      const existing = await pool.query('SELECT id FROM members WHERE user_id = $1', [req.user.id]);
-      if (existing.rowCount > 0) {
-        return res.status(409).json({ error: 'You already have a member record. Update it instead.' });
-      }
+      return res.status(403).json({ error: 'Admin access required to create member records' });
     }
+
+    // allow multiple member records per user (no pre-insert uniqueness check)
 
     const result = await pool.query(
       `INSERT INTO members (
@@ -398,8 +398,9 @@ app.patch('/api/members/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Member record not found' });
     }
 
-    if (req.user.role !== 'admin' && existing.rows[0].user_id !== req.user.id) {
-      return res.status(403).json({ error: 'You can only update your own member record' });
+    // Only admin users may update member records via this endpoint.
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required to update member records' });
     }
 
     const result = await pool.query(
@@ -435,6 +436,143 @@ app.patch('/api/members/:id', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Unable to update member' });
+  }
+});
+
+// Admin: create member for any user (admin-only path)
+app.post('/api/admin/members', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const {
+      userId,
+      name,
+      phone,
+      email,
+      age,
+      nationalId,
+      subLocation,
+      education,
+      formFourYear,
+      kcse,
+      institution,
+      course,
+      graduation,
+      status,
+      employer,
+      career,
+      skills,
+    } = req.body || {};
+
+    if (!userId || !name || !phone || !email || !age || !nationalId || !career || !status) {
+      return res.status(400).json({ error: 'Missing required member fields or userId' });
+    }
+
+    // Verify user exists
+    const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [userId]);
+    if (!userCheck.rowCount) return res.status(404).json({ error: 'User not found' });
+
+    // allow multiple member records per user (no pre-insert uniqueness check)
+
+    const result = await pool.query(
+      `INSERT INTO members (
+         user_id, name, phone, email, age, national_id, sub_location,
+         education, form_four_year, kcse, institution, course, graduation,
+         status, employer, career, skills
+       ) VALUES (
+         $1, $2, $3, $4, $5, $6, $7,
+         $8, $9, $10, $11, $12, $13,
+         $14, $15, $16, $17
+       ) RETURNING *`,
+      [
+        userId,
+        name,
+        phone,
+        email,
+        age,
+        nationalId,
+        subLocation || '',
+        education || '',
+        formFourYear || null,
+        kcse || '',
+        institution || '',
+        course || '',
+        graduation || null,
+        status,
+        employer || '',
+        career,
+        Array.isArray(skills) ? skills : [],
+      ]
+    );
+
+    res.status(201).json({ member: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Unable to create member' });
+  }
+});
+
+// Admin: delete member record
+app.delete('/api/members/:id', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const result = await pool.query('DELETE FROM members WHERE id = $1 RETURNING id', [req.params.id]);
+    if (!result.rowCount) return res.status(404).json({ error: 'Member not found' });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Unable to delete member' });
+  }
+});
+
+// Admin: get member by id
+app.get('/api/members/:id', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM members WHERE id = $1', [req.params.id]);
+    if (!result.rowCount) return res.status(404).json({ error: 'Member not found' });
+    res.json({ member: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Unable to load member' });
+  }
+});
+
+// Admin: export members to CSV
+app.get('/api/admin/export/members', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, user_id, name, email, phone, age, national_id, sub_location, education, kcse, institution, course, graduation, status, employer, career, skills, created_at FROM members ORDER BY created_at DESC');
+    const rows = result.rows || [];
+    const columns = ['id','user_id','name','email','phone','age','national_id','sub_location','education','kcse','institution','course','graduation','status','employer','career','skills','created_at'];
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="members-export.csv"');
+    const escape = v => typeof v === 'string' && (v.includes(',') || v.includes('\n') || v.includes('"')) ? `"${v.replace(/"/g,'""')}"` : (v===null||v===undefined?'':v);
+    res.write(columns.join(',') + '\n');
+    rows.forEach(r => {
+      const line = columns.map(c => escape(Array.isArray(r[c]) ? r[c].join(';') : (r[c]===null? '': String(r[c])))).join(',');
+      res.write(line + '\n');
+    });
+    res.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Unable to export members' });
+  }
+});
+
+// Admin: export users to CSV
+app.get('/api/admin/export/users', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, name, email, role, status, created_at FROM users ORDER BY created_at DESC');
+    const rows = result.rows || [];
+    const columns = ['id','name','email','role','status','created_at'];
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="users-export.csv"');
+    const escape = v => typeof v === 'string' && (v.includes(',') || v.includes('\n') || v.includes('"')) ? `"${v.replace(/"/g,'""')}"` : (v===null||v===undefined?'':v);
+    res.write(columns.join(',') + '\n');
+    rows.forEach(r => {
+      const line = columns.map(c => escape(r[c])).join(',');
+      res.write(line + '\n');
+    });
+    res.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Unable to export users' });
   }
 });
 

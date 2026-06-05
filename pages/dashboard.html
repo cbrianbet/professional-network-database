@@ -1057,14 +1057,25 @@ document.addEventListener('DOMContentLoaded', async () => {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="searchInput" placeholder="Search members…" oninput="filterTable()" />
         </div>
-        <button class="topbar-btn" type="button" onclick="window.location.hash='register'">
+        <button class="topbar-btn" type="button" id="exportCsvBtn" onclick="exportMembersCSV()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+        <button class="topbar-btn" type="button" id="addMemberBtn" onclick="window.location.hash='register'">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add Member
         </button>
       </div>
     `,
     onMount: async () => {
-      await initDashboardPage();
+        await initDashboardPage();
+        // hide Add Member for non-admins
+        try {
+          if (!(window.currentUser && window.currentUser.role === 'admin')) {
+            const addBtn = document.getElementById('addMemberBtn');
+            if (addBtn) addBtn.style.display = 'none';
+          }
+        } catch (e){}
       window.addEventListener('hashchange', renderByHash);
       await renderByHash();
     }
@@ -1211,6 +1222,7 @@ function renderTable(){
       <td>${m.subLocation}</td>
       <td><div class="row-actions">
         <button class="row-btn" onclick="openModal(${m.id})">View</button>
+        ${window.currentUser && window.currentUser.role === 'admin' ? `<button class="row-btn" onclick="editMember(${m.id})">Edit</button><button class="row-btn danger" onclick="deleteMember(${m.id})">Delete</button>` : ''}
       </div></td>
     </tr>`;
   }).join('');
@@ -1230,6 +1242,48 @@ function renderTable(){
 function goPage(p){page=p;renderTable();document.querySelector('.table-card').scrollIntoView({behavior:'smooth',block:'nearest'})}
 
 // ===================== MODAL =====================
+
+// Export members client-side CSV from loaded MEMBERS
+function exportMembersCSV(){
+  try{
+    const cols = ['id','user_id','name','email','phone','age','national_id','sub_location','education','kcse','institution','course','graduation','status','employer','career','skills','created_at'];
+    const rows = MEMBERS.map(m=>cols.map(c=>{
+      let v = m[c];
+      if (Array.isArray(v)) v = v.join(';');
+      if (v===null||v===undefined) v='';
+      if (typeof v === 'string' && (v.includes(',')||v.includes('"')||v.includes('\n'))) v = '"'+v.replace(/"/g,'""')+'"';
+      return String(v);
+    }).join(','));
+    const csv = cols.join(',') + '\n' + rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'members-export.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }catch(e){ alert('Unable to export members') }
+}
+
+// Admin: delete member
+async function deleteMember(id){
+  if(!confirm('Delete this member? This cannot be undone.')) return;
+  const token = localStorage.getItem('authToken');
+  try{
+    const res = await fetch(`/api/members/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    const body = await res.json();
+    if(!res.ok) throw new Error(body.error || 'Delete failed');
+    await loadMembers();
+  }catch(err){ alert(err.message || 'Unable to delete member'); }
+}
+
+// Admin: edit member -> route to register page and stash id
+function editMember(id){
+  try{ sessionStorage.setItem('editMemberId', String(id)); }catch(e){}
+  window.location.hash = 'register';
+}
 function openModal(id){
   const m=MEMBERS.find(x=>x.id===id);
   const [bg,fg]=avatarColor(m.id);

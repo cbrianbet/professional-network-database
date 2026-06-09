@@ -136,6 +136,14 @@ tbody td{padding:0.85rem 1rem;font-size:0.82rem;color:var(--text);white-space:no
           <option>Master's Degree</option><option>Certificate</option>
         </select>
         <select class="filter-select" id="filterCareer" onchange="filterTable()"><option value="">All Careers</option></select>
+        <div class="topbar-actions">
+          <div class="topbar-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg><input type="text" id="searchInput" placeholder="Search members…" oninput="filterTable()" /></div><button
+            class="topbar-btn" onclick="exportMembersCSV()">Export CSV</button><button class="topbar-btn" id="addMemberBtn"
+            onclick="window.location.href='/register'">Add Member</button>
+        </div>
         <div class="filter-count">Showing <span id="rowCount">0</span> members</div>
       </div>
       <div class="table-card">
@@ -204,7 +212,6 @@ document.addEventListener('DOMContentLoaded',async()=>{
     title:'Dashboard',
     activeHref:'dashboard.html',
     contentHtml:document.getElementById('dashboard-content').innerHTML,
-    topbarHtml:`<div class="topbar-actions"><div class="topbar-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="searchInput" placeholder="Search members…" oninput="filterTable()"/></div><button class="topbar-btn" onclick="exportMembersCSV()">Export CSV</button><button class="topbar-btn" id="addMemberBtn" onclick="window.location.href='/register'">Add Member</button></div>`,
     onMount:async()=>{
       await initDashboardPage();
       try{if(!(window.currentUser&&window.currentUser.role==='admin')){const b=document.getElementById('addMemberBtn');if(b)b.style.display='none';}}catch(e){}

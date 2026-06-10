@@ -162,6 +162,7 @@ def member_detail_update_delete(request, member_id):
 
     # PATCH
     sz = MemberWriteSerializer(data=request.data, context={'user': request.user})
+    print('Updating member', member_id, 'with data', request.data, 'validated:', sz.is_valid())
     if not sz.is_valid():
         err = next(iter(sz.errors.values()))[0]
         return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
@@ -224,6 +225,7 @@ def profile_detail(request, profile_id):
 
     # PATCH
     profile_status = request.data.get('status')
+    print('Updating profile', profile_id, 'to status', profile_status)
     if not profile_status:
         return Response({'error': 'Status is required.'}, status=status.HTTP_400_BAD_REQUEST)
     profile.status = profile_status

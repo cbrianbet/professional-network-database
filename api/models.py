@@ -9,8 +9,7 @@ class User(models.Model):
     to the original Node project and migrations are clean.
     """
     ROLE_CHOICES = [('user', 'User'), ('admin', 'Admin')]
-    STATUS_CHOICES = [('active', 'Active'), ('pending',
-                                             'Pending'), ('disabled', 'Disabled')]
+    STATUS_CHOICES = [('active', 'Active'), ('pending', 'Pending'), ('disabled', 'Disabled')]
 
     name = models.TextField()
     email = models.EmailField(unique=True)
@@ -59,6 +58,7 @@ class User(models.Model):
 
 
 class Member(models.Model):
+    GENDER_CHOICES = [('male', 'Male'), ('female', 'Female')]
     """Mirrors the `members` table."""
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='members')
@@ -66,6 +66,7 @@ class Member(models.Model):
     phone = models.TextField()
     email = models.TextField()
     age = models.IntegerField()
+    gender = models.TextField(choices=GENDER_CHOICES, default='')
     national_id = models.TextField()
     sub_location = models.TextField(blank=True, default='')
     education = models.TextField(blank=True, default='')

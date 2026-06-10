@@ -92,6 +92,7 @@ class MemberWriteSerializer(serializers.Serializer):
     email = serializers.EmailField()
     age = serializers.IntegerField()
     nationalId = serializers.CharField(source='national_id')
+    gender = serializers.ChoiceField(choices=[('male', 'Male'), ('female', 'Female')])
     subLocation = serializers.CharField(source='sub_location', allow_blank=True, default='')
     education = serializers.CharField(allow_blank=True, default='')
     formFourYear = serializers.IntegerField(source='form_four_year', allow_null=True, required=False)

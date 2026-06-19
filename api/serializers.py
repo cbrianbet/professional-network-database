@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Member, Profile
+from .models import User, Member, Profile, FileResource
 
 
 # ── User ─────────────────────────────────────────────────────────────────────
@@ -44,6 +44,7 @@ class SignupSerializer(serializers.Serializer):
         user = User(
             name=validated_data['name'].strip(),
             email=validated_data.get('email', '').lower() if validated_data.get('email') else '',
+            status='pending',  # New users start as pending approval
         )
         user.set_password(validated_data['password'])
         user.save()
@@ -200,3 +201,45 @@ class ProfileWriteSerializer(serializers.Serializer):
     def create(self, validated_data):
         user = self.context['user']
         return Profile.objects.create(user=user, **validated_data)
+
+
+# ── FileResource ─────────────────────────────────────────────────────────────
+
+class FileResourceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FileResource
+        fields = '__all__'
+
+
+class FileResourceWriteSerializer(serializers.Serializer):
+    original_filename = serializers.CharField()
+    file_size = serializers.IntegerField()  # in bytes
+    file_type = serializers.ChoiceField(choices=[
+        ('pdf', 'PDF'),
+        ('jpeg', 'JPEG'),
+        ('png', 'PNG'),
+    ])
+    upload_path = serializers.CharField()  # path to stored file
+    permission_level = serializers.ChoiceField(choices=[
+        ('public', 'Public'),
+        ('authenticated', 'Authenticated'),
+        ('private', 'Private'),
+    ], default='private')
+    uploaded_by = serializers.CharField(allow_blank=True, default='')  # username who uploaded
+
+    def validate(self, data):
+        required = ['original_filename', 'file_size', 'file_type', 'upload_path']
+        for field in required:
+            if data.get(field) is None:
+                raise serializers.ValidationError({field: 'This field is required.'})
+        return data
+
+    def create(self, validated_data):
+        user = self.context['user']
+        return FileResource.objects.create(user=user, **validated_data)
+
+    def update(self, instance, validated_data):
+        for attr, val in validated_data.items():
+            setattr(instance, attr, val)
+        instance.save()
+        return instance

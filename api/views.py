@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .auth_backend import CustomJWTAuthentication, get_tokens_for_user
-from .models import User, Member, Profile
+from .models import User, Member, Profile, FileResource
 from .permissions import IsAdminUser
 from .serializers import (
     UserSerializer,
@@ -80,6 +80,9 @@ def login(request):
     if not user.check_password(password):
         return Response({'error': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
 
+    if user.status == 'pending':
+        return Response({'error': 'Account is pending approval. Please contact an administrator.'}, status=status.HTTP_403_FORBIDDEN)
+
     if user.status == 'disabled':
         return Response({'error': 'Account is disabled.'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -95,6 +98,10 @@ def login(request):
 def admin_users_list_create(request):
     if request.method == 'GET':
         users = User.objects.all()
+        # Filter by status if provided
+        status = request.query_params.get('status')
+        if status:
+            users = users.filter(status=status)
         return Response({'users': UserSerializer(users, many=True).data})
 
     # POST — create user
@@ -107,7 +114,7 @@ def admin_users_list_create(request):
     return Response({'user': UserSerializer(user).data}, status=status.HTTP_201_CREATED)
 
 
-@api_view(['PATCH'])
+@api_view(['GET', 'PATCH', 'DELETE'])
 @authentication_classes(AUTH)
 @permission_classes(ADMIN)
 def admin_users_update(request, user_id):
@@ -116,17 +123,26 @@ def admin_users_update(request, user_id):
     except User.DoesNotExist:
         return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-    sz = AdminUpdateUserSerializer(data=request.data, partial=True)
-    if not sz.is_valid():
-        err = next(iter(sz.errors.values()))[0]
-        return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == 'GET':
+        serializer = UserSerializer(user)
+        return Response({'user': serializer.data})
 
-    try:
-        user = sz.update(user, sz.validated_data)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_409_CONFLICT)
+    elif request.method == 'PATCH':
+        sz = AdminUpdateUserSerializer(data=request.data, partial=True)
+        if not sz.is_valid():
+            err = next(iter(sz.errors.values()))[0]
+            return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response({'user': UserSerializer(user).data})
+        try:
+            user = sz.update(user, sz.validated_data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_409_CONFLICT)
+
+        return Response({'user': UserSerializer(user).data})
+
+    elif request.method == 'DELETE':
+        user.delete()
+        return Response({'success': True})
 
 
 # ── Members ───────────────────────────────────────────────────────────────────
@@ -300,3 +316,119 @@ def export_users(request):
             'created_at': u.created_at.isoformat(),
         })
     return _stream_csv(rows, columns, 'users-export.csv')
+
+
+@api_view(['GET'])
+@authentication_classes(AUTH)
+@permission_classes(ADMIN)
+def admin_stats(request):
+    from django.db.models import Count
+    from django.utils import timezone
+    from datetime import timedelta
+
+    # Basic counts
+    total_users = User.objects.count()
+    users_by_role = User.objects.values('role').annotate(count=Count('role'))
+    users_by_status = User.objects.values('status').annotate(count=Count('status'))
+
+    # Recent users (last 7 days, 30 days)
+    seven_days_ago = timezone.now() - timedelta(days=7)
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+
+    recent_users_7d = User.objects.filter(created_at__gte=seven_days_ago).count()
+    recent_users_30d = User.objects.filter(created_at__gte=thirty_days_ago).count()
+
+    # Format the data for easier consumption
+    role_counts = {item['role']: item['count'] for item in users_by_role}
+    status_counts = {item['status']: item['count'] for item in users_by_status}
+
+    stats = {
+        'total_users': total_users,
+        'users_by_role': role_counts,
+        'users_by_status': status_counts,
+        'recent_users': {
+            'last_7_days': recent_users_7d,
+            'last_30_days': recent_users_30d
+        }
+    }
+
+    return Response(stats)
+
+
+@api_view(['PATCH'])
+@authentication_classes(AUTH)
+@permission_classes(ADMIN)
+def admin_user_approve_reject(request, user_id):
+    """
+    Approve or reject a pending user registration
+    Expected data: {'status': 'active' or 'disabled'}
+    """
+    try:
+        user = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Only allow approving/rejecting pending users
+    if user.status != 'pending':
+        return Response({'error': 'Only pending users can be approved or rejected.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    new_status = request.data.get('status')
+    if new_status not in ['active', 'disabled']:
+        return Response({'error': 'Status must be either \"active\" or \"disabled\".'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user.status = new_status
+    user.save()
+
+    return Response({'user': UserSerializer(user).data})
+
+
+# ── File Resources ─────────────────────────────────────────────────────────────
+@api_view(['GET', 'POST'])
+@authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsAdminUser])
+def file_resources_list_create(request):
+    """
+    GET: List all file resources
+    POST: Create a new file resource
+    """
+    if request.method == 'GET':
+        resources = FileResource.objects.all()
+        serializer = FileResourceSerializer(resources, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = FileResourceWriteSerializer(data=request.data, context={'user': request.user})
+        if serializer.is_valid():
+            resource = serializer.save()
+            return Response(FileResourceSerializer(resource).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PATCH', 'DELETE'])
+@authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsAdminUser])
+def file_resource_detail(request, resource_id):
+    """
+    GET: Get file resource details
+    PATCH: Update file resource
+    DELETE: Delete file resource
+    """
+    try:
+        resource = FileResource.objects.get(id=resource_id)
+    except FileResource.DoesNotExist:
+        return Response({'error': 'File resource not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = FileResourceSerializer(resource)
+        return Response(serializer.data)
+
+    elif request.method == 'PATCH':
+        serializer = FileResourceWriteSerializer(resource, data=request.data, partial=True, context={'user': request.user})
+        if serializer.is_valid():
+            resource = serializer.save()
+            return Response(FileResourceSerializer(resource).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        resource.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

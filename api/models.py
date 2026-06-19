@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password
+import os
+from django.conf import settings
 
 
 class User(models.Model):
@@ -124,6 +126,95 @@ class Member(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class FileResource(models.Model):
+    """Model for uploaded file resources."""
+    FILE_TYPE_CHOICES = [
+        ('pdf', 'PDF'),
+        ('jpeg', 'JPEG'),
+        ('png', 'PNG'),
+    ]
+
+    PERMISSION_LEVEL_CHOICES = [
+        ('public', 'Public'),
+        ('authenticated', 'Authenticated'),
+        ('private', 'Private'),
+    ]
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='file_resources')
+    original_filename = models.TextField()
+    file_size = models.IntegerField()  # in bytes
+    file_type = models.TextField(choices=FILE_TYPE_CHOICES)
+    upload_path = models.TextField()  # path to stored file
+    thumbnail_path = models.TextField(blank=True, default='')  # path to thumbnail/preview
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    permission_level = models.TextField(choices=PERMISSION_LEVEL_CHOICES, default='private')
+    uploaded_by = models.TextField(blank=True, default='')  # username who uploaded
+
+    class Meta:
+        db_table = 'file_resources'
+        ordering = ['-uploaded_at']
+
+    def generate_thumbnail(self):
+        """Generate thumbnail for image files or preview for PDFs"""
+        if not self.upload_path or not os.path.exists(self.upload_path):
+            return
+
+        try:
+            from PIL import Image
+
+            # Create thumbnails directory if it doesn't exist
+            thumbnail_dir = os.path.join(settings.MEDIA_ROOT, 'thumbnails')
+            os.makedirs(thumbnail_dir, exist_ok=True)
+
+            # Generate thumbnail filename
+            name, ext = os.path.splitext(os.path.basename(self.upload_path))
+            thumbnail_filename = f"{name}_thumb{ext}"
+            thumbnail_path = os.path.join(thumbnail_dir, thumbnail_filename)
+
+            # Generate thumbnail based on file type
+            if self.file_type.lower() in ['jpeg', 'png']:
+                # For images, create thumbnail
+                with Image.open(self.upload_path) as img:
+                    # Convert to RGB if necessary (for PNG with transparency)
+                    if img.mode in ('RGBA', 'LA', 'P'):
+                        rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+                        rgb_img.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                        img = rgb_img
+
+                    # Create thumbnail
+                    img.thumbnail((200, 200), Image.Resampling.LANCZOS)
+                    img.save(thumbnail_path, optimize=True, quality=85)
+
+            elif self.file_type.lower() == 'pdf':
+                # For PDFs, we would need a PDF library like pdf2image or PyMuPDF
+                # For now, we'll just copy the file or create a placeholder
+                # In a real implementation, you'd render the first page as an image
+                import shutil
+                shutil.copy2(self.upload_path, thumbnail_path)
+
+            # Update thumbnail path (relative to MEDIA_ROOT for storage)
+            self.thumbnail_path = os.path.relpath(thumbnail_path, settings.MEDIA_ROOT)
+            self.save(update_fields=['thumbnail_path'])
+
+        except ImportError:
+            # PIL not available, skip thumbnail generation
+            pass
+        except Exception:
+            # Any other error, skip thumbnail generation
+            pass
+
+    def save(self, *args, **kwargs):
+        """Override save to generate thumbnail after saving"""
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new and self.file_type.lower() in ['jpeg', 'png', 'pdf']:
+            self.generate_thumbnail()
+
+    def __str__(self):
+        return f"{self.original_filename} ({self.file_type})"
 
 
 class Profile(models.Model):

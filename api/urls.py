@@ -3,9 +3,9 @@ from . import views
 
 urlpatterns = [
     # ── Auth ──────────────────────────────────────────────────────────────
-    path('auth/me',     views.me),
-    path('auth/signup', views.signup),
-    path('auth/login',  views.login),
+    path('auth/me/',     views.me),
+    path('auth/signup/', views.signup),
+    path('auth/login/',  views.login),
 
     # ── Admin — users (GET list, POST create, PATCH update) ────────────────
     path('admin/users',               views.admin_users_list_create),
@@ -20,7 +20,7 @@ urlpatterns = [
 
     # ── Members (GET list, POST create) ────────────────────────────────────
     path('members',                 views.members_list_create),
-    # ── Member detail (GET, PATCH, DELETE) ────────────────────────────────
+    # ── Member detail (GET, PATCH, DELETE) ─────────────────────────────────
     path('members/<int:member_id>', views.member_detail_update_delete),
 
     # ── Profiles (GET list, POST create) ───────────────────────────────────

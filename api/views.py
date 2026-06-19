@@ -56,15 +56,26 @@ def signup(request):
 def login(request):
     sz = LoginSerializer(data=request.data)
     if not sz.is_valid():
-        return Response({'error': 'Email and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Email/National ID and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    email    = sz.validated_data['email'].lower()
+    identifier = sz.validated_data['email']
     password = sz.validated_data['password']
 
-    try:
-        user = User.objects.get(email=email)
-    except User.DoesNotExist:
-        return Response({'error': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
+    # Determine if identifier is email or national_id
+    if '@' in identifier:
+        # Login by email
+        try:
+            user = User.objects.get(email=identifier.lower())
+        except User.DoesNotExist:
+            return Response({'error': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        # Login by national_id - find user through their member record
+        national_id = identifier.replace(' ', '').upper()
+        try:
+            member = Member.objects.get(national_id=national_id)
+            user = member.user
+        except Member.DoesNotExist:
+            return Response({'error': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
 
     if not user.check_password(password):
         return Response({'error': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)

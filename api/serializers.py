@@ -12,27 +12,85 @@ class UserSerializer(serializers.ModelSerializer):
 
 class SignupSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
-    email = serializers.EmailField()
+    email = serializers.EmailField(required=False)
+    national_id = serializers.CharField(max_length=50, required=False)
     password = serializers.CharField(min_length=8, write_only=True)
 
     def validate_email(self, value):
-        if User.objects.filter(email=value.lower()).exists():
-            raise serializers.ValidationError('Email is already registered.')
-        return value.lower()
+        if value:  # Only validate if provided
+            value = value.lower().strip()
+            if User.objects.filter(email=value).exists():
+                raise serializers.ValidationError('Email is already registered.')
+            return value
+        return value
+
+    def validate_national_id(self, value):
+        if value:  # Only validate if provided
+            value = value.replace(' ', '').upper()
+            if Member.objects.filter(national_id=value).exists():
+                raise serializers.ValidationError('National ID is already registered.')
+            return value
+        return value
+
+    def validate(self, attrs):
+        # Ensure at least one identifier is provided
+        email = attrs.get('email')
+        national_id = attrs.get('national_id')
+        if not email and not national_id:
+            raise serializers.ValidationError('Either email or national ID must be provided.')
+        return attrs
 
     def create(self, validated_data):
         user = User(
             name=validated_data['name'].strip(),
-            email=validated_data['email'],
+            email=validated_data.get('email', '').lower() if validated_data.get('email') else '',
         )
         user.set_password(validated_data['password'])
         user.save()
+
+        # Create member record if national_id provided
+        national_id = validated_data.get('national_id')
+        if national_id:
+            national_id = national_id.replace(' ', '').upper()
+            # Use provided name for member, empty strings for other required text fields, 0 for age
+            Member.objects.create(
+                user=user,
+                name=validated_data['name'].strip(),
+                phone='',
+                email='',
+                age=0,
+                national_id=national_id
+            )
+
         return user
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.CharField()
     password = serializers.CharField(write_only=True)
+
+    def validate_email(self, value):
+        # Convert to lowercase for consistency and strip whitespace
+        value = value.lower().strip()
+
+        # Check if it looks like an email (contains @)
+        if '@' in value:
+            # Validate as email
+            if not value:
+                raise serializers.ValidationError('Email is required.')
+            # Basic email validation - should have @ and at least one . after @
+            if '@' not in value or '.' not in value.split('@')[1]:
+                raise serializers.ValidationError('Enter a valid email address.')
+            return value
+        else:
+            # Treat as national_id - basic validation
+            if not value:
+                raise serializers.ValidationError('National ID is required.')
+            # Remove spaces and convert to uppercase for consistency
+            value = value.replace(' ', '').upper()
+            if len(value) < 6:  # Assuming minimum national ID length
+                raise serializers.ValidationError('National ID is too short.')
+            return value
 
 
 class AdminCreateUserSerializer(serializers.Serializer):

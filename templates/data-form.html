@@ -139,9 +139,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
                   <option>Employed (Full-time)</option><option>Employed (Part-time)</option>
                   <option>Self-employed / Business Owner</option><option>On Internship</option>
                   <option>On Attachment</option><option>On Voluntary / Community Service</option>
-                  <option>Active Application</option><option>Shortlisted</option>
-                  <option>Attended Interview</option><option>Unemployed (Actively Seeking)</option>
-                  <option>Unemployed (Not Seeking)</option><option>Student</option><option>Retired</option>
+                  <option>On Contract terms</option><option>On Casual terms</option>
+                  <option>TSC Transfer Request</option><option>Active Application</option>
+                  <option>Shortlisted</option><option>Attended Interview</option>
+                  <option>Unemployed (Actively Seeking)</option><option>Unemployed (Not Seeking)</option>
+                  <option>Student</option><option>Retired</option>
                 </select>
                 <span class="err-msg">Please select employment status</span>
               </div>
@@ -202,7 +204,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
       const token=localStorage.getItem('authToken');
       // load current user
       let user=null;
-      try{const res=await fetch('/api/auth/me',{headers:{Authorization:`Bearer ${token}`}});if(res.ok){const d=await res.json();user=d.user;window.currentUser=user;const n=document.getElementById('authUserName');if(n)n.textContent=user.name;}}catch(e){}
+      try{const res=await fetch('/api/auth/me/',{headers:{Authorization:`Bearer ${token}`}});if(res.ok){const d=await res.json();user=d.user;window.currentUser=user;const n=document.getElementById('authUserName');if(n)n.textContent=user.name;}}catch(e){}
       // wire events
       const form=document.getElementById('dataForm');
       form.addEventListener('input',updateProgress);

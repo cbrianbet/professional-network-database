@@ -8,7 +8,7 @@ async function ensureAuthenticated() {
   const token = localStorage.getItem('authToken');
   if (!token) { window.location.href = '/login'; return false; }
   try {
-    const res = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch('/api/auth/me/', { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) throw new Error('Unauthorized');
     return true;
   } catch {
@@ -56,7 +56,7 @@ async function loadCurrentUser() {
   const token = localStorage.getItem('authToken');
   if (!token) return null;
   try {
-    const res = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch('/api/auth/me/', { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) throw new Error('Unauthorized');
     const data = await res.json();
     window.currentUser = data.user;

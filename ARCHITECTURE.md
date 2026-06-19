@@ -26,10 +26,10 @@ All protected pages (`dashboard.html`, `data-form.html`, `admin.html`) now use a
 ### Page-Specific Files
 Each protected page has its own HTML with page-specific styles and logic, but all render through `renderProtectedPage()`.
 
-- **`dashboard.html`** — Main shell and page routing
+- **`dashboard.html`** — Main dashboard showing member statistics and management
   - Uses `renderProtectedPage()` to display shell
-  - Contains page config routing table
-  - Admin/Register render helpers (legacy, can be removed)
+  - Contains page-specific JavaScript for KPIs, charts, filters, and member table
+  - `initDashboardPage()` called on mount via `onMount` callback
 
 - **`data-form.html`** — Member registration form
   - Form content in `<template id="page-body-template">`
@@ -55,7 +55,6 @@ Each protected page has its own HTML with page-specific styles and logic, but al
        <div class="topbar">...</div>
        <main class="page-content">${contentHtml}</main>
      </div>
-   </div>
    ```
 5. Content HTML (from `<template>`) is injected into `.page-content`
 6. `onMount` callback is invoked to attach page-specific event listeners
@@ -103,19 +102,19 @@ To change the sidebar, topbar, or any shell styling:
 
 ## CSS Variable Reference (from `shared-layout.css`)
 ```css
---ink: #0f1923;           /* Dark text/background */
---paper: #f5f0e8;         /* Light background */
---cream: #ede7d9;         /* Soft neutral */
---gold: #c9952a;          /* Primary accent */
---gold-light: #e8b84b;    /* Secondary accent */
---rust: #8b3a2a;          /* Error/danger color */
---sage: #3d6b5e;          /* Tertiary accent */
---mist: #8a9aab;          /* Muted text */
---white: #ffffff;         /* Pure white */
---error: #c0392b;         /* Error state */
---success: #27ae60;       /* Success state */
---shadow: 0 4px 24px rgba(15,25,35,0.10);
---radius: 10px;
+--bg: #0b0f14;              /* Background */
+--surface: #131920;         /* Surface level 1 */
+--surface2: #1a2330;        /* Surface level 2 */
+--border: rgba(255,255,255,0.08); /* Borders */
+--text: #edf2f7;            /* Primary text */
+--muted: #a0aec0;           /* Muted text */
+--gold: #d4a843;            /* Primary accent */
+--gold2: #f0c96a;           /* Secondary accent */
+--radius: 14px;             /* Border radius */
+--sidebar-w: 220px;         /* Sidebar width */
+--topbar-h: 58px;           /* Topbar height */
+--font-head: Inter, system-ui, sans-serif; /* Heading font */
+--font-body: Inter, system-ui, sans-serif; /* Body font */
 ```
 
 ## Future Enhancements

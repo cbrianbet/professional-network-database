@@ -56,9 +56,45 @@ class User(models.Model):
     def __str__(self):
         return f'{self.name} <{self.email}>'
 
+    @classmethod
+    def create_user(cls, email, password, name=None, role='user', status='active'):
+        """Create and return a new user with the given email and password."""
+        if not email:
+            raise ValueError('Users must have an email address')
+        if not password:
+            raise ValueError('Users must have a password')
+
+        user = cls(
+            email=email.lower(),
+            name=name or '',
+            role=role,
+            status=status
+        )
+        user.set_password(password)
+        user.save()
+        return user
+
 
 class Member(models.Model):
     GENDER_CHOICES = [('male', 'Male'), ('female', 'Female')]
+    STATUS_CHOICES = [
+        'employed (full-time)',
+        'employed (part-time)',
+        'self-employed / business owner',
+        'on internship',
+        'on attachment',
+        'on voluntary / community service',
+        'on contract terms',
+        'on casual terms',
+        'tsc transfer request',
+        'active application',
+        'shortlisted',
+        'attended interview',
+        'unemployed (actively seeking)',
+        'unemployed (not seeking)',
+        'student',
+        'retired'
+    ]
     """Mirrors the `members` table."""
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='members')
@@ -67,7 +103,7 @@ class Member(models.Model):
     email = models.TextField()
     age = models.IntegerField()
     gender = models.TextField(choices=GENDER_CHOICES, default='')
-    national_id = models.TextField()
+    national_id = models.TextField(unique=True)
     sub_location = models.TextField(blank=True, default='')
     education = models.TextField(blank=True, default='')
     form_four_year = models.IntegerField(null=True, blank=True)

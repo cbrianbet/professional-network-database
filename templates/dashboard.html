@@ -262,6 +262,9 @@ tbody td{padding:0.85rem 1rem;font-size:0.82rem;color:var(--text);white-space:no
               <option>On Internship</option>
               <option>On Attachment</option>
               <option>On Voluntary / Community Service</option>
+              <option>On Contract terms</option>
+              <option>On Casual terms</option>
+              <option>TSC Transfer Request</option>
               <option>Active Application</option>
               <option>Shortlisted</option>
               <option>Attended Interview</option>
@@ -523,10 +526,10 @@ async function deleteMember(id) {
 ══════════════════════════════════════════════════════════ */
 function cohortSet() {
   if (!activeCohort) return MEMBERS;
-  if (activeCohort === 'employed')    return MEMBERS.filter(m => m.status.startsWith('Employed') || m.status === 'Self-employed / Business Owner');
+  if (activeCohort === 'employed')    return MEMBERS.filter(m => m.status.startsWith('Employed') || m.status === 'Self-employed / Business Owner' || m.status === 'On Contract terms' || m.status === 'On Casual terms');
   if (activeCohort === 'unemployed')  return MEMBERS.filter(m => m.status.includes('Unemployed'));
   if (activeCohort === 'intern')      return MEMBERS.filter(m => m.status.includes('Internship') || m.status.includes('Attachment') || m.status.includes('Voluntary'));
-  if (activeCohort === 'applying')    return MEMBERS.filter(m => m.status.includes('Application') || m.status === 'Shortlisted' || m.status.includes('Interview'));
+  if (activeCohort === 'applying')    return MEMBERS.filter(m => m.status.includes('Application') || m.status === 'Shortlisted' || m.status.includes('Interview') || m.status === 'TSC Transfer Request');
   return MEMBERS;
 }
 
@@ -549,8 +552,8 @@ document.addEventListener('click', e => {
 function buildKPI(set) {
   set = set || MEMBERS;
   const total    = set.length;
-  const employed = set.filter(m => m.status.startsWith('Employed') || m.status === 'Self-employed / Business Owner').length;
-  const seeking  = set.filter(m => m.status.includes('Unemployed') || m.status.includes('Application') || m.status === 'Shortlisted' || m.status.includes('Interview')).length;
+  const employed = set.filter(m => m.status.startsWith('Employed') || m.status === 'Self-employed / Business Owner' || m.status === 'On Contract terms' || m.status === 'On Casual terms').length;
+  const seeking  = set.filter(m => m.status.includes('Unemployed') || m.status.includes('Application') || m.status === 'Shortlisted' || m.status.includes('Interview') || m.status === 'TSC Transfer Request').length;
   const interns  = set.filter(m => m.status.includes('Internship') || m.status.includes('Attachment')).length;
   const kpis = [
     { label:'Total Members',       val:total,    icon:'👥', cls:'gold', delta:`${MEMBERS.length} overall`,      up:true },
@@ -819,6 +822,7 @@ function shortStatus(s) {
     "Unemployed (Actively Seeking)":"Unemployed","On Voluntary / Community Service":"Voluntary",
     "Self-employed / Business Owner":"Self-employed","Active Application":"Applying",
     "Attended Interview":"Interviewed",
+    "On Contract terms":"On Contract","On Casual terms":"On Casual","TSC Transfer Request":"TSC Transfer",
   }[s] || s;
 }
 
@@ -1069,6 +1073,7 @@ function statusOptions(current) {
   return [
     'Employed (Full-time)','Employed (Part-time)','Self-employed / Business Owner',
     'On Internship','On Attachment','On Voluntary / Community Service',
+    'On Contract terms','On Casual terms','TSC Transfer Request',
     'Active Application','Shortlisted','Attended Interview',
     'Unemployed (Actively Seeking)','Unemployed (Not Seeking)','Student','Retired',
   ].map(s => `<option value="${s}" ${s===current?'selected':''}>${s}</option>`).join('');

@@ -227,7 +227,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
       });
       // load existing member record
       if(user&&user.role!=='admin'){
-        try{const res=await fetch('/api/members',{headers:{Authorization:`Bearer ${token}`}});if(res.ok){const d=await res.json();const member=(d.members&&d.members[0])||null;if(member){cachedMemberRecord=member;const prompt=document.getElementById('existingRecordPrompt');if(prompt)prompt.style.display='flex';}}}catch(e){}
+        try{const res=await fetch('/api/members/',{headers:{Authorization:`Bearer ${token}`}});if(res.ok){const d=await res.json();const member=(d.members&&d.members[0])||null;if(member){cachedMemberRecord=member;const prompt=document.getElementById('existingRecordPrompt');if(prompt)prompt.style.display='flex';}}}catch(e){}
       }
       document.getElementById('loadExistingMemberBtn')?.addEventListener('click',()=>{if(cachedMemberRecord){fillMemberForm(cachedMemberRecord);document.getElementById('existingRecordPrompt').style.display='none';}});
       updateProgress();

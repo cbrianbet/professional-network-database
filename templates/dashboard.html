@@ -506,7 +506,7 @@ async function deleteMember(id) {
   if (!confirm('Delete this member record? This cannot be undone.')) return;
   const token = localStorage.getItem('authToken');
   try {
-    const res = await fetch(`/api/members/${id}`, {
+    const res = await fetch(`/api/members/${id}/`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });

@@ -10,20 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='fileresource',
-            name='is_public',
-        ),
-        migrations.AddField(
-            model_name='fileresource',
-            name='permission_level',
-            field=models.TextField(choices=[('public', 'Public'), ('authenticated', 'Authenticated'), ('private', 'Private')], default='private'),
-        ),
-        migrations.AddField(
-            model_name='fileresource',
-            name='thumbnail_path',
-            field=models.TextField(blank=True, default=''),
-        ),
         # Add database indexes for frequently queried fields
         migrations.AddIndex(
             model_name='fileresource',

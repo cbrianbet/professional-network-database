@@ -49,7 +49,7 @@
       const errorEl = document.getElementById('error');
       errorEl.style.display = 'none';
       try {
-        const res = await fetch('/api/auth/signup', {
+        const res = await fetch('/api/auth/signup/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

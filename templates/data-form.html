@@ -92,7 +92,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
                 <option value="male">Male</option>
                 <option value="female">Female</option>
               </select></div>
-              <div class="field"><label>Sub-Location</label><input type="text" name="subLocation" placeholder="e.g. Chemilil, Kibisem"></div>
+              <div class="field"><label>Location <span class="req">*</span></label>
+                <select name="location" id="locationSelect" required>
+                  <option value="" disabled selected>— Select location —</option>
+                  <option value="Chemelil">Chemelil</option>
+                  <option value="Tambul">Tambul</option>
+                  <option value="Chemase">Chemase</option>
+                  <option value="Kibisem">Kibisem</option>
+                </select>
+                <span class="err-msg">Location is required</span>
+              </div>
+              <div class="field"><label>Sub-Location <span class="req">*</span></label>
+                <select name="subLocation" id="subLocationSelect" required>
+                  <option value="" disabled selected>— Select sub-location —</option>
+                </select>
+                <span class="err-msg">Sub-location is required</span>
+              </div>
             </div>
           </div>
         </div>
@@ -189,15 +204,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
     let currentMemberId = null;
     let cachedMemberRecord = null;
     const skills = [];
+    const locationSubLocationMap = {
+        "Chemelil": ["Kimwani", "Chemelil"],
+        "Tambul": ["Kamaina", "Tambul"],
+        "Chemase": ["Kapkuong", "Kibigong"],
+        "Kibisem": ["Kibisem", "Chemursoi"]
+    };
 
     function toggleSection(header){const body=header.nextElementSibling;const isOpen=body.classList.contains('open');header.classList.toggle('open',!isOpen);body.classList.toggle('open',!isOpen);}
     function toggleEmployerField(sel){const show=['Employed (Full-time)','Employed (Part-time)','Self-employed / Business Owner','On Internship','On Attachment'].includes(sel.value);document.getElementById('employerFieldWrap').style.opacity=show?'1':'0.45';}
     function addSkill(){const input=document.getElementById('skillInput');const val=input.value.trim();if(!val||skills.includes(val)){input.value='';return;}skills.push(val);renderTags();input.value='';input.focus();}
     function removeSkill(idx){skills.splice(idx,1);renderTags();}
     function renderTags(){const wrap=document.getElementById('tagsDisplay');wrap.innerHTML=skills.map((s,i)=>`<span class="tag-pill">${s}<button type="button" onclick="removeSkill(${i})" title="Remove">×</button></span>`).join('');document.getElementById('skillsHidden').value=skills.join(', ');}
-    function validateField(input){const field=input.closest('.field');if(!field)return true;let valid=true;if(input.required&&!input.value.trim())valid=false;if(input.type==='email'&&input.value&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value))valid=false;if(input.type==='tel'&&input.value&&!/^[\d\s\+\-]{7,15}$/.test(input.value))valid=false;input.classList.toggle('invalid',!valid);field.classList.toggle('has-error',!valid);return valid;}
+    function validateField(input){const field=input.closest('.field');if(!field)return true;if(input.hasAttribute('disabled')) return true;let valid=true;if(input.required&&!input.value.trim())valid=false;if(input.type==='email'&&input.value&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value))valid=false;if(input.type==='tel'&&input.value&&!/^[\d\s\+\-]{7,15}$/.test(input.value))valid=false;input.classList.toggle('invalid',!valid);field.classList.toggle('has-error',!valid);return valid;}
     function updateProgress(){const inputs=document.querySelectorAll('#dataForm input:not([type=hidden]),#dataForm select,#dataForm textarea');let filled=0;inputs.forEach(el=>{if(el.value.trim())filled++;});document.getElementById('progressBar').style.width=Math.round((filled/inputs.length)*100)+'%';}
-    function fillMemberForm(member){if(!member)return;currentMemberId=member.id;const map={fullName:'name',phone:'phone',email:'email',age:'age',gender:'gender',nationalId:'national_id',subLocation:'sub_location',educationLevel:'education',formFourYear:'form_four_year',kcseGrade:'kcse',institution:'institution',course:'course',graduationYear:'graduation',employmentStatus:'status',employer:'employer',career:'career'};Object.entries(map).forEach(([fieldName,key])=>{const el=document.querySelector(`[name="${fieldName}"]`);if(el)el.value=member[key]||'';});skills.length=0;if(Array.isArray(member.skills))member.skills.forEach(s=>{if(s&&!skills.includes(s))skills.push(s);});renderTags();const submitBtn=document.getElementById('submitBtn');if(submitBtn)submitBtn.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Update Record';toggleEmployerField(document.querySelector('select[name="employmentStatus"]'));}
+    function fillMemberForm(member){if(!member)return;currentMemberId=member.id;const map={fullName:'name',phone:'phone',email:'email',age:'age',gender:'gender',nationalId:'national_id',educationLevel:'education',formFourYear:'form_four_year',kcseGrade:'kcse',institution:'institution',course:'course',graduationYear:'graduation',employmentStatus:'status',employer:'employer',career:'career'};Object.entries(map).forEach(([fieldName,key])=>{const el=document.querySelector(`[name="${fieldName}"]`);if(el)el.value=member[key]||'';}); // Handle location and subLocation from the existing record's sub_location if (member.sub_location) { const subLocationValue = member.sub_location; let locationValue = ''; for (const [loc, subs] of Object.entries(locationSubLocationMap)) { if (subs.includes(subLocationValue)) { locationValue = loc; break; } } const locationEl = document.querySelector('[name="location"]'); if (locationEl) { locationEl.value = locationValue; locationEl.dispatchEvent(new Event('change')); } const subLocationEl = document.querySelector('[name="subLocation"]'); if (subLocationEl) { subLocationEl.value = subLocationValue; } } skills.length=0;if(Array.isArray(member.skills))member.skills.forEach(s=>{if(s&&!skills.includes(s))skills.push(s);});renderTags();const submitBtn=document.getElementById('submitBtn');if(submitBtn)submitBtn.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Update Record';toggleEmployerField(document.querySelector('select[name="employmentStatus"]')); }
     function resetForm(){document.getElementById('dataForm').reset();skills.length=0;renderTags();document.getElementById('successOverlay').classList.remove('show');updateProgress();}
 
     async function initDataFormPage(){
@@ -224,6 +245,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
         try{const res=await fetch(endpoint,{method,headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify(payload)});const result=await res.json();if(!res.ok)throw new Error(result.error||'Submission failed');document.getElementById('successOverlay').classList.add('show');}
         catch(err){alert(err.message||'Unable to submit registration');}
         finally{btn.disabled=false;btn.innerHTML=currentMemberId?'Update Record':'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Submit Registration';}
+      });
+      // Cascading dropdown for Location and Sub-Location
+      const locationSelect = document.getElementById('locationSelect');
+      const subLocationSelect = document.getElementById('subLocationSelect');
+      locationSelect.addEventListener('change', () => {
+        const location = locationSelect.value;
+        const subLocations = locationSubLocationMap[location] || [];
+        subLocationSelect.innerHTML = '';
+        // Add default disabled option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        defaultOption.textContent = '— Select sub-location —';
+        subLocationSelect.appendChild(defaultOption);
+        subLocations.forEach(subloc => {
+          const option = document.createElement('option');
+          option.value = subloc;
+          option.textContent = subloc;
+          subLocationSelect.appendChild(option);
+        });
+        // Enable sub-location select only if a location is selected
+        subLocationSelect.disabled = !location;
+        // Validate the sub-location field when location changes
+        validateField(subLocationSelect);
       });
       // load existing member record
       if(user&&user.role!=='admin'){

@@ -1161,9 +1161,9 @@ function closeModal(e) {
 ══════════════════════════════════════════════════════════ */
 function exportMembersCSV() {
   try {
-    const cols = ['id','name','email','phone','age','gender','national_id','sub_location','education','kcse','institution','course','graduation','status','employer','career','skills'];
+    const cols = ['id','name','email','phone','age','gender','national_id','location','sub_location','education','kcse','institution','course','graduation','status','employer','career','skills'];
     const rows = filtered.map(m =>
-      ['id','name','email','phone','age','gender','nationalId','subLocation','education','kcse','institution','course','graduation','status','employer','career','skills'].map((c,i) => {
+      ['id','name','email','phone','age','gender','nationalId','location','subLocation','education','kcse','institution','course','graduation','status','employer','career','skills'].map((c,i) => {
         let v = c === 'skills' ? m.skills.join(';') : (m[c] ?? '');
         v = String(v);
         if (v.includes(',') || v.includes('"')) v = `"${v.replace(/"/g,'""')}"`;

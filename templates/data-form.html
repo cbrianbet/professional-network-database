@@ -220,7 +220,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
         const payload={name:fv.get('fullName').trim(),phone:fv.get('phone').trim(),email:fv.get('email').trim(),age:Number(fv.get('age'))||null,nationalId:fv.get('nationalId').trim(),gender:fv.get('gender'),subLocation:fv.get('subLocation').trim(),education:fv.get('educationLevel'),formFourYear:Number(fv.get('formFourYear'))||null,kcse:fv.get('kcseGrade'),institution:fv.get('institution').trim(),course:fv.get('course').trim(),graduation:Number(fv.get('graduationYear'))||null,status:fv.get('employmentStatus'),employer:fv.get('employer').trim(),career:fv.get('career').trim(),skills};
         const btn=document.getElementById('submitBtn');btn.disabled=true;btn.innerHTML='Submitting…';
         const method=currentMemberId?'PATCH':'POST';
-        const endpoint=currentMemberId?`/api/members/${currentMemberId}`:'/api/members';
+        const endpoint=currentMemberId?`/api/members/${currentMemberId}/`:'/api/members/';
         try{const res=await fetch(endpoint,{method,headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify(payload)});const result=await res.json();if(!res.ok)throw new Error(result.error||'Submission failed');document.getElementById('successOverlay').classList.add('show');}
         catch(err){alert(err.message||'Unable to submit registration');}
         finally{btn.disabled=false;btn.innerHTML=currentMemberId?'Update Record':'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Submit Registration';}

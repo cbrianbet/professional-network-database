@@ -218,7 +218,38 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
     function renderTags(){const wrap=document.getElementById('tagsDisplay');wrap.innerHTML=skills.map((s,i)=>`<span class="tag-pill">${s}<button type="button" onclick="removeSkill(${i})" title="Remove">×</button></span>`).join('');document.getElementById('skillsHidden').value=skills.join(', ');}
     function validateField(input){const field=input.closest('.field');if(!field)return true;if(input.hasAttribute('disabled')) return true;let valid=true;if(input.required&&!input.value.trim())valid=false;if(input.type==='email'&&input.value&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value))valid=false;if(input.type==='tel'&&input.value&&!/^[\d\s\+\-]{7,15}$/.test(input.value))valid=false;input.classList.toggle('invalid',!valid);field.classList.toggle('has-error',!valid);return valid;}
     function updateProgress(){const inputs=document.querySelectorAll('#dataForm input:not([type=hidden]),#dataForm select,#dataForm textarea');let filled=0;inputs.forEach(el=>{if(el.value.trim())filled++;});document.getElementById('progressBar').style.width=Math.round((filled/inputs.length)*100)+'%';}
-    function fillMemberForm(member){if(!member)return;currentMemberId=member.id;const map={fullName:'name',phone:'phone',email:'email',age:'age',gender:'gender',nationalId:'national_id',educationLevel:'education',formFourYear:'form_four_year',kcseGrade:'kcse',institution:'institution',course:'course',graduationYear:'graduation',employmentStatus:'status',employer:'employer',career:'career'};Object.entries(map).forEach(([fieldName,key])=>{const el=document.querySelector(`[name="${fieldName}"]`);if(el)el.value=member[key]||'';}); // Handle location and subLocation from the existing record's sub_location if (member.sub_location) { const subLocationValue = member.sub_location; let locationValue = ''; for (const [loc, subs] of Object.entries(locationSubLocationMap)) { if (subs.includes(subLocationValue)) { locationValue = loc; break; } } const locationEl = document.querySelector('[name="location"]'); if (locationEl) { locationEl.value = locationValue; locationEl.dispatchEvent(new Event('change')); } const subLocationEl = document.querySelector('[name="subLocation"]'); if (subLocationEl) { subLocationEl.value = subLocationValue; } } skills.length=0;if(Array.isArray(member.skills))member.skills.forEach(s=>{if(s&&!skills.includes(s))skills.push(s);});renderTags();const submitBtn=document.getElementById('submitBtn');if(submitBtn)submitBtn.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Update Record';toggleEmployerField(document.querySelector('select[name="employmentStatus"]')); }
+    function fillMemberForm(member){if(!member)return;currentMemberId=member.id;const map={fullName:'name',phone:'phone',email:'email',age:'age',gender:'gender',nationalId:'national_id',educationLevel:'education',formFourYear:'form_four_year',kcseGrade:'kcse',institution:'institution',course:'course',graduationYear:'graduation',employmentStatus:'status',employer:'employer',career:'career'};Object.entries(map).forEach(([fieldName,key])=>{const el=document.querySelector(`[name="${fieldName}"]`);if(el)el.value=member[key]||'';}); // Handle location and subLocation from the existing record's sub_location
+    if (member.sub_location) {
+      const subLocationValue = member.sub_location;
+      let locationValue = '';
+      for (const [loc, subs] of Object.entries(locationSubLocationMap)) {
+        if (subs.includes(subLocationValue)) {
+          locationValue = loc;
+          break;
+        }
+      }
+      const locationEl = document.querySelector('[name="location"]');
+      if (locationEl) {
+        locationEl.value = locationValue;
+        locationEl.dispatchEvent(new Event('change'));
+      }
+      const subLocationEl = document.querySelector('[name="subLocation"]');
+      if (subLocationEl) {
+        subLocationEl.value = subLocationValue;
+      }
+    }
+    skills.length=0;
+    if(Array.isArray(member.skills))
+      member.skills.forEach(s=>{
+        if(s&&!skills.includes(s))
+          skills.push(s);
+      });
+    renderTags();
+    const submitBtn=document.getElementById('submitBtn');
+    if(submitBtn)
+      submitBtn.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Update Record';
+    toggleEmployerField(document.querySelector('select[name="employmentStatus"]'));
+}
     function resetForm(){document.getElementById('dataForm').reset();skills.length=0;renderTags();document.getElementById('successOverlay').classList.remove('show');updateProgress();}
 
     async function initDataFormPage(){

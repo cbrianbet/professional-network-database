@@ -227,6 +227,45 @@ class FileResourceWriteSerializer(serializers.Serializer):
     ], default='private')
     uploaded_by = serializers.CharField(allow_blank=True, default='')  # username who uploaded
 
+
+class BulkFileResourceOperationSerializer(serializers.Serializer):
+    ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        min_length=1,
+        max_length=1000  # Reasonable limit for bulk operations
+    )
+    action = serializers.ChoiceField(choices=[
+        ('delete', 'Delete'),
+        ('change_permission', 'Change Permission Level')
+    ])
+    parameters = serializers.DictField(
+        required=False,
+        default=dict
+    )
+
+    def validate_ids(self, value):
+        """Validate that all IDs correspond to existing file resources"""
+        # Check if all IDs exist in the database
+        existing_ids = set(FileResource.objects.filter(id__in=value).values_list('id', flat=True))
+        input_ids = set(value)
+        missing_ids = input_ids - existing_ids
+        if missing_ids:
+            raise serializers.ValidationError(
+                f"The following file resource IDs do not exist: {sorted(missing_ids)}"
+            )
+        return value
+
+    def validate_parameters(self, value):
+        """Validate parameters based on action"""
+        action = self.initial_data.get('action')
+        if action == 'change_permission':
+            permission_level = value.get('permission_level')
+            if permission_level not in dict(FileResource.PERMISSION_LEVEL_CHOICES):
+                raise serializers.ValidationError(
+                    f"permission_level must be one of: {list(dict(FileResource.PERMISSION_LEVEL_CHOICES).keys())}"
+                )
+        return value
+
     def validate(self, data):
         required = ['original_filename', 'file_size', 'file_type', 'upload_path']
         for field in required:

@@ -27,6 +27,7 @@ urlpatterns = [
     # ── Admin — file resources (GET list, POST create) ───────────────────
     path('admin/file-resources/', views.file_resources_list_create),
     path('admin/file-resources/<int:resource_id>/', views.file_resource_detail),
+    path('admin/file-resources/bulk/', views.file_resources_bulk_delete),
 
     # ── Members (GET list, POST create) ────────────────────────────────────
     path('members/',                 views.members_list_create),

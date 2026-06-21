@@ -1,8 +1,11 @@
 import csv
+import hashlib
 
 from django.conf import settings
+from django.core.cache import cache
+from django.db import models, transaction, IntegrityError
 from django.http import StreamingHttpResponse
-from rest_framework import status
+from rest_framework import status, exceptions
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -135,8 +138,12 @@ def admin_users_update(request, user_id):
 
         try:
             user = sz.update(user, sz.validated_data)
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_409_CONFLICT)
+        except exceptions.ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError as e:
+            return Response({'error': 'Database integrity error. Possible duplicate entry.'}, status=status.HTTP_409_CONFLICT)
+        except Exception as e:  # Keep as safety net for unexpected errors
+            return Response({'error': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({'user': UserSerializer(user).data})
 
@@ -171,14 +178,14 @@ def members_list_create(request):
 @authentication_classes(AUTH)
 @permission_classes(AUTHED)
 def member_detail_update_delete(request, member_id):
-    # GET and DELETE are admin-only; PATCH is also admin-only per original logic
-    if request.user.role != 'admin':
-        return Response({'error': 'Admin access required.'}, status=status.HTTP_403_FORBIDDEN)
-
     try:
         member = Member.objects.get(pk=member_id)
     except Member.DoesNotExist:
         return Response({'error': 'Member not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Check permissions: admin can access any member, regular users can only access their own
+    if request.user.role != 'admin' and member.user != request.user:
+        return Response({'error': 'Admin access required.'}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'GET':
         return Response({'member': MemberSerializer(member).data})
@@ -189,7 +196,6 @@ def member_detail_update_delete(request, member_id):
 
     # PATCH
     sz = MemberWriteSerializer(data=request.data, context={'user': request.user})
-    print('Updating member', member_id, 'with data', request.data, 'validated:', sz.is_valid())
     if not sz.is_valid():
         err = next(iter(sz.errors.values()))[0]
         return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
@@ -239,12 +245,16 @@ def profiles_list_create(request):
 
 @api_view(['PATCH', 'DELETE'])
 @authentication_classes(AUTH)
-@permission_classes(ADMIN)
+@permission_classes(AUTHED)
 def profile_detail(request, profile_id):
     try:
         profile = Profile.objects.get(pk=profile_id)
     except Profile.DoesNotExist:
         return Response({'error': 'Profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Check permissions: admin can access any profile, regular users can only access their own
+    if request.user.role != 'admin' and profile.user != request.user:
+        return Response({'error': 'Admin access required.'}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'DELETE':
         profile.delete()
@@ -252,7 +262,6 @@ def profile_detail(request, profile_id):
 
     # PATCH
     profile_status = request.data.get('status')
-    print('Updating profile', profile_id, 'to status', profile_status)
     if not profile_status:
         return Response({'error': 'Status is required.'}, status=status.HTTP_400_BAD_REQUEST)
     profile.status = profile_status
@@ -289,18 +298,20 @@ def export_members(request):
         'sub_location', 'education', 'kcse', 'institution', 'course',
         'graduation', 'status', 'employer', 'career', 'skills', 'created_at',
     ]
-    rows = []
-    for m in Member.objects.all():
-        rows.append({
-            'id': m.id, 'user_id': m.user_id, 'name': m.name, 'email': m.email,
-            'phone': m.phone, 'age': m.age, 'national_id': m.national_id,
-            'sub_location': m.sub_location, 'education': m.education,
-            'kcse': m.kcse, 'institution': m.institution, 'course': m.course,
-            'graduation': m.graduation, 'status': m.status, 'employer': m.employer,
-            'career': m.career, 'skills': ';'.join(m.skills or []),
-            'created_at': m.created_at.isoformat(),
-        })
-    return _stream_csv(rows, columns, 'members-export.csv')
+
+    def generate_rows():
+        for member in Member.objects.all().iterator():
+            yield {
+                'id': member.id, 'user_id': member.user_id, 'name': member.name, 'email': member.email,
+                'phone': member.phone, 'age': member.age, 'national_id': member.national_id,
+                'sub_location': member.sub_location, 'education': member.education,
+                'kcse': member.kcse, 'institution': member.institution, 'course': member.course,
+                'graduation': member.graduation, 'status': member.status, 'employer': member.employer,
+                'career': member.career, 'skills': ';'.join(member.skills or []),
+                'created_at': member.created_at.isoformat(),
+            }
+
+    return _stream_csv(generate_rows(), columns, 'members-export.csv')
 
 
 @api_view(['GET'])
@@ -308,21 +319,23 @@ def export_members(request):
 @permission_classes(ADMIN)
 def export_users(request):
     columns = ['id', 'name', 'email', 'role', 'status', 'created_at']
-    rows = []
-    for u in User.objects.all():
-        rows.append({
-            'id': u.id, 'name': u.name, 'email': u.email,
-            'role': u.role, 'status': u.status,
-            'created_at': u.created_at.isoformat(),
-        })
-    return _stream_csv(rows, columns, 'users-export.csv')
+
+    def generate_rows():
+        for user in User.objects.all().iterator():
+            yield {
+                'id': user.id, 'name': user.name, 'email': user.email,
+                'role': user.role, 'status': user.status,
+                'created_at': user.created_at.isoformat(),
+            }
+
+    return _stream_csv(generate_rows(), columns, 'users-export.csv')
 
 
 @api_view(['GET'])
 @authentication_classes(AUTH)
 @permission_classes(ADMIN)
 def admin_stats(request):
-    from django.db.models import Count
+    from django.db.models import Count, Sum, Avg, Max, Min
     from django.utils import timezone
     from datetime import timedelta
 
@@ -342,6 +355,74 @@ def admin_stats(request):
     role_counts = {item['role']: item['count'] for item in users_by_role}
     status_counts = {item['status']: item['count'] for item in users_by_status}
 
+    # Storage analytics
+    file_stats = FileResource.objects.aggregate(
+        total_files=Count('id'),
+        total_size=Sum('file_size'),
+        avg_file_size=Avg('file_size'),
+        max_file_size=Max('file_size'),
+        min_file_size=Min('file_size')
+    )
+
+    # Files by type
+    files_by_type = FileResource.objects.values('file_type').annotate(
+        count=Count('id'),
+        total_size=Sum('file_size')
+    ).order_by('file_type')
+
+    # Files by permission level
+    files_by_permission = FileResource.objects.values('permission_level').annotate(
+        count=Count('id'),
+        total_size=Sum('file_size')
+    ).order_by('permission_level')
+
+    # Recent uploads (last 24h, 7d, 30d) using conditional aggregation
+    twentyfour_hours_ago = timezone.now() - timedelta(hours=24)
+    seven_days_ago = timezone.now() - timedelta(days=7)
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+
+    upload_aggregates = FileResource.objects.aggregate(
+        recent_uploads_24h=models.Count(
+            models.Case(
+                models.When(uploaded_at__gte=twentyfour_hours_ago, then=1),
+                output_field=models.IntegerField(),
+            )
+        ),
+        recent_uploads_7d=models.Count(
+            models.Case(
+                models.When(uploaded_at__gte=seven_days_ago, then=1),
+                output_field=models.IntegerField(),
+            )
+        ),
+        recent_uploads_30d=models.Count(
+            models.Case(
+                models.When(uploaded_at__gte=thirty_days_ago, then=1),
+                output_field=models.IntegerField(),
+            )
+        ),
+    )
+
+    recent_uploads_24h = upload_aggregates['recent_uploads_24h']
+    recent_uploads_7d = upload_aggregates['recent_uploads_7d']
+    recent_uploads_30d = upload_aggregates['recent_uploads_30d']
+
+    # Format storage analytics
+    files_by_type_dict = {}
+    for item in files_by_type:
+        files_by_type_dict[item['file_type']] = {
+            'count': item['count'],
+            'size_bytes': item['total_size'] or 0,
+            'size_mb': round((item['total_size'] or 0) / (1024 * 1024), 2)
+        }
+
+    files_by_permission_dict = {}
+    for item in files_by_permission:
+        files_by_permission_dict[item['permission_level']] = {
+            'count': item['count'],
+            'size_bytes': item['total_size'] or 0,
+            'size_mb': round((item['total_size'] or 0) / (1024 * 1024), 2)
+        }
+
     stats = {
         'total_users': total_users,
         'users_by_role': role_counts,
@@ -349,6 +430,21 @@ def admin_stats(request):
         'recent_users': {
             'last_7_days': recent_users_7d,
             'last_30_days': recent_users_30d
+        },
+        'storage_analytics': {
+            'total_files': file_stats['total_files'] or 0,
+            'total_size_bytes': file_stats['total_size'] or 0,
+            'total_size_mb': round((file_stats['total_size'] or 0) / (1024 * 1024), 2),
+            'avg_file_size_bytes': round(file_stats['avg_file_size'] or 0, 2),
+            'max_file_size_bytes': file_stats['max_file_size'] or 0,
+            'min_file_size_bytes': file_stats['min_file_size'] or 0,
+            'by_file_type': files_by_type_dict,
+            'by_permission_level': files_by_permission_dict,
+            'recent_uploads': {
+                'last_24_hours': recent_uploads_24h,
+                'last_7_days': recent_uploads_7d,
+                'last_30_days': recent_uploads_30d
+            }
         }
     }
 
@@ -384,29 +480,99 @@ def admin_user_approve_reject(request, user_id):
 
 # ── File Resources ─────────────────────────────────────────────────────────────
 @api_view(['GET', 'POST'])
-@authentication_classes([CustomJWTAuthentication])
-@permission_classes([IsAdminUser])
+@authentication_classes(AUTH)
+@permission_classes(ADMIN)
 def file_resources_list_create(request):
     """
-    GET: List all file resources
+    GET: List all file resources with filtering and search (cached)
     POST: Create a new file resource
     """
     if request.method == 'GET':
+        # Get cache version for invalidation strategy
+        version = cache.get('file_resources_list_version', 1)
+        # Create cache key based on query parameters
+        query_params = request.GET.urlencode()
+        if query_params:
+            # Create stable hash using MD5 (consistent across Python processes)
+            query_hash = hashlib.md5(query_params.encode()).hexdigest()
+            cache_key = f"file_resources_list_v{version}_{query_hash}_user{request.user.id}"
+        else:
+            cache_key = f"file_resources_list_v{version}_all_user{request.user.id}"
+
+        # Try to get cached response
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return Response(cached_response)
+
         resources = FileResource.objects.all()
+
+        # Filter by file type
+        file_type = request.GET.get('file_type')
+        if file_type:
+            resources = resources.filter(file_type=file_type)
+
+        # Filter by permission level
+        permission_level = request.GET.get('permission_level')
+        if permission_level:
+            resources = resources.filter(permission_level=permission_level)
+
+        # Filter by upload date range
+        uploaded_after = request.GET.get('uploaded_after')
+        if uploaded_after:
+            resources = resources.filter(uploaded_at__gte=uploaded_after)
+
+        uploaded_before = request.GET.get('uploaded_before')
+        if uploaded_before:
+            resources = resources.filter(uploaded_at__lte=uploaded_before)
+
+        # Search in filename and uploaded_by
+        search = request.GET.get('search')
+        if search:
+            resources = resources.filter(
+                models.Q(original_filename__icontains=search) |
+                models.Q(uploaded_by__icontains=search)
+            )
+
+        # Ordering
+        ordering = request.GET.get('ordering', '-uploaded_at')  # Default to newest first
+        # Validate ordering field to prevent SQL injection
+        valid_ordering_fields = [
+            'uploaded_at', '-uploaded_at',
+            'original_filename', '-original_filename',
+            'file_size', '-file_size',
+            'file_type', '-file_type',
+            'permission_level', '-permission_level'
+        ]
+        if ordering in valid_ordering_fields:
+            resources = resources.order_by(ordering)
+        else:
+            # Default to newest first if invalid ordering provided
+            resources = resources.order_by('-uploaded_at')
+
         serializer = FileResourceSerializer(resources, many=True)
-        return Response(serializer.data)
+        response_data = serializer.data
+
+        # Cache the response for 5 minutes
+        cache.set(cache_key, response_data, 300)
+
+        return Response(response_data)
 
     elif request.method == 'POST':
         serializer = FileResourceWriteSerializer(data=request.data, context={'user': request.user})
         if serializer.is_valid():
             resource = serializer.save()
+            # Increment cache version to invalidate all file resources list caches
+            try:
+                cache.incr('file_resources_list_version')
+            except ValueError:
+                cache.set('file_resources_list_version', 1)
             return Response(FileResourceSerializer(resource).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PATCH', 'DELETE'])
-@authentication_classes([CustomJWTAuthentication])
-@permission_classes([IsAdminUser])
+@authentication_classes(AUTH)
+@permission_classes(ADMIN)
 def file_resource_detail(request, resource_id):
     """
     GET: Get file resource details
@@ -426,9 +592,80 @@ def file_resource_detail(request, resource_id):
         serializer = FileResourceWriteSerializer(resource, data=request.data, partial=True, context={'user': request.user})
         if serializer.is_valid():
             resource = serializer.save()
+            # Increment cache version to invalidate all file resources list caches
+            try:
+                cache.incr('file_resources_list_version')
+            except ValueError:
+                cache.set('file_resources_list_version', 1)
             return Response(FileResourceSerializer(resource).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         resource.delete()
+        # Increment cache version to invalidate all file resources list caches
+        try:
+            cache.incr('file_resources_list_version')
+        except ValueError:
+            cache.set('file_resources_list_version', 1)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+@authentication_classes(AUTH)
+@permission_classes(ADMIN)
+def file_resources_bulk_delete(request):
+    """
+    Bulk delete file resources
+    Expected data: {'ids': [1, 2, 3, ...]}
+    """
+    serializer = BulkFileResourceOperationSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    ids = serializer.validated_data['ids']
+    action = serializer.validated_data['action']
+    parameters = serializer.validated_data.get('parameters', {})
+
+    if action == 'delete':
+        # Bulk delete
+        with transaction.atomic():
+            resources_to_delete = FileResource.objects.filter(id__in=ids)
+            count = resources_to_delete.count()
+            resources_to_delete.delete()
+            # Increment cache version to invalidate all file resources list caches
+            try:
+                cache.incr('file_resources_list_version')
+            except ValueError:
+                cache.set('file_resources_list_version', 1)
+
+        return Response({
+            'deleted_count': count,
+            'message': f'Successfully deleted {count} file resource(s)'
+        }, status=status.HTTP_200_OK)
+
+    elif action == 'change_permission':
+        # Bulk change permission level
+        permission_level = parameters.get('permission_level')
+        if not permission_level:
+            return Response({
+                'error': 'permission_level parameter is required for change_permission action'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            resources_to_update = FileResource.objects.filter(id__in=ids)
+            count = resources_to_update.count()
+            resources_to_update.update(permission_level=permission_level)
+            # Increment cache version to invalidate all file resources list caches
+            try:
+                cache.incr('file_resources_list_version')
+            except ValueError:
+                cache.set('file_resources_list_version', 1)
+
+        return Response({
+            'updated_count': count,
+            'message': f'Successfully updated permission level to {permission_level} for {count} file resource(s)'
+        }, status=status.HTTP_200_OK)
+
+    return Response({
+        'error': 'Invalid action specified'
+    }, status=status.HTTP_400_BAD_REQUEST)

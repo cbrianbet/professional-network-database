@@ -301,6 +301,17 @@ tbody td{padding:0.85rem 1rem;font-size:0.82rem;color:var(--text);white-space:no
           </div>
 
           <div class="filter-group">
+            <label>Location</label>
+            <select class="filter-select" id="filterLocation" onchange="applyFilters()">
+              <option value="">Any location</option>
+              <option value="Chemelil">Chemelil</option>
+              <option value="Tambul">Tambul</option>
+              <option value="Chemase">Chemase</option>
+              <option value="Kibisem">Kibisem</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
             <label>Career / Profession</label>
             <select class="filter-select" id="filterCareer" onchange="applyFilters()">
               <option value="">Any career</option>

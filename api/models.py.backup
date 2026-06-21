@@ -107,7 +107,6 @@ class Member(models.Model):
     gender = models.TextField(choices=GENDER_CHOICES, default='')
     national_id = models.TextField(unique=True)
     sub_location = models.TextField(blank=True, default='')
-    location = models.TextField(blank=True, default='')
     education = models.TextField(blank=True, default='')
     form_four_year = models.IntegerField(null=True, blank=True)
     kcse = models.TextField(blank=True, default='')

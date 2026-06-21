@@ -709,7 +709,7 @@ function clearAllFilters(e) {
 
 function countActiveFilters() {
   let count = 0;
-  ['filterStatus','filterGender','filterEdu','filterCareer'].forEach(id => {
+  ['filterStatus','filterGender','filterEdu','filterCareer','filterLocation'].forEach(id => {
     if (document.getElementById(id)?.value) count++;
   });
   if (document.getElementById('filterSubLocation')?.value.trim()) count++;
@@ -726,6 +726,7 @@ function applyFilters() {
   const edu      = document.getElementById('filterEdu')?.value     || '';
   const career   = document.getElementById('filterCareer')?.value  || '';
   const subloc   = (document.getElementById('filterSubLocation')?.value || '').trim().toLowerCase();
+  const loc      = document.getElementById('filterLocation')?.value || '';
   const ageMin   = Number(document.getElementById('filterAgeMin')?.value)  || 0;
   const ageMax   = Number(document.getElementById('filterAgeMax')?.value)  || 999;
   const gradMin  = Number(document.getElementById('filterGradMin')?.value) || 0;
@@ -744,6 +745,7 @@ function applyFilters() {
     if (edu    && m.education !== edu)                          return false;
     if (career && m.career    !== career)                       return false;
     if (subloc && !m.subLocation.toLowerCase().includes(subloc)) return false;
+    if (loc      && m.location    !== loc)                      return false;
     if (m.age  < ageMin || m.age  > ageMax)                    return false;
     if (m.graduation && (m.graduation < gradMin || m.graduation > gradMax)) return false;
     if (skillFilters.length && !skillFilters.every(sf =>

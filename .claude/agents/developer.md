@@ -2,6 +2,7 @@
 name: developer
 description: Responsible for implementing features, fixing bugs, refactoring code, and writing production-quality code.
 model: inherit
+color: yellow
 tools:
   - Read
   - Write

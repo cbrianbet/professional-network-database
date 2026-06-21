@@ -478,7 +478,7 @@ async function loadMembers() {
   const token = localStorage.getItem('authToken');
   if (!token) return;
   try {
-    const res = await fetch('/api/members', { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch('/api/members/', { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) throw new Error('Unable to load members');
     const data = await res.json();
     MEMBERS.splice(0, MEMBERS.length, ...(data.members || []).map(normalizeMember));

@@ -492,7 +492,7 @@ async function loadMembers() {
 
 async function saveMemberEdit(id, payload) {
   const token = localStorage.getItem('authToken');
-  const res = await fetch(`/api/members/${id}`, {
+  const res = await fetch(`/api/members/${id}/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),

@@ -21,6 +21,8 @@
    - Updated `normalizeMember` function to include `diaspora` and `profession_bodies` fields
    - Updated `applyFilters` function to filter by diaspora selection and profession_bodies text inclusion
    - Updated `countActiveFilters` function to include the new filter fields
+   - Added Diaspora dropdown and Profession Bodies input to member edit form
+   - Updated commitEdit function to include these fields in the payload
 
 2. **Member Registration Form** (`templates/data-form.html`):
    - Added Diaspora dropdown (Yes/No) after Career/Profession field

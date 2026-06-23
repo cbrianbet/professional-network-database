@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 load_dotenv()
 
@@ -122,6 +123,23 @@ USE_TZ = True
 # ── Admin seeding ─────────────────────────────────────────────────────────────
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', '')
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '')
+
+# ── CSV Encryption ───────────────────────────────────────────────────────────
+from cryptography.fernet import Fernet
+CSV_ENCRYPTION_KEY = os.environ.get('CSV_ENCRYPTION_KEY')
+if not CSV_ENCRYPTION_KEY:
+    if DEBUG:
+        # Generate a key for development (NOT SECURE FOR PRODUCTION)
+        CSV_ENCRYPTION_KEY = Fernet.generate_key()
+        # In a real deployment, you should set this via environment variable
+        import warnings
+        warnings.warn('Using generated CSV encryption key. Set CSV_ENCRYPTION_KEY environment variable for production.')
+    else:
+        raise ImproperlyConfigured('CSV_ENCRYPTION_KEY must be set in environment variables')
+else:
+    # Ensure it's bytes
+    if isinstance(CSV_ENCRYPTION_KEY, str):
+        CSV_ENCRYPTION_KEY = CSV_ENCRYPTION_KEY.encode()
 
 # ── Email Configuration ───────────────────────────────────────────────────────
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')

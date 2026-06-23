@@ -7,6 +7,8 @@ from api.serializers import BulkFileResourceOperationSerializer
 import json
 import tempfile
 import os
+import io
+from io import BytesIO
 
 class FileResourceTestCase(TestCase):
     def setUp(self):
@@ -368,3 +370,79 @@ class FileResourceTestCase(TestCase):
             self.client.force_authenticate(user=self.regular_user)
             response = self.client.get(url)
             self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def test_encrypted_csv_exports(self):
+        """Test that CSV exports are encrypted"""
+        from cryptography.fernet import Fernet
+
+        # Create a test member
+        member = Member.objects.create(
+            user=self.regular_user,
+            name='Test Member',
+            email='test@example.com',
+            national_id='12345678',
+            status='active'
+        )
+
+        # Test members export encryption
+        response = self.client.get(
+            reverse('export-members'),
+            HTTP_AUTHORIZATION=f'Bearer {self.admin_token}'
+        )
+
+        # Check that response is successful
+        self.assertEqual(response.status_code, 200)
+
+        # Check that it's encrypted content type
+        self.assertEqual(response['Content-Type'], 'application/octet-stream')
+        self.assertTrue(response['Content-Disposition'].endswith('.enc"'))
+        self.assertEqual(response['X-Content-Encrypted'], 'true')
+
+        # Decrypt the content and verify it's valid CSV
+        encrypted_content = response.content
+        from django.conf import settings
+        cipher = Fernet(settings.CSV_ENCRYPTION_KEY)
+        decrypted_content = cipher.decrypt(encrypted_content)
+
+        # Parse CSV to verify content
+        csv_file = BytesIO(decrypted_content)
+        decoder = csv_file.decode('utf-8').splitlines()
+        reader = csv.DictReader(decoder)
+        rows = list(reader)
+
+        # Should have header + 1 data row
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]['name'], 'Test Member')
+        self.assertEqual(rows[0]['email'], 'test@example.com')
+
+        # Test users export encryption
+        response = self.client.get(
+            reverse('export-users'),
+            HTTP_AUTHORIZATION=f'Bearer {self.admin_token}'
+        )
+
+        # Check that response is successful
+        self.assertEqual(response.status_code, 200)
+
+        # Check that it's encrypted content type
+        self.assertEqual(response['Content-Type'], 'application/octet-stream')
+        self.assertTrue(response['Content-Disposition'].endswith('.enc"'))
+        self.assertEqual(response['X-Content-Encrypted'], 'true')
+
+        # Decrypt the content and verify it's valid CSV
+        encrypted_content = response.content
+        cipher = Fernet(settings.CSV_ENCRYPTION_KEY)
+        decrypted_content = cipher.decrypt(encrypted_content)
+
+        # Parse CSV to verify content
+        csv_file = BytesIO(decrypted_content)
+        decoder = csv_file.decode('utf-8').splitlines()
+        reader = csv.DictReader(decoder)
+        rows = list(reader)
+
+        # Should have header + at least 1 data row (admin user)
+        self.assertGreaterEqual(len(rows), 1)
+        # Find the admin user
+        admin_row = next((row for row in rows if row['email'] == 'admin@test.com'), None)
+        self.assertIsNotNone(admin_row)
+        self.assertEqual(admin_row['role'], 'admin')

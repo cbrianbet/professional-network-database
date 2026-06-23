@@ -1,10 +1,12 @@
 import csv
 import hashlib
+import io
+from cryptography.fernet import Fernet
 
 from django.conf import settings
 from django.core.cache import cache
 from django.db import models, transaction, IntegrityError
-from django.http import StreamingHttpResponse
+from django.http import StreamingHttpResponse, HttpResponse
 from rest_framework import status, exceptions
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
@@ -28,6 +30,27 @@ from .serializers import (
 AUTH  = [CustomJWTAuthentication]
 AUTHED = [IsAuthenticated]
 ADMIN  = [IsAdminUser]
+
+
+# ── CSV Encryption Utilities ───────────────────────────────────────────────────
+def get_encryption_cipher():
+    """Get Fernet cipher instance for CSV encryption/decryption."""
+    key = getattr(settings, 'CSV_ENCRYPTION_KEY', None)
+    if not key:
+        raise ValueError("CSV_ENCRYPTION_KEY not configured in settings")
+    return Fernet(key)
+
+
+def encrypt_csv_data(csv_data: bytes) -> bytes:
+    """Encrypt CSV data using Fernet symmetric encryption."""
+    cipher = get_encryption_cipher()
+    return cipher.encrypt(csv_data)
+
+
+def decrypt_csv_data(encrypted_data: bytes) -> bytes:
+    """Decrypt CSV data using Fernet symmetric encryption."""
+    cipher = get_encryption_cipher()
+    return cipher.decrypt(encrypted_data)
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -289,6 +312,35 @@ def _stream_csv(rows, columns, filename):
     return response
 
 
+def _encrypt_and_stream_csv(rows, columns, filename):
+    """Generate CSV, encrypt it, and return as HTTP response."""
+    # Generate CSV content in memory
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Write header
+    writer.writerow(columns)
+
+    # Write data rows
+    for row in rows:
+        writer.writerow([str(row.get(c, '') or '') for c in columns])
+
+    # Get CSV data as bytes
+    csv_data = output.getvalue().encode('utf-8')
+
+    # Encrypt the CSV data
+    encrypted_data = encrypt_csv_data(csv_data)
+
+    # Create response with encrypted data
+    response = HttpResponse(encrypted_data, content_type='application/octet-stream')
+    response['Content-Disposition'] = f'attachment; filename="{filename}.enc"'
+    # Add header to indicate encryption for client-side handling
+    response['X-Content-Encrypted'] = 'true'
+    response['X-Encryption-Algorithm'] = 'Fernet (AES-128 in CBC mode with HMAC)'
+
+    return response
+
+
 @api_view(['GET'])
 @authentication_classes(AUTH)
 @permission_classes(ADMIN)
@@ -311,7 +363,7 @@ def export_members(request):
                 'created_at': member.created_at.isoformat(),
             }
 
-    return _stream_csv(generate_rows(), columns, 'members-export.csv')
+    return _encrypt_and_stream_csv(generate_rows(), columns, 'members-export.csv')
 
 
 @api_view(['GET'])
@@ -328,7 +380,7 @@ def export_users(request):
                 'created_at': user.created_at.isoformat(),
             }
 
-    return _stream_csv(generate_rows(), columns, 'users-export.csv')
+    return _encrypt_and_stream_csv(generate_rows(), columns, 'users-export.csv')
 
 
 @api_view(['GET'])

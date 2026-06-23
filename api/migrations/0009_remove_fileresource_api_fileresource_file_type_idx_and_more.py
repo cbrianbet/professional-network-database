@@ -34,14 +34,4 @@ class Migration(migrations.Migration):
             model_name='user',
             name='api_user_created_at_idx',
         ),
-        migrations.AddField(
-            model_name='member',
-            name='diaspora',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='member',
-            name='profession_bodies',
-            field=models.JSONField(blank=True, default=list),
-        ),
     ]

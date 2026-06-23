@@ -983,6 +983,18 @@ function openEditRow(id) {
           <input id="ei-employer" value="${esc(m.employer)}">
         </div>
         <div class="edit-field">
+          <label>Diaspora</label>
+          <select id="ei-diaspora">
+            <option value="">—</option>
+            <option value="true"  ${m.diaspora === true ?'selected':''}>Yes</option>
+            <option value="false"${m.diaspora === false?'selected':''}>No</option>
+          </select>
+        </div>
+        <div class="edit-field">
+          <label>Profession Bodies</label>
+          <input id="ei-profession-bodies" value="${Array.isArray(m.profession_bodies) ? m.profession_bodies.join(', ') : ''}">
+        </div>
+        <div class="edit-field">
           <label>Education Level</label>
           <select id="ei-education">
             ${educationOptions(m.education)}
@@ -1078,6 +1090,8 @@ async function commitEdit(id) {
     institution: document.getElementById('ei-institution').value.trim(),
     course:      document.getElementById('ei-course').value.trim(),
     graduation:  Number(document.getElementById('ei-graduation').value) || null,
+    diaspora:    document.getElementById('ei-diaspora')?.value === 'true' || false,
+    profession_bodies: document.getElementById('ei-profession-bodies')?.value.split(',').map(s => s.trim()).filter(s => s.length > 0) || [],
     skills:      editSkills,
   };
 

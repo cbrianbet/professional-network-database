@@ -301,6 +301,15 @@ tbody td{padding:0.85rem 1rem;font-size:0.82rem;color:var(--text);white-space:no
           </div>
 
           <div class="filter-group">
+            <label>Diaspora</label>
+            <select class="filter-select" id="filterDiaspora" onchange="applyFilters()">
+              <option value="">Any</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
             <label>Location</label>
             <select class="filter-select" id="filterLocation" onchange="applyFilters()">
               <option value="">Any location</option>
@@ -309,6 +318,11 @@ tbody td{padding:0.85rem 1rem;font-size:0.82rem;color:var(--text);white-space:no
               <option value="Chemase">Chemase</option>
               <option value="Kibisem">Kibisem</option>
             </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Profession Bodies</label>
+            <input class="filter-input" id="filterProfessionBodies" type="text" placeholder="e.g. Law Society, Medical Board" oninput="applyFilters()">
           </div>
 
           <div class="filter-group">
@@ -460,25 +474,28 @@ let activeCohort = '';
 ══════════════════════════════════════════════════════════ */
 function normalizeMember(r) {
   return {
-    id:         r.id,
-    name:       r.name       || '',
-    phone:      r.phone      || '',
-    email:      r.email      || '',
-    age:        r.age        || 0,
-    gender:     r.gender     || '',
-    nationalId: r.national_id|| '',
-    subLocation:r.sub_location|| '',
-    education:  r.education  || '',
-    formFourYear:r.form_four_year || null,
-    kcse:       r.kcse       || '',
-    institution:r.institution|| '',
-    course:     r.course     || '',
-    graduation: r.graduation || null,
-    status:     r.status     || '',
-    employer:   r.employer   || '',
-    career:     r.career     || '',
-    skills:     Array.isArray(r.skills) ? r.skills : [],
-    created_at: r.created_at || '',
+    id:             r.id,
+    name:           r.name       || '',
+    phone:          r.phone      || '',
+    email:          r.email      || '',
+    age:            r.age        || 0,
+    gender:         r.gender     || '',
+    nationalId:     r.national_id|| '',
+    subLocation:    r.sub_location|| '',
+    location:       r.location   || '',
+    education:      r.education  || '',
+    formFourYear:   r.form_four_year || null,
+    kcse:           r.kcse       || '',
+    institution:    r.institution|| '',
+    course:         r.course     || '',
+    graduation:     r.graduation || null,
+    status:         r.status     || '',
+    employer:       r.employer   || '',
+    career:         r.career     || '',
+    skills:         Array.isArray(r.skills) ? r.skills : [],
+    diaspora:       !!r.diaspora,
+    profession_bodies: Array.isArray(r.profession_bodies) ? r.profession_bodies : [],
+    created_at:     r.created_at || '',
   };
 }
 
@@ -709,7 +726,7 @@ function clearAllFilters(e) {
 
 function countActiveFilters() {
   let count = 0;
-  ['filterStatus','filterGender','filterEdu','filterCareer','filterLocation'].forEach(id => {
+  ['filterStatus','filterGender','filterEdu','filterCareer','filterLocation','filterDiaspora','filterProfessionBodies'].forEach(id => {
     if (document.getElementById(id)?.value) count++;
   });
   if (document.getElementById('filterSubLocation')?.value.trim()) count++;
@@ -727,6 +744,8 @@ function applyFilters() {
   const career   = document.getElementById('filterCareer')?.value  || '';
   const subloc   = (document.getElementById('filterSubLocation')?.value || '').trim().toLowerCase();
   const loc      = document.getElementById('filterLocation')?.value || '';
+  const diaspora = document.getElementById('filterDiaspora')?.value || '';
+  const profB    = (document.getElementById('filterProfessionBodies')?.value || '').trim().toLowerCase();
   const ageMin   = Number(document.getElementById('filterAgeMin')?.value)  || 0;
   const ageMax   = Number(document.getElementById('filterAgeMax')?.value)  || 999;
   const gradMin  = Number(document.getElementById('filterGradMin')?.value) || 0;
@@ -738,7 +757,7 @@ function applyFilters() {
   sortKey = sf; sortDir = (sd === 'desc' ? -1 : 1);
 
   filtered = MEMBERS.filter(m => {
-    const txt = (m.name + m.career + m.skills.join(' ') + m.subLocation + m.institution + m.email).toLowerCase();
+    const txt = (m.name + m.career + m.skills.join(' ') + m.subLocation + m.institution + m.email + ' ' + m.profession_bodies.join(' ')).toLowerCase();
     if (q      && !txt.includes(q))                             return false;
     if (status && m.status    !== status)                       return false;
     if (gender && m.gender    !== gender)                       return false;
@@ -746,6 +765,9 @@ function applyFilters() {
     if (career && m.career    !== career)                       return false;
     if (subloc && !m.subLocation.toLowerCase().includes(subloc)) return false;
     if (loc      && m.location    !== loc)                      return false;
+    if (diaspora === 'yes' && !m.diaspora)                      return false;
+    if (diaspora === 'no' && m.diaspora)                        return false;
+    if (profB    && !m.profession_bodies.some(pb => pb.toLowerCase().includes(prob))) return false;
     if (m.age  < ageMin || m.age  > ageMax)                    return false;
     if (m.graduation && (m.graduation < gradMin || m.graduation > gradMax)) return false;
     if (skillFilters.length && !skillFilters.every(sf =>

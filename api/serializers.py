@@ -164,6 +164,8 @@ class MemberWriteSerializer(serializers.Serializer):
     employer = serializers.CharField(allow_blank=True, default='')
     career = serializers.CharField()
     skills = serializers.ListField(child=serializers.CharField(), default=list)
+    diaspora = serializers.BooleanField(default=False)
+    profession_bodies = serializers.ListField(child=serializers.CharField(), default=list)
 
     def validate(self, data):
         required = ['name', 'phone', 'email', 'age', 'national_id', 'career', 'status']

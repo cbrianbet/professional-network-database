@@ -1,3 +1,4 @@
+import contextlib
 from django.db import models
 from django.contrib.auth.hashers import make_password
 import os
@@ -119,6 +120,9 @@ class Member(models.Model):
     career = models.TextField(blank=True, default='')
     # PostgreSQL text[] stored as a JSON array in Django
     skills = models.JSONField(default=list, blank=True)
+    # New fields for diaspora and professional bodies
+    diaspora = models.BooleanField(default=False)
+    profession_bodies = models.JSONField(default=list, blank=True)  # list of strings
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -163,7 +167,7 @@ class FileResource(models.Model):
         if not self.upload_path or not os.path.exists(self.upload_path):
             return
 
-        try:
+        with contextlib.suppress(Exception):
             from PIL import Image
 
             # Create thumbnails directory if it doesn't exist
@@ -199,13 +203,6 @@ class FileResource(models.Model):
             # Update thumbnail path (relative to MEDIA_ROOT for storage)
             self.thumbnail_path = os.path.relpath(thumbnail_path, settings.MEDIA_ROOT)
             self.save(update_fields=['thumbnail_path'])
-
-        except ImportError:
-            # PIL not available, skip thumbnail generation
-            pass
-        except Exception:
-            # Any other error, skip thumbnail generation
-            pass
 
     def save(self, *args, **kwargs):
         """Override save to generate thumbnail after saving"""

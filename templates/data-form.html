@@ -164,6 +164,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
               </div>
               <div class="field" id="employerFieldWrap"><label>Employer / Business Name</label><input type="text" name="employer" placeholder="e.g. Kenya Power Ltd"></div>
               <div class="field"><label>Career / Profession <span class="req">*</span></label><input type="text" name="career" placeholder="e.g. Software Engineer" required><span class="err-msg">Career field is required</span></div>
+              <div class="field">
+                <label>Diaspora</label>
+                <select name="diaspora">
+                  <option value="">— Select —</option>
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Profession Bodies</label>
+                <input type="text" name="profession_bodies" placeholder="e.g. Law Society, Medical Board">
+              </div>
               <div class="field span-2">
                 <label>Skills &amp; Talents</label>
                 <div class="skills-input-wrap">
@@ -218,37 +230,56 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
     function renderTags(){const wrap=document.getElementById('tagsDisplay');wrap.innerHTML=skills.map((s,i)=>`<span class="tag-pill">${s}<button type="button" onclick="removeSkill(${i})" title="Remove">×</button></span>`).join('');document.getElementById('skillsHidden').value=skills.join(', ');}
     function validateField(input){const field=input.closest('.field');if(!field)return true;if(input.hasAttribute('disabled')) return true;let valid=true;if(input.required&&!input.value.trim())valid=false;if(input.type==='email'&&input.value&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value))valid=false;if(input.type==='tel'&&input.value&&!/^[\d\s\+\-]{7,15}$/.test(input.value))valid=false;input.classList.toggle('invalid',!valid);field.classList.toggle('has-error',!valid);return valid;}
     function updateProgress(){const inputs=document.querySelectorAll('#dataForm input:not([type=hidden]),#dataForm select,#dataForm textarea');let filled=0;inputs.forEach(el=>{if(el.value.trim())filled++;});document.getElementById('progressBar').style.width=Math.round((filled/inputs.length)*100)+'%';}
-    function fillMemberForm(member){if(!member)return;currentMemberId=member.id;const map={fullName:'name',phone:'phone',email:'email',age:'age',gender:'gender',nationalId:'national_id',educationLevel:'education',formFourYear:'form_four_year',kcseGrade:'kcse',institution:'institution',course:'course',graduationYear:'graduation',employmentStatus:'status',employer:'employer',career:'career'};Object.entries(map).forEach(([fieldName,key])=>{const el=document.querySelector(`[name="${fieldName}"]`);if(el)el.value=member[key]||'';}); // Handle location and subLocation from the existing record's sub_location
-    if (member.sub_location) {
-      const subLocationValue = member.sub_location;
-      let locationValue = '';
-      for (const [loc, subs] of Object.entries(locationSubLocationMap)) {
-        if (subs.includes(subLocationValue)) {
-          locationValue = loc;
-          break;
+    function fillMemberForm(member){
+      if(!member)return;
+      currentMemberId=member.id;
+      const map={fullName:'name',phone:'phone',email:'email',age:'age',gender:'gender',nationalId:'national_id',educationLevel:'education',formFourYear:'form_four_year',kcseGrade:'kcse',institution:'institution',course:'course',graduationYear:'graduation',employmentStatus:'status',employer:'employer',career:'career'};
+      Object.entries(map).forEach(([fieldName,key])=>{const el=document.querySelector(`[name="${fieldName}"]`);if(el)el.value=member[key]||'';});
+      // Handle diaspora
+      if (member.diaspora !== undefined && member.diaspora !== null) {
+        const diasporaEl = document.querySelector('[name="diaspora"]');
+        if (diasporaEl) {
+          diasporaEl.value = member.diaspora ? 'true' : 'false';
         }
       }
-      const locationEl = document.querySelector('[name="location"]');
-      if (locationEl) {
-        locationEl.value = locationValue;
-        locationEl.dispatchEvent(new Event('change'));
+      // Handle profession_bodies
+      if (member.profession_bodies && Array.isArray(member.profession_bodies)) {
+        const professionBodiesEl = document.querySelector('[name="profession_bodies"]');
+        if (professionBodiesEl) {
+          professionBodiesEl.value = member.profession_bodies.join(', ');
+        }
       }
-      const subLocationEl = document.querySelector('[name="subLocation"]');
-      if (subLocationEl) {
-        subLocationEl.value = subLocationValue;
+      // Handle location and subLocation from the existing record's sub_location
+      if (member.sub_location) {
+        const subLocationValue = member.sub_location;
+        let locationValue = '';
+        for (const [loc, subs] of Object.entries(locationSubLocationMap)) {
+          if (subs.includes(subLocationValue)) {
+            locationValue = loc;
+            break;
+          }
+        }
+        const locationEl = document.querySelector('[name="location"]');
+        if (locationEl) {
+          locationEl.value = locationValue;
+          locationEl.dispatchEvent(new Event('change'));
+        }
+        const subLocationEl = document.querySelector('[name="subLocation"]');
+        if (subLocationEl) {
+          subLocationEl.value = subLocationValue;
+        }
       }
-    }
-    skills.length=0;
-    if(Array.isArray(member.skills))
-      member.skills.forEach(s=>{
-        if(s&&!skills.includes(s))
-          skills.push(s);
-      });
-    renderTags();
-    const submitBtn=document.getElementById('submitBtn');
-    if(submitBtn)
-      submitBtn.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Update Record';
-    toggleEmployerField(document.querySelector('select[name="employmentStatus"]'));
+      skills.length=0;
+      if(Array.isArray(member.skills))
+        member.skills.forEach(s=>{
+          if(s&&!skills.includes(s))
+            skills.push(s);
+        });
+      renderTags();
+      const submitBtn=document.getElementById('submitBtn');
+      if(submitBtn)
+        submitBtn.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Update Record';
+      toggleEmployerField(document.querySelector('select[name="employmentStatus"]'));
 }
     function resetForm(){document.getElementById('dataForm').reset();skills.length=0;renderTags();document.getElementById('successOverlay').classList.remove('show');updateProgress();}
 
@@ -269,7 +300,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
         this.querySelectorAll('input:not([type=hidden]),select,textarea').forEach(el=>{if(!validateField(el))allValid=false;});
         if(!allValid){const first=this.querySelector('.invalid');if(first)first.scrollIntoView({behavior:'smooth',block:'center'});return;}
         const fv=new FormData(this);
-        const payload={name:fv.get('fullName').trim(),phone:fv.get('phone').trim(),email:fv.get('email').trim(),age:Number(fv.get('age'))||null,nationalId:fv.get('nationalId').trim(),gender:fv.get('gender'),subLocation:fv.get('subLocation').trim(),education:fv.get('educationLevel'),formFourYear:Number(fv.get('formFourYear'))||null,kcse:fv.get('kcseGrade'),institution:fv.get('institution').trim(),course:fv.get('course').trim(),graduation:Number(fv.get('graduationYear'))||null,status:fv.get('employmentStatus'),employer:fv.get('employer').trim(),career:fv.get('career').trim(),skills};
+        const payload={name:fv.get('fullName').trim(),phone:fv.get('phone').trim(),email:fv.get('email').trim(),age:Number(fv.get('age'))||null,nationalId:fv.get('nationalId').trim(),gender:fv.get('gender'),subLocation:fv.get('subLocation').trim(),education:fv.get('educationLevel'),formFourYear:Number(fv.get('formFourYear'))||null,kcse:fv.get('kcseGrade'),institution:fv.get('institution').trim(),course:fv.get('course').trim(),graduation:Number(fv.get('graduationYear'))||null,status:fv.get('employmentStatus'),employer:fv.get('employer').trim(),career:fv.get('career').trim(),diaspora:fv.get('diaspora')==='true',profession_bodies:fv.get('profession_bodies').split(',').map(s=>s.trim()).filter(s=>s!==''),skills};
         const btn=document.getElementById('submitBtn');btn.disabled=true;btn.innerHTML='Submitting…';
         const method=currentMemberId?'PATCH':'POST';
         const endpoint=currentMemberId?`/api/members/${currentMemberId}/`:'/api/members/';

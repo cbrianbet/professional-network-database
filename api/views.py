@@ -338,7 +338,6 @@ def _encrypt_and_stream_csv(rows, columns, filename):
     return response
 
 
-@api_view(['GET'])
 @authentication_classes(AUTH)
 @permission_classes(ADMIN)
 def export_members(request):
@@ -366,7 +365,6 @@ def export_members(request):
     return _encrypt_and_stream_csv(generate_rows(), columns, 'members-export.csv')
 
 
-@api_view(['GET'])
 @authentication_classes(AUTH)
 @permission_classes(ADMIN)
 def export_users(request):

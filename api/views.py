@@ -313,31 +313,28 @@ def _stream_csv(rows, columns, filename):
 
 
 def _encrypt_and_stream_csv(rows, columns, filename):
-    """Generate CSV, encrypt it, and return as HTTP response."""
+    """Generate CSV, encrypt it with a per-request key, and return HTTP response with key header."""
     # Generate CSV content in memory
     output = io.StringIO()
     writer = csv.writer(output)
-
     # Write header
     writer.writerow(columns)
-
     # Write data rows
     for row in rows:
         writer.writerow([str(row.get(c, '') or '') for c in columns])
-
     # Get CSV data as bytes
     csv_data = output.getvalue().encode('utf-8')
-
-    # Encrypt the CSV data
-    encrypted_data = encrypt_csv_data(csv_data)
-
-    # Create response with encrypted data
+    # Generate a random key for this encryption
+    key = Fernet.generate_key()
+    cipher = Fernet(key)
+    encrypted_data = cipher.encrypt(csv_data)
+    # Create response
     response = HttpResponse(encrypted_data, content_type='application/octet-stream')
     response['Content-Disposition'] = f'attachment; filename="{filename}.enc"'
-    # Add header to indicate encryption for client-side handling
+    # Headers to indicate encryption and provide the key
     response['X-Content-Encrypted'] = 'true'
     response['X-Encryption-Algorithm'] = 'Fernet (AES-128 in CBC mode with HMAC)'
-
+    response['X-Encryption-Key'] = key.decode()  # Pass the key to client (base64 string)
     return response
 
 

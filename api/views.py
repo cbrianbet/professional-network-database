@@ -1,6 +1,11 @@
 import csv
 import hashlib
 import io
+import json
+import base64
+import pyzipper
+import secrets
+import string
 from cryptography.fernet import Fernet
 
 from django.conf import settings
@@ -313,29 +318,43 @@ def _stream_csv(rows, columns, filename):
 
 
 def _encrypt_and_stream_csv(rows, columns, filename):
-    """Generate CSV, encrypt it with a per-request key, and return HTTP response with key header."""
+    """Generate CSV, protect it with a password inside a zip,
+    and return JSON with the zip blob and the password."""
     # Generate CSV content in memory
     output = io.StringIO()
     writer = csv.writer(output)
-    # Write header
     writer.writerow(columns)
-    # Write data rows
     for row in rows:
         writer.writerow([str(row.get(c, '') or '') for c in columns])
-    # Get CSV data as bytes
-    csv_data = output.getvalue().encode('utf-8')
-    # Generate a random key for this encryption
-    key = Fernet.generate_key()
-    cipher = Fernet(key)
-    encrypted_data = cipher.encrypt(csv_data)
-    # Create response
-    response = HttpResponse(encrypted_data, content_type='application/octet-stream')
-    response['Content-Disposition'] = f'attachment; filename="{filename}.enc"'
-    # Headers to indicate encryption and provide the key
-    response['X-Content-Encrypted'] = 'true'
-    response['X-Encryption-Algorithm'] = 'Fernet (AES-128 in CBC mode with HMAC)'
-    response['X-Encryption-Key'] = key.decode()  # Pass the key to client (base64 string)
-    return response
+    csv_bytes = output.getvalue().encode('utf-8')
+
+    # Generate a random 10-character alphanumeric password
+    alphabet = string.ascii_letters + string.digits
+    password = ''.join(secrets.choice(alphabet) for _ in range(10))
+
+    # Create a zip file in memory with the CSV inside, password-protected
+    zip_buffer = io.BytesIO()
+    with pyzipper.AESZipFile(
+        zip_buffer,
+        'w',
+        compression=pyzipper.ZIP_DEFLATED,
+        encryption=pyzipper.WZ_AES,
+    ) as zf:
+        zf.setpassword(password.encode('utf-8'))
+        zf.writestr(filename, csv_bytes)
+
+    # Get the zip bytes
+    zip_bytes = zip_buffer.getvalue()
+
+    # Encode for JSON transport
+    b64_zip = base64.b64encode(zip_bytes).decode()
+
+    payload = json.dumps({"password": password, "data": b64_zip})
+    return HttpResponse(
+        payload,
+        content_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{filename}.zip"'},
+    )
 
 
 @authentication_classes(AUTH)

@@ -1368,13 +1368,22 @@ async function initDashboardPage() {
   if (countySelect) {
     populateCountySelect(countySelect);
   }
-  applyFilters();
   // Populate country dropdown with dynamic data
   const countrySelect = document.getElementById('filterCountry');
   if (countrySelect) {
     populateCountrySelect(countrySelect, 'Any country');
   }
+  applyFilters();
   /* Hide Add Member for non-admins */
+  const cSelect = document.getElementById('ei-county');
+  if (cSelect) {
+    populateCountySelect(cSelect);
+  }
+  // Populate country dropdown with dynamic data
+  const ctSelect = document.getElementById('ei-country');
+  if (ctSelect) {
+    populateCountrySelect(ctSelect, 'Any country');
+  }
   try {
     if (!(window.currentUser && window.currentUser.role === 'admin')) {
       const b = document.getElementById('addMemberBtn');

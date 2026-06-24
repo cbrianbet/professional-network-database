@@ -410,7 +410,9 @@ tbody td{padding:0.85rem 1rem;font-size:0.82rem;color:var(--text);white-space:no
 
                     <div class="filter-group">
             <label>County</label>
-            <input class="filter-input" id="filterCounty" type="text" placeholder="e.g. Nairobi" oninput="applyFilters()">
+            <select class="filter-input" id="filterCounty" oninput="applyFilters()">
+              <option value="">— All counties —</option>
+            </select>
           </div>
             <label>Age Range</label>
             <div class="filter-range">
@@ -1060,109 +1062,13 @@ function openEditRow(id) {
         </div>
         <div class="edit-field">
           <label>Country of Residence</label>
-          <select id="ei-country" onchange="toggleCountyField()">
-            <option value="">—</option>
-            <option value="DZ" ${m.country === 'DZ' ? 'selected' : ''}>Algeria</option>
-            <option value="AO" ${m.country === 'AO' ? 'selected' : ''}>Angola</option>
-            <option value="BJ" ${m.country === 'BJ' ? 'selected' : ''}>Benin</option>
-            <option value="BW" ${m.country === 'BW' ? 'selected' : ''}>Botswana</option>
-            <option value="BF" ${m.country === 'BF' ? 'selected' : ''}>Burkina Faso</option>
-            <option value="BI" ${m.country === 'BI' ? 'selected' : ''}>Burundi</option>
-            <option value="CV" ${m.country === 'CV' ? 'selected' : ''}>Cabo Verde</option>
-            <option value="CM" ${m.country === 'CM' ? 'selected' : ''}>Cameroon</option>
-            <option value="CF" ${m.country === 'CF' ? 'selected' : ''}>Central African Republic</option>
-            <option value="TD" ${m.country === 'TD' ? 'selected' : ''}>Chad</option>
-            <option value="KM" ${m.country === 'KM' ? 'selected' : ''}>Comoros</option>
-            <option value="CD" ${m.country === 'CD' ? 'selected' : ''}>Democratic Republic of the Congo</option>
-            <option value="CG" ${m.country === 'CG' ? 'selected' : ''}>Republic of the Congo</option>
-            <option value="DJ" ${m.country === 'DJ' ? 'selected' : ''}>Djibouti</option>
-            <option value="EG" ${m.country === 'EG' ? 'selected' : ''}>Egypt</option>
-            <option value="GQ" ${m.country === 'GQ' ? 'selected' : ''}>Equatorial Guinea</option>
-            <option value="ER" ${m.country === 'ER' ? 'selected' : ''}>Eritrea</option>
-            <option value="SZ" ${m.country === 'SZ' ? 'selected' : ''}>Eswatini (Swaziland)</option>
-            <option value="ET" ${m.country === 'ET' ? 'selected' : ''}>Ethiopia</option>
-            <option value="GA" ${m.country === 'GA' ? 'selected' : ''}>Gabon</option>
-            <option value="GM" ${m.country === 'GM' ? 'selected' : ''}>Gambia</option>
-            <option value="GH" ${m.country === 'GH' ? 'selected' : ''}>Ghana</option>
-            <option value="GN" ${m.country === 'GN' ? 'selected' : ''}>Guinea</option>
-            <option value="GW" ${m.country === 'GW' ? 'selected' : ''}>Guinea-Bissau</option>
-            <option value="CI" ${m.country === 'CI' ? 'selected' : ''}>Ivory Coast</option>
-            <option value="KE" ${m.country === 'KE' ? 'selected' : ''}>Kenya</option>
-            <option value="LS" ${m.country === 'LS' ? 'selected' : ''}>Lesotho</option>
-            <option value="LR" ${m.country === 'LR' ? 'selected' : ''}>Liberia</option>
-            <option value="LY" ${m.country === 'LY' ? 'selected' : ''}>Libya</option>
-            <option value="MG" ${m.country === 'MG' ? 'selected' : ''}>Madagascar</option>
-            <option value="MW" ${m.country === 'MW' ? 'selected' : ''}>Malawi</option>
-            <option value="ML" ${m.country === 'ML' ? 'selected' : ''}>Mali</option>
-            <option value="MR" ${m.country === 'MR' ? 'selected' : ''}>Mauritania</option>
-            <option value="MU" ${m.country === 'MU' ? 'selected' : ''}>Mauritius</option>
-            <option value="YT" ${m.country === 'YT' ? 'selected' : ''}>Mayotte</option>
-            <option value="MA" ${m.country === 'MA' ? 'selected' : ''}>Morocco</option>
-            <option value="MZ" ${m.country === 'MZ' ? 'selected' : ''}>Mozambique</option>
-            <option value="NA" ${m.country === 'NA' ? 'selected' : ''}>Namibia</option>
-            <option value="NE" ${m.country === 'NE' ? 'selected' : ''}>Niger</option>
-            <option value="NG" ${m.country === 'NG' ? 'selected' : ''}>Nigeria</option>
-            <option value="RE" ${m.country === 'RE' ? 'selected' : ''}>Réunion</option>
-            <option value="RW" ${m.country === 'RW' ? 'selected' : ''}>Rwanda</option>
-            <option value="ST" ${m.country === 'ST' ? 'selected' : ''}>São Tomé and Príncipe</option>
-            <option value="SN" ${m.country === 'SN' ? 'selected' : ''}>Senegal</option>
-            <option value="SC" ${m.country === 'SC' ? 'selected' : ''}>Seychelles</option>
-            <option value="SL" ${m.country === 'SL' ? 'selected' : ''}>Sierra Leone</option>
-            <option value="SO" ${m.country === 'SO' ? 'selected' : ''}>Somalia</option>
-            <option value="ZA" ${m.country === 'ZA' ? 'selected' : ''}>South Africa</option>
-            <option value="SS" ${m.country === 'SS' ? 'selected' : ''}>South Sudan</option>
-            <option value="SD" ${m.country === 'SD' ? 'selected' : ''}>Sudan</option>
-            <option value="SZ" ${m.country === 'SZ' ? 'selected' : ''}>Swaziland</option>
-            <option value="TZ" ${m.country === 'TZ' ? 'selected' : ''}>Tanzania</option>
-            <option value="TG" ${m.country === 'TG' ? 'selected' : ''}>Togo</option>
-            <option value="TN" ${m.country === 'TN' ? 'selected' : ''}>Tunisia</option>
-            <option value="UG" ${m.country === 'UG' ? 'selected' : ''}>Uganda</option>
-            <option value="ZM" ${m.country === 'ZM' ? 'selected' : ''}>Zambia</option>
-            <option value="ZW" ${m.country === 'ZW' ? 'selected' : ''}>Zimbabwe</option>
-            <option value="US" ${m.country === 'US' ? 'selected' : ''}>United States</option>
-            <option value="CA" ${m.country === 'CA' ? 'selected' : ''}>Canada</option>
-            <option value="MX" ${m.country === 'MX' ? 'selected' : ''}>Mexico</option>
-            <option value="BR" ${m.country === 'BR' ? 'selected' : ''}>Brazil</option>
-            <option value="AR" ${m.country === 'AR' ? 'selected' : ''}>Argentina</option>
-            <option value="CL" ${m.country === 'CL' ? 'selected' : ''}>Chile</option>
-            <option value="CO" ${m.country === 'CO' ? 'selected' : ''}>Colombia</option>
-            <option value="PE" ${m.country === 'PE' ? 'selected' : ''}>Peru</option>
-            <option value="VE" ${m.country === 'VE' ? 'selected' : ''}>Venezuela</option>
-            <option value="JM" ${m.country === 'JM' ? 'selected' : ''}>Jamaica</option>
-            <option value="GB" ${m.country === 'GB' ? 'selected' : ''}>United Kingdom</option>
-            <option value="FR" ${m.country === 'FR' ? 'selected' : ''}>France</option>
-            <option value="DE" ${m.country === 'DE' ? 'selected' : ''}>Germany</option>
-            <option value="IT" ${m.country === 'IT' ? 'selected' : ''}>Italy</option>
-            <option value="ES" ${m.country === 'ES' ? 'selected' : ''}>Spain</option>
-            <option value="NL" ${m.country === 'NL' ? 'selected' : ''}>Netherlands</option>
-            <option value="CH" ${m.country === 'CH' ? 'selected' : ''}>Switzerland</option>
-            <option value="SE" ${m.country === 'SE' ? 'selected' : ''}>Sweden</option>
-            <option value="NO" ${m.country === 'NO' ? 'selected' : ''}>Norway</option>
-            <option value="PL" ${m.country === 'PL' ? 'selected' : ''}>Poland</option>
-            <option value="RU" ${m.country === 'RU' ? 'selected' : ''}>Russia</option>
-            <option value="TR" ${m.country === 'TR' ? 'selected' : ''}>Turkey</option>
-            <option value="CN" ${m.country === 'CN' ? 'selected' : ''}>China</option>
-            <option value="JP" ${m.country === 'JP' ? 'selected' : ''}>Japan</option>
-            <option value="IN" ${m.country === 'IN' ? 'selected' : ''}>India</option>
-            <option value="KR" ${m.country === 'KR' ? 'selected' : ''}>South Korea</option>
-            <option value="SG" ${m.country === 'SG' ? 'selected' : ''}>Singapore</option>
-            <option value="TH" ${m.country === 'TH' ? 'selected' : ''}>Thailand</option>
-            <option value="MY" ${m.country === 'MY' ? 'selected' : ''}>Malaysia</option>
-            <option value="ID" ${m.country === 'ID' ? 'selected' : ''}>Indonesia</option>
-            <option value="PH" ${m.country === 'PH' ? 'selected' : ''}>Philippines</option>
-            <option value="VN" ${m.country === 'VN' ? 'selected' : ''}>Vietnam</option>
-            <option value="IL" ${m.country === 'IL' ? 'selected' : ''}>Israel</option>
-            <option value="SA" ${m.country === 'SA' ? 'selected' : ''}>Saudi Arabia</option>
-            <option value="AE" ${m.country === 'AE' ? 'selected' : ''}>United Arab Emirates</option>
-            <option value="AU" ${m.country === 'AU' ? 'selected' : ''}>Australia</option>
-            <option value="NZ" ${m.country === 'NZ' ? 'selected' : ''}>New Zealand</option>
-            <option value="FJ" ${m.country === 'FJ' ? 'selected' : ''}>Fiji</option>
-            <option value="OTHER" ${m.country === 'OTHER' ? 'selected' : ''}>Other</option>
-          </select>
+          <select id="ei-country" onchange="toggleCountyField()"></select>
         </div>
         <div class="edit-field" id="ei-county-wrapper">
           <label>County (required if Kenya)</label>
-          <input id="ei-county" value="${m.county || ''}">
+          <select id="ei-county">
+            <option value="" disabled selected>— Select county —</option>
+          </select>
         </div>
         <div class="edit-field">
           <label>Profession Bodies</label>
@@ -1442,6 +1348,9 @@ function toggleCountyField(){
   const inp=document.getElementById('ei-county');
   if(!wrap||!inp)return;
   const isKenya=sel&&sel.value==='KE';
+  if(isKenya){
+    populateCountySelect(inp);
+  }
   wrap.style.display=isKenya?'':'none';
   inp.required=isKenya;
 }
@@ -1454,7 +1363,17 @@ async function initDashboardPage() {
   buildDonut(set);
   buildSkillsCloud(set);
   buildCareerFilter();
+  // Populate county filter with dynamic data
+  const countySelect = document.getElementById('filterCounty');
+  if (countySelect) {
+    populateCountySelect(countySelect);
+  }
   applyFilters();
+  // Populate country dropdown with dynamic data
+  const countrySelect = document.getElementById('filterCountry');
+  if (countrySelect) {
+    populateCountrySelect(countrySelect, 'Any country');
+  }
   /* Hide Add Member for non-admins */
   try {
     if (!(window.currentUser && window.currentUser.role === 'admin')) {

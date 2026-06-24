@@ -274,7 +274,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
               </div>
               <div class="field" id="countyFieldWrap" style="display:none">
                 <label>County <span class="req">*</span></label>
-                <input type="text" name="county" id="countyInput" placeholder="e.g. Kisumu">
+                <select name="county" id="countySelect">
+                  <option value="" disabled selected>— Select county —</option>
+                </select>
                 <span class="err-msg">County is required for Kenya residents</span>
               </div>
               <div class="field">
@@ -330,7 +332,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
 
     function toggleSection(header){const body=header.nextElementSibling;const isOpen=body.classList.contains('open');header.classList.toggle('open',!isOpen);body.classList.toggle('open',!isOpen);}
     function toggleEmployerField(sel){const show=['Employed (Full-time)','Employed (Part-time)','Self-employed / Business Owner','On Internship','On Attachment'].includes(sel.value);document.getElementById('employerFieldWrap').style.opacity=show?'1':'0.45';}
-    function toggleCountyField(){const sel=document.getElementById('countrySelect');const wrap=document.getElementById('countyFieldWrap');const inp=document.getElementById('countyInput');if(!wrap||!inp)return;const isKenya=sel&&sel.value==='KE';wrap.style.display=isKenya?'':'none';inp.required=isKenya;}
+    function toggleCountyField(){
+      const sel=document.getElementById('countrySelect');
+      const wrap=document.getElementById('countyFieldWrap');
+      const inp=document.getElementById('countySelect');
+      if(!wrap||!inp)return;
+      const isKenya=sel&&sel.value==='KE';
+      if(isKenya){populateCountySelect(inp);}
+      wrap.style.display=isKenya?'':'none';inp.required=isKenya;
+      }
     function addSkill(){const input=document.getElementById('skillInput');const val=input.value.trim();if(!val||skills.includes(val)){input.value='';return;}skills.push(val);renderTags();input.value='';input.focus();}
     function removeSkill(idx){skills.splice(idx,1);renderTags();}
     function renderTags(){const wrap=document.getElementById('tagsDisplay');wrap.innerHTML=skills.map((s,i)=>`<span class="tag-pill">${s}<button type="button" onclick="removeSkill(${i})" title="Remove">×</button></span>`).join('');document.getElementById('skillsHidden').value=skills.join(', ');}
@@ -446,6 +456,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
       }
       document.getElementById('loadExistingMemberBtn')?.addEventListener('click',()=>{if(cachedMemberRecord){fillMemberForm(cachedMemberRecord);document.getElementById('existingRecordPrompt').style.display='none';}});
       updateProgress();
+      // Populate country dropdown with dynamic data
+      const countrySelect = document.getElementById('countrySelect');
+      if (countrySelect) {
+        populateCountrySelect(countrySelect);
+      }
     }
 
     document.addEventListener('DOMContentLoaded',()=>{

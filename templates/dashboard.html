@@ -301,43 +301,117 @@ tbody td{padding:0.85rem 1rem;font-size:0.82rem;color:var(--text);white-space:no
           </div>
 
           <div class="filter-group">
-            <label>Diaspora</label>
-            <select class="filter-select" id="filterDiaspora" onchange="applyFilters()">
-              <option value="">Any</option>
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
+            <label>Country</label>
+            <select class="filter-select" id="filterCountry" onchange="applyFilters()">
+              <option value="">Any country</option>
+              <!-- African Countries -->
+              <option value="DZ">Algeria</option>
+              <option value="AO">Angola</option>
+              <option value="BJ">Benin</option>
+              <option value="BW">Botswana</option>
+              <option value="BF">Burkina Faso</option>
+              <option value="BI">Burundi</option>
+              <option value="CV">Cabo Verde</option>
+              <option value="CM">Cameroon</option>
+              <option value="CF">Central African Republic</option>
+              <option value="TD">Chad</option>
+              <option value="KM">Comoros</option>
+              <option value="CD">Democratic Republic of the Congo</option>
+              <option value="CG">Republic of the Congo</option>
+              <option value="DJ">Djibouti</option>
+              <option value="EG">Egypt</option>
+              <option value="GQ">Equatorial Guinea</option>
+              <option value="ER">Eritrea</option>
+              <option value="SZ">Eswatini (Swaziland)</option>
+              <option value="ET">Ethiopia</option>
+              <option value="GA">Gabon</option>
+              <option value="GM">Gambia</option>
+              <option value="GH">Ghana</option>
+              <option value="GN">Guinea</option>
+              <option value="GW">Guinea-Bissau</option>
+              <option value="CI">Ivory Coast</option>
+              <option value="KE">Kenya</option>
+              <option value="LS">Lesotho</option>
+              <option value="LR">Liberia</option>
+              <option value="LY">Libya</option>
+              <option value="MG">Madagascar</option>
+              <option value="MW">Malawi</option>
+              <option value="ML">Mali</option>
+              <option value="MR">Mauritania</option>
+              <option value="MU">Mauritius</option>
+              <option value="YT">Mayotte</option>
+              <option value="MA">Morocco</option>
+              <option value="MZ">Mozambique</option>
+              <option value="NA">Namibia</option>
+              <option value="NE">Niger</option>
+              <option value="NG">Nigeria</option>
+              <option value="RE">Réunion</option>
+              <option value="RW">Rwanda</option>
+              <option value="ST">São Tomé and Príncipe</option>
+              <option value="SN">Senegal</option>
+              <option value="SC">Seychelles</option>
+              <option value="SL">Sierra Leone</option>
+              <option value="SO">Somalia</option>
+              <option value="ZA">South Africa</option>
+              <option value="SS">South Sudan</option>
+              <option value="SD">Sudan</option>
+              <option value="SZ">Swaziland</option>
+              <option value="TZ">Tanzania</option>
+              <option value="TG">Togo</option>
+              <option value="TN">Tunisia</option>
+              <option value="UG">Uganda</option>
+              <option value="ZM">Zambia</option>
+              <option value="ZW">Zimbabwe</option>
+              <!-- Americas -->
+              <option value="US">United States</option>
+              <option value="CA">Canada</option>
+              <option value="MX">Mexico</option>
+              <option value="BR">Brazil</option>
+              <option value="AR">Argentina</option>
+              <option value="CL">Chile</option>
+              <option value="CO">Colombia</option>
+              <option value="PE">Peru</option>
+              <option value="VE">Venezuela</option>
+              <option value="JM">Jamaica</option>
+              <!-- Europe -->
+              <option value="GB">United Kingdom</option>
+              <option value="FR">France</option>
+              <option value="DE">Germany</option>
+              <option value="IT">Italy</option>
+              <option value="ES">Spain</option>
+              <option value="NL">Netherlands</option>
+              <option value="CH">Switzerland</option>
+              <option value="SE">Sweden</option>
+              <option value="NO">Norway</option>
+              <option value="PL">Poland</option>
+              <option value="RU">Russia</option>
+              <option value="TR">Turkey</option>
+              <!-- Asia -->
+              <option value="CN">China</option>
+              <option value="JP">Japan</option>
+              <option value="IN">India</option>
+              <option value="KR">South Korea</option>
+              <option value="SG">Singapore</option>
+              <option value="TH">Thailand</option>
+              <option value="MY">Malaysia</option>
+              <option value="ID">Indonesia</option>
+              <option value="PH">Philippines</option>
+              <option value="VN">Vietnam</option>
+              <option value="IL">Israel</option>
+              <option value="SA">Saudi Arabia</option>
+              <option value="AE">United Arab Emirates</option>
+              <!-- Oceania -->
+              <option value="AU">Australia</option>
+              <option value="NZ">New Zealand</option>
+              <option value="FJ">Fiji</option>
+              <option value="OTHER">Other</option>
             </select>
           </div>
 
-          <div class="filter-group">
-            <label>Location</label>
-            <select class="filter-select" id="filterLocation" onchange="applyFilters()">
-              <option value="">Any location</option>
-              <option value="Chemelil">Chemelil</option>
-              <option value="Tambul">Tambul</option>
-              <option value="Chemase">Chemase</option>
-              <option value="Kibisem">Kibisem</option>
-            </select>
+                    <div class="filter-group">
+            <label>County</label>
+            <input class="filter-input" id="filterCounty" type="text" placeholder="e.g. Nairobi" oninput="applyFilters()">
           </div>
-
-          <div class="filter-group">
-            <label>Profession Bodies</label>
-            <input class="filter-input" id="filterProfessionBodies" type="text" placeholder="e.g. Law Society, Medical Board" oninput="applyFilters()">
-          </div>
-
-          <div class="filter-group">
-            <label>Career / Profession</label>
-            <select class="filter-select" id="filterCareer" onchange="applyFilters()">
-              <option value="">Any career</option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label>Sub-Location</label>
-            <input class="filter-input" id="filterSubLocation" type="text" placeholder="e.g. Kibisem" oninput="applyFilters()">
-          </div>
-
-          <div class="filter-group">
             <label>Age Range</label>
             <div class="filter-range">
               <input type="number" id="filterAgeMin" placeholder="Min" min="16" max="80" oninput="applyFilters()">
@@ -493,7 +567,8 @@ function normalizeMember(r) {
     employer:       r.employer   || '',
     career:         r.career     || '',
     skills:         Array.isArray(r.skills) ? r.skills : [],
-    diaspora:       !!r.diaspora,
+    country:        r.country    || '',
+    county:         r.county     || '',
     profession_bodies: Array.isArray(r.profession_bodies) ? r.profession_bodies : [],
     created_at:     r.created_at || '',
   };
@@ -710,7 +785,7 @@ function renderSkillFilterTags() {
 
 function clearAllFilters(e) {
   if (e) e.stopPropagation();
-  ['filterStatus','filterGender','filterEdu','filterCareer'].forEach(id => {
+  ['filterStatus','filterGender','filterEdu','filterCareer','filterCountry','filterCounty'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   ['filterSubLocation','filterAgeMin','filterAgeMax','filterGradMin','filterGradMax'].forEach(id => {
@@ -726,7 +801,7 @@ function clearAllFilters(e) {
 
 function countActiveFilters() {
   let count = 0;
-  ['filterStatus','filterGender','filterEdu','filterCareer','filterLocation','filterDiaspora','filterProfessionBodies'].forEach(id => {
+  ['filterStatus','filterGender','filterEdu','filterCareer','filterLocation','filterProfessionBodies','filterCountry','filterCounty'].forEach(id => {
     if (document.getElementById(id)?.value) count++;
   });
   if (document.getElementById('filterSubLocation')?.value.trim()) count++;
@@ -744,7 +819,8 @@ function applyFilters() {
   const career   = document.getElementById('filterCareer')?.value  || '';
   const subloc   = (document.getElementById('filterSubLocation')?.value || '').trim().toLowerCase();
   const loc      = document.getElementById('filterLocation')?.value || '';
-  const diaspora = document.getElementById('filterDiaspora')?.value || '';
+  const country  = document.getElementById('filterCountry')?.value || '';
+  const county   = (document.getElementById('filterCounty')?.value || '').trim().toLowerCase();
   const profB    = (document.getElementById('filterProfessionBodies')?.value || '').trim().toLowerCase();
   const ageMin   = Number(document.getElementById('filterAgeMin')?.value)  || 0;
   const ageMax   = Number(document.getElementById('filterAgeMax')?.value)  || 999;
@@ -765,9 +841,9 @@ function applyFilters() {
     if (career && m.career    !== career)                       return false;
     if (subloc && !m.subLocation.toLowerCase().includes(subloc)) return false;
     if (loc      && m.location    !== loc)                      return false;
-    if (diaspora === 'yes' && !m.diaspora)                      return false;
-    if (diaspora === 'no' && m.diaspora)                        return false;
-    if (profB    && !m.profession_bodies.some(pb => pb.toLowerCase().includes(prob))) return false;
+    if (country  && m.country    !== country)                   return false;
+    if (county   && !m.county.toLowerCase().includes(county))   return false;
+    if (profB    && !m.profession_bodies.some(pb => pb.toLowerCase().includes(profB))) return false;
     if (m.age  < ageMin || m.age  > ageMax)                    return false;
     if (m.graduation && (m.graduation < gradMin || m.graduation > gradMax)) return false;
     if (skillFilters.length && !skillFilters.every(sf =>
@@ -983,12 +1059,110 @@ function openEditRow(id) {
           <input id="ei-employer" value="${esc(m.employer)}">
         </div>
         <div class="edit-field">
-          <label>Diaspora</label>
-          <select id="ei-diaspora">
+          <label>Country of Residence</label>
+          <select id="ei-country" onchange="toggleCountyField()">
             <option value="">—</option>
-            <option value="true"  ${m.diaspora === true ?'selected':''}>Yes</option>
-            <option value="false"${m.diaspora === false?'selected':''}>No</option>
+            <option value="DZ" ${m.country === 'DZ' ? 'selected' : ''}>Algeria</option>
+            <option value="AO" ${m.country === 'AO' ? 'selected' : ''}>Angola</option>
+            <option value="BJ" ${m.country === 'BJ' ? 'selected' : ''}>Benin</option>
+            <option value="BW" ${m.country === 'BW' ? 'selected' : ''}>Botswana</option>
+            <option value="BF" ${m.country === 'BF' ? 'selected' : ''}>Burkina Faso</option>
+            <option value="BI" ${m.country === 'BI' ? 'selected' : ''}>Burundi</option>
+            <option value="CV" ${m.country === 'CV' ? 'selected' : ''}>Cabo Verde</option>
+            <option value="CM" ${m.country === 'CM' ? 'selected' : ''}>Cameroon</option>
+            <option value="CF" ${m.country === 'CF' ? 'selected' : ''}>Central African Republic</option>
+            <option value="TD" ${m.country === 'TD' ? 'selected' : ''}>Chad</option>
+            <option value="KM" ${m.country === 'KM' ? 'selected' : ''}>Comoros</option>
+            <option value="CD" ${m.country === 'CD' ? 'selected' : ''}>Democratic Republic of the Congo</option>
+            <option value="CG" ${m.country === 'CG' ? 'selected' : ''}>Republic of the Congo</option>
+            <option value="DJ" ${m.country === 'DJ' ? 'selected' : ''}>Djibouti</option>
+            <option value="EG" ${m.country === 'EG' ? 'selected' : ''}>Egypt</option>
+            <option value="GQ" ${m.country === 'GQ' ? 'selected' : ''}>Equatorial Guinea</option>
+            <option value="ER" ${m.country === 'ER' ? 'selected' : ''}>Eritrea</option>
+            <option value="SZ" ${m.country === 'SZ' ? 'selected' : ''}>Eswatini (Swaziland)</option>
+            <option value="ET" ${m.country === 'ET' ? 'selected' : ''}>Ethiopia</option>
+            <option value="GA" ${m.country === 'GA' ? 'selected' : ''}>Gabon</option>
+            <option value="GM" ${m.country === 'GM' ? 'selected' : ''}>Gambia</option>
+            <option value="GH" ${m.country === 'GH' ? 'selected' : ''}>Ghana</option>
+            <option value="GN" ${m.country === 'GN' ? 'selected' : ''}>Guinea</option>
+            <option value="GW" ${m.country === 'GW' ? 'selected' : ''}>Guinea-Bissau</option>
+            <option value="CI" ${m.country === 'CI' ? 'selected' : ''}>Ivory Coast</option>
+            <option value="KE" ${m.country === 'KE' ? 'selected' : ''}>Kenya</option>
+            <option value="LS" ${m.country === 'LS' ? 'selected' : ''}>Lesotho</option>
+            <option value="LR" ${m.country === 'LR' ? 'selected' : ''}>Liberia</option>
+            <option value="LY" ${m.country === 'LY' ? 'selected' : ''}>Libya</option>
+            <option value="MG" ${m.country === 'MG' ? 'selected' : ''}>Madagascar</option>
+            <option value="MW" ${m.country === 'MW' ? 'selected' : ''}>Malawi</option>
+            <option value="ML" ${m.country === 'ML' ? 'selected' : ''}>Mali</option>
+            <option value="MR" ${m.country === 'MR' ? 'selected' : ''}>Mauritania</option>
+            <option value="MU" ${m.country === 'MU' ? 'selected' : ''}>Mauritius</option>
+            <option value="YT" ${m.country === 'YT' ? 'selected' : ''}>Mayotte</option>
+            <option value="MA" ${m.country === 'MA' ? 'selected' : ''}>Morocco</option>
+            <option value="MZ" ${m.country === 'MZ' ? 'selected' : ''}>Mozambique</option>
+            <option value="NA" ${m.country === 'NA' ? 'selected' : ''}>Namibia</option>
+            <option value="NE" ${m.country === 'NE' ? 'selected' : ''}>Niger</option>
+            <option value="NG" ${m.country === 'NG' ? 'selected' : ''}>Nigeria</option>
+            <option value="RE" ${m.country === 'RE' ? 'selected' : ''}>Réunion</option>
+            <option value="RW" ${m.country === 'RW' ? 'selected' : ''}>Rwanda</option>
+            <option value="ST" ${m.country === 'ST' ? 'selected' : ''}>São Tomé and Príncipe</option>
+            <option value="SN" ${m.country === 'SN' ? 'selected' : ''}>Senegal</option>
+            <option value="SC" ${m.country === 'SC' ? 'selected' : ''}>Seychelles</option>
+            <option value="SL" ${m.country === 'SL' ? 'selected' : ''}>Sierra Leone</option>
+            <option value="SO" ${m.country === 'SO' ? 'selected' : ''}>Somalia</option>
+            <option value="ZA" ${m.country === 'ZA' ? 'selected' : ''}>South Africa</option>
+            <option value="SS" ${m.country === 'SS' ? 'selected' : ''}>South Sudan</option>
+            <option value="SD" ${m.country === 'SD' ? 'selected' : ''}>Sudan</option>
+            <option value="SZ" ${m.country === 'SZ' ? 'selected' : ''}>Swaziland</option>
+            <option value="TZ" ${m.country === 'TZ' ? 'selected' : ''}>Tanzania</option>
+            <option value="TG" ${m.country === 'TG' ? 'selected' : ''}>Togo</option>
+            <option value="TN" ${m.country === 'TN' ? 'selected' : ''}>Tunisia</option>
+            <option value="UG" ${m.country === 'UG' ? 'selected' : ''}>Uganda</option>
+            <option value="ZM" ${m.country === 'ZM' ? 'selected' : ''}>Zambia</option>
+            <option value="ZW" ${m.country === 'ZW' ? 'selected' : ''}>Zimbabwe</option>
+            <option value="US" ${m.country === 'US' ? 'selected' : ''}>United States</option>
+            <option value="CA" ${m.country === 'CA' ? 'selected' : ''}>Canada</option>
+            <option value="MX" ${m.country === 'MX' ? 'selected' : ''}>Mexico</option>
+            <option value="BR" ${m.country === 'BR' ? 'selected' : ''}>Brazil</option>
+            <option value="AR" ${m.country === 'AR' ? 'selected' : ''}>Argentina</option>
+            <option value="CL" ${m.country === 'CL' ? 'selected' : ''}>Chile</option>
+            <option value="CO" ${m.country === 'CO' ? 'selected' : ''}>Colombia</option>
+            <option value="PE" ${m.country === 'PE' ? 'selected' : ''}>Peru</option>
+            <option value="VE" ${m.country === 'VE' ? 'selected' : ''}>Venezuela</option>
+            <option value="JM" ${m.country === 'JM' ? 'selected' : ''}>Jamaica</option>
+            <option value="GB" ${m.country === 'GB' ? 'selected' : ''}>United Kingdom</option>
+            <option value="FR" ${m.country === 'FR' ? 'selected' : ''}>France</option>
+            <option value="DE" ${m.country === 'DE' ? 'selected' : ''}>Germany</option>
+            <option value="IT" ${m.country === 'IT' ? 'selected' : ''}>Italy</option>
+            <option value="ES" ${m.country === 'ES' ? 'selected' : ''}>Spain</option>
+            <option value="NL" ${m.country === 'NL' ? 'selected' : ''}>Netherlands</option>
+            <option value="CH" ${m.country === 'CH' ? 'selected' : ''}>Switzerland</option>
+            <option value="SE" ${m.country === 'SE' ? 'selected' : ''}>Sweden</option>
+            <option value="NO" ${m.country === 'NO' ? 'selected' : ''}>Norway</option>
+            <option value="PL" ${m.country === 'PL' ? 'selected' : ''}>Poland</option>
+            <option value="RU" ${m.country === 'RU' ? 'selected' : ''}>Russia</option>
+            <option value="TR" ${m.country === 'TR' ? 'selected' : ''}>Turkey</option>
+            <option value="CN" ${m.country === 'CN' ? 'selected' : ''}>China</option>
+            <option value="JP" ${m.country === 'JP' ? 'selected' : ''}>Japan</option>
+            <option value="IN" ${m.country === 'IN' ? 'selected' : ''}>India</option>
+            <option value="KR" ${m.country === 'KR' ? 'selected' : ''}>South Korea</option>
+            <option value="SG" ${m.country === 'SG' ? 'selected' : ''}>Singapore</option>
+            <option value="TH" ${m.country === 'TH' ? 'selected' : ''}>Thailand</option>
+            <option value="MY" ${m.country === 'MY' ? 'selected' : ''}>Malaysia</option>
+            <option value="ID" ${m.country === 'ID' ? 'selected' : ''}>Indonesia</option>
+            <option value="PH" ${m.country === 'PH' ? 'selected' : ''}>Philippines</option>
+            <option value="VN" ${m.country === 'VN' ? 'selected' : ''}>Vietnam</option>
+            <option value="IL" ${m.country === 'IL' ? 'selected' : ''}>Israel</option>
+            <option value="SA" ${m.country === 'SA' ? 'selected' : ''}>Saudi Arabia</option>
+            <option value="AE" ${m.country === 'AE' ? 'selected' : ''}>United Arab Emirates</option>
+            <option value="AU" ${m.country === 'AU' ? 'selected' : ''}>Australia</option>
+            <option value="NZ" ${m.country === 'NZ' ? 'selected' : ''}>New Zealand</option>
+            <option value="FJ" ${m.country === 'FJ' ? 'selected' : ''}>Fiji</option>
+            <option value="OTHER" ${m.country === 'OTHER' ? 'selected' : ''}>Other</option>
           </select>
+        </div>
+        <div class="edit-field" id="ei-county-wrapper">
+          <label>County (required if Kenya)</label>
+          <input id="ei-county" value="${m.county || ''}">
         </div>
         <div class="edit-field">
           <label>Profession Bodies</label>
@@ -1090,7 +1264,8 @@ async function commitEdit(id) {
     institution: document.getElementById('ei-institution').value.trim(),
     course:      document.getElementById('ei-course').value.trim(),
     graduation:  Number(document.getElementById('ei-graduation').value) || null,
-    diaspora:    document.getElementById('ei-diaspora')?.value === 'true' || false,
+    country:     document.getElementById('ei-country').value,
+    county:      document.getElementById('ei-county').value.trim(),
     profession_bodies: document.getElementById('ei-profession-bodies')?.value.split(',').map(s => s.trim()).filter(s => s.length > 0) || [],
     skills:      editSkills,
   };
@@ -1258,6 +1433,19 @@ async function exportMembersCSV() {
 /* ═══════════════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════════════════ */
+/**
+ * Toggle county field visibility based on country selection
+ */
+function toggleCountyField(){
+  const sel=document.getElementById('ei-country');
+  const wrap=document.getElementById('ei-county-wrapper');
+  const inp=document.getElementById('ei-county');
+  if(!wrap||!inp)return;
+  const isKenya=sel&&sel.value==='KE';
+  wrap.style.display=isKenya?'':'none';
+  inp.required=isKenya;
+}
+
 async function initDashboardPage() {
   await loadMembers();
   const set = cohortSet();

@@ -1,3 +1,5 @@
+from django_countries.serializer_fields import CountryField
+from django_countries.serializers import CountryFieldMixin
 from rest_framework import serializers
 from .models import User, Member, Profile, FileResource
 
@@ -145,7 +147,7 @@ class MemberSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class MemberWriteSerializer(serializers.Serializer):
+class MemberWriteSerializer(CountryFieldMixin, serializers.Serializer):
     name = serializers.CharField()
     phone = serializers.CharField()
     email = serializers.EmailField()
@@ -164,7 +166,8 @@ class MemberWriteSerializer(serializers.Serializer):
     employer = serializers.CharField(allow_blank=True, default='')
     career = serializers.CharField()
     skills = serializers.ListField(child=serializers.CharField(), default=list)
-    diaspora = serializers.BooleanField(default=False)
+    country = CountryField()
+    county = serializers.CharField(allow_blank=True, required=False)
     profession_bodies = serializers.ListField(child=serializers.CharField(), default=list)
 
     def validate(self, data):
@@ -172,6 +175,9 @@ class MemberWriteSerializer(serializers.Serializer):
         for field in required:
             if not data.get(field):
                 raise serializers.ValidationError({field: 'This field is required.'})
+        # If country is Kenya, county is required
+        if data.get('country') == 'KE' and not data.get('county'):
+            raise serializers.ValidationError({'county': 'County is required when country is Kenya.'})
         return data
 
     def create(self, validated_data):

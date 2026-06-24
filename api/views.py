@@ -364,7 +364,7 @@ def export_members(request):
         'id', 'user_id', 'name', 'email', 'phone', 'age', 'national_id',
         'sub_location', 'education', 'kcse', 'institution', 'course',
         'graduation', 'status', 'employer', 'career', 'skills', 'created_at',
-        'diaspora', 'profession_bodies',
+        'country', 'county', 'profession_bodies',
     ]
 
     def generate_rows():
@@ -376,7 +376,8 @@ def export_members(request):
                 'kcse': member.kcse, 'institution': member.institution, 'course': member.course,
                 'graduation': member.graduation, 'status': member.status, 'employer': member.employer,
                 'career': member.career, 'skills': ';'.join(member.skills or []),
-                'diaspora': member.diaspora,
+                'country': str(member.country),
+                'county': member.county,
                 'profession_bodies': ';'.join(member.profession_bodies or []),
                 'created_at': member.created_at.isoformat(),
             }

@@ -514,6 +514,39 @@ async function loadCurrentUser() {
   }
 }
 
+/**
+ * Populates a given HTMLSelectElement with the list of countries from the `countries` array.
+ * @param {HTMLSelectElement} selectElement - The select element to populate.
+ * @param {string} [placeholder='— Select country —'] - Optional placeholder text for the first option.
+ */
+function populateCountrySelect(selectElement, placeholder) {
+  placeholder = placeholder || '— Select country —';
+  if (!selectElement) return;
+  selectElement.innerHTML = '';
+  var o = document.createElement('option');
+  o.value = ''; o.disabled = true; o.selected = true; o.textContent = placeholder;
+  selectElement.appendChild(o);
+  countries.forEach(function(c) {
+    var opt = document.createElement('option');
+    opt.value = c.value; opt.textContent = c.label;
+    selectElement.appendChild(opt);
+  });
+}
+
+function populateCountySelect(selectElement, placeholder) {
+  placeholder = placeholder || '— Select county —';
+  if (!selectElement) return;
+  selectElement.innerHTML = '';
+  var o = document.createElement('option');
+  o.value = ''; o.disabled = true; o.selected = true; o.textContent = placeholder;
+  selectElement.appendChild(o);
+  counties.forEach(function(c) {
+    var opt = document.createElement('option');
+    opt.value = c.name; opt.textContent = c.name;
+    selectElement.appendChild(opt);
+  });
+}
+
 function logout() {
   localStorage.removeItem('authToken');
   window.location.href = '/login';

@@ -121,7 +121,7 @@ class Member(models.Model):
     career = models.TextField(blank=True, default='')
     # PostgreSQL text[] stored as a JSON array in Django
     skills = models.JSONField(default=list, blank=True)
-    # Country of residence (for diaspora tracking)
+    # Country of residence
     country = CountryField(default='KE', blank_label='(select country)')
     county = models.CharField(max_length=50, blank=True, help_text='Required if country is Kenya')
     profession_bodies = models.JSONField(default=list, blank=True)  # list of strings

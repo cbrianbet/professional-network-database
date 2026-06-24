@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.hashers import make_password
 import os
 from django.conf import settings
+from django_countries.fields import CountryField
 
 
 class User(models.Model):
@@ -120,8 +121,9 @@ class Member(models.Model):
     career = models.TextField(blank=True, default='')
     # PostgreSQL text[] stored as a JSON array in Django
     skills = models.JSONField(default=list, blank=True)
-    # New fields for diaspora and professional bodies
-    diaspora = models.BooleanField(default=False)
+    # Country of residence (for diaspora tracking)
+    country = CountryField(default='KE', blank_label='(select country)')
+    county = models.CharField(max_length=50, blank=True, help_text='Required if country is Kenya')
     profession_bodies = models.JSONField(default=list, blank=True)  # list of strings
     created_at = models.DateTimeField(auto_now_add=True)
 

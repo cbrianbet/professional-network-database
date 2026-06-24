@@ -1130,7 +1130,7 @@ function statusOptions(current) {
 
 function educationOptions(current) {
   return [
-    'Primary (KCPE)','Secondary (KCSE)','Certificate','Diploma',
+    'Certificate','Diploma',
     'Higher National Diploma (HND)',"Bachelor's Degree",'Postgraduate Diploma',
     "Master's Degree",'PhD / Doctorate',
   ].map(s => `<option value="${s}" ${s===current?'selected':''}>${s}</option>`).join('');

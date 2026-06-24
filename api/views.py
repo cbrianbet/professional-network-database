@@ -37,26 +37,6 @@ AUTHED = [IsAuthenticated]
 ADMIN  = [IsAdminUser]
 
 
-# ── CSV Encryption Utilities ───────────────────────────────────────────────────
-def get_encryption_cipher():
-    """Get Fernet cipher instance for CSV encryption/decryption."""
-    key = getattr(settings, 'CSV_ENCRYPTION_KEY', None)
-    if not key:
-        raise ValueError("CSV_ENCRYPTION_KEY not configured in settings")
-    return Fernet(key)
-
-
-def encrypt_csv_data(csv_data: bytes) -> bytes:
-    """Encrypt CSV data using Fernet symmetric encryption."""
-    cipher = get_encryption_cipher()
-    return cipher.encrypt(csv_data)
-
-
-def decrypt_csv_data(encrypted_data: bytes) -> bytes:
-    """Decrypt CSV data using Fernet symmetric encryption."""
-    cipher = get_encryption_cipher()
-    return cipher.decrypt(encrypted_data)
-
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
@@ -299,24 +279,6 @@ def profile_detail(request, profile_id):
 
 # ── CSV Exports ───────────────────────────────────────────────────────────────
 
-class _Echo:
-    def write(self, value):
-        return value
-
-
-def _stream_csv(rows, columns, filename):
-    writer = csv.writer(_Echo())
-
-    def generate():
-        yield writer.writerow(columns)
-        for row in rows:
-            yield writer.writerow([str(row.get(c, '') or '') for c in columns])
-
-    response = StreamingHttpResponse(generate(), content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
-    return response
-
-
 def _encrypt_and_stream_csv(rows, columns, filename):
     """Generate CSV, protect it with a password inside a zip,
     and return JSON with the zip blob and the password."""
@@ -376,8 +338,8 @@ def export_members(request):
                 'kcse': member.kcse, 'institution': member.institution, 'course': member.course,
                 'graduation': member.graduation, 'status': member.status, 'employer': member.employer,
                 'career': member.career, 'skills': ';'.join(member.skills or []),
-                'country': str(member.country),
-                'county': member.county,
+                'country': str(member.country.name) if member.country else '',
+                'county': str(member.county) if member.county else '',
                 'profession_bodies': ';'.join(member.profession_bodies or []),
                 'created_at': member.created_at.isoformat(),
             }

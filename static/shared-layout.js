@@ -532,18 +532,71 @@ async function loadCurrentUser() {
 }
 
 /**
- * Populates a given HTMLSelectElement with the list of countries.
+ * Populates the primary "Country of Residence" select with just two choices:
+ * Kenya and Diaspora. Used for registration and edit forms.
+ * @param {HTMLSelectElement} selectElement
+ * @param {string} [selectedValue] - 'KE' pre-selects Kenya; anything else pre-selects Diaspora
+ */
+function populateResidenceSelect(selectElement, selectedValue) {
+	if (!selectElement) return;
+	selectElement.innerHTML = "";
+	const placeholder = document.createElement("option");
+	placeholder.value = "";
+	placeholder.disabled = true;
+	placeholder.textContent = "— Select —";
+	if (!selectedValue) placeholder.selected = true;
+	selectElement.appendChild(placeholder);
+
+	const kenya = document.createElement("option");
+	kenya.value = "KE";
+	kenya.textContent = "Kenya";
+	if (selectedValue === "KE") kenya.selected = true;
+	selectElement.appendChild(kenya);
+
+	const diaspora = document.createElement("option");
+	diaspora.value = "diaspora";
+	diaspora.textContent = "Diaspora";
+	if (selectedValue && selectedValue !== "KE") diaspora.selected = true;
+	selectElement.appendChild(diaspora);
+}
+
+/**
+ * Populates a select with all countries except Kenya (for diaspora members).
+ * @param {HTMLSelectElement} selectElement
+ * @param {string} [selectedValue] - ISO code to pre-select
+ */
+function populateDiasporaSelect(selectElement, selectedValue) {
+	if (!selectElement) return;
+	selectElement.innerHTML = "";
+	const placeholder = document.createElement("option");
+	placeholder.value = "";
+	placeholder.disabled = true;
+	placeholder.textContent = "— Select country —";
+	if (!selectedValue) placeholder.selected = true;
+	selectElement.appendChild(placeholder);
+	countries.forEach(function (c) {
+		if (c.value === "KE") return;
+		const opt = document.createElement("option");
+		opt.value = c.value;
+		opt.textContent = c.label;
+		if (selectedValue && c.value === selectedValue) opt.selected = true;
+		selectElement.appendChild(opt);
+	});
+}
+
+/**
+ * Populates a given HTMLSelectElement with the full list of countries.
+ * Used for filter dropdowns only (not the residence form field).
  * @param {HTMLSelectElement} selectElement
  * @param {string} [placeholder]
- * @param {string} [selectedValue] - option value to pre-select
+ * @param {string} [selectedValue]
  */
 function populateCountrySelect(selectElement, placeholder, selectedValue) {
-	placeholder = placeholder || "— Select country —";
+	placeholder = placeholder || "— Any country —";
 	if (!selectElement) return;
 	selectElement.innerHTML = "";
 	let o = document.createElement("option");
 	o.value = "";
-	o.disabled = true;
 	o.textContent = placeholder;
 	if (!selectedValue) o.selected = true;
 	selectElement.appendChild(o);
@@ -580,7 +633,6 @@ function populateCountySelect(selectElement, placeholder, selectedValue) {
 		selectElement.appendChild(opt);
 	});
 }
-
 function logout() {
 	localStorage.removeItem("authToken");
 	window.location.href = "/login";

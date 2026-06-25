@@ -24,9 +24,10 @@ urlpatterns = [
     # ── Admin — user approval ─────────────────────────────────────────────
     path('admin/users/<int:user_id>/approve-reject/', views.admin_user_approve_reject),
 
-    # ── Job Adverts (admin: list/create/delete) ──────────────────────────
-    path('job-adverts/',                     views.job_adverts_list_create),
-    path('job-adverts/<int:advert_id>/',     views.job_advert_detail),
+    # ── Job Adverts ─────────────────────────────────────────────────────
+    path('job-adverts/',                     views.job_adverts_list),        # GET: public list (auth)
+    path('job-adverts/create/',              views.job_advert_create),       # POST: admin create
+    path('job-adverts/<int:advert_id>/',     views.job_advert_detail),       # GET/DELETE: admin
 
     # ── Admin — file resources (GET list, POST create) ───────────────────
     path('admin/file-resources/', views.file_resources_list_create),

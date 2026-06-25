@@ -2214,13 +2214,17 @@
         </div>
         <div class="edit-field">
           <label>Country of Residence</label>
-          <select id="ei-country" onchange="toggleCountyField()"></select>
+          <select id="ei-residence" onchange="toggleResidenceFields()"></select>
         </div>
-        <div class="edit-field" id="ei-county-wrapper">
-          <label>County (required if Kenya)</label>
+        <div class="edit-field" id="ei-county-wrapper" style="display:none">
+          <label>County <span style="color:var(--rose)">*</span></label>
           <select id="ei-county">
             <option value="" disabled selected>— Select county —</option>
           </select>
+        </div>
+        <div class="edit-field" id="ei-diaspora-wrapper" style="display:none">
+          <label>Country</label>
+          <select id="ei-country"></select>
         </div>
         <div class="edit-field">
           <label>Profession Bodies</label>
@@ -2265,21 +2269,28 @@
       tr.insertAdjacentElement('afterend', editTr);
       renderEditSkillTags();
 
-      /* Populate country dropdown and pre-select the member's current value */
-      const countryEl = document.getElementById('ei-country');
-      if (countryEl) {
-        populateCountrySelect(countryEl, '— Select country —', m.country || '');
-      }
+      /* Populate residence select (Kenya / Diaspora) and cascade fields */
+      const residenceEl = document.getElementById('ei-residence');
+      const isKenya = (m.country || '') === 'KE';
+      const isDiaspora = !isKenya && !!m.country;
+      const residenceVal = isKenya ? 'KE' : (isDiaspora ? 'diaspora' : '');
+      populateResidenceSelect(residenceEl, residenceVal);
 
-      /* Show county wrapper and populate, pre-selecting the member's current value */
       const countyWrap = document.getElementById('ei-county-wrapper');
       const countyEl = document.getElementById('ei-county');
-      const isKenya = (m.country || '') === 'KE';
-      if (countyEl) {
+      if (isKenya) {
         populateCountySelect(countyEl, '— Select county —', m.county || '');
+        if (countyWrap) countyWrap.style.display = '';
+        if (countyEl) countyEl.required = true;
       }
-      if (countyWrap) countyWrap.style.display = isKenya ? '' : 'none';
-      if (countyEl) countyEl.required = isKenya;
+
+      const diasporaWrap = document.getElementById('ei-diaspora-wrapper');
+      const diasporaEl = document.getElementById('ei-country');
+      if (isDiaspora) {
+        populateDiasporaSelect(diasporaEl, m.country || '');
+        if (diasporaWrap) diasporaWrap.style.display = '';
+        if (diasporaEl) diasporaEl.required = true;
+      }
 
       editTr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
@@ -2339,8 +2350,14 @@
         institution: document.getElementById('ei-institution').value.trim(),
         course: document.getElementById('ei-course').value.trim(),
         graduation: Number(document.getElementById('ei-graduation').value) || null,
-        country: document.getElementById('ei-country').value,
-        county: document.getElementById('ei-county').value.trim(),
+        country: (function () {
+          const res = document.getElementById('ei-residence').value;
+          if (res === 'KE') return 'KE';
+          if (res === 'diaspora') return document.getElementById('ei-country').value;
+          return '';
+        })(),
+        county: (document.getElementById('ei-residence').value === 'KE')
+          ? document.getElementById('ei-county').value.trim() : '',
         profession_bodies: document.getElementById('ei-profession-bodies')?.value.split(',').map(s => s.trim()).filter(s => s.length > 0) || [],
         skills: editSkills,
       };
@@ -2511,17 +2528,28 @@
     /**
      * Toggle county field visibility based on country selection
      */
-    function toggleCountyField() {
-      const sel = document.getElementById('ei-country');
-      const wrap = document.getElementById('ei-county-wrapper');
-      const inp = document.getElementById('ei-county');
-      if (!wrap || !inp) return;
-      const isKenya = sel && sel.value === 'KE';
-      if (isKenya) {
-        populateCountySelect(inp);
+    function toggleResidenceFields() {
+      const sel = document.getElementById('ei-residence');
+      const countyWrap = document.getElementById('ei-county-wrapper');
+      const countyEl = document.getElementById('ei-county');
+      const diasporaWrap = document.getElementById('ei-diaspora-wrapper');
+      const diasporaEl = document.getElementById('ei-country');
+      if (!sel) return;
+      const val = sel.value;
+      const isKenya = val === 'KE';
+      const isDiaspora = val === 'diaspora';
+      // County
+      if (countyWrap) countyWrap.style.display = isKenya ? '' : 'none';
+      if (countyEl) {
+        countyEl.required = isKenya;
+        if (isKenya && countyEl.options.length <= 1) populateCountySelect(countyEl);
       }
-      wrap.style.display = isKenya ? '' : 'none';
-      inp.required = isKenya;
+      // Diaspora country
+      if (diasporaWrap) diasporaWrap.style.display = isDiaspora ? '' : 'none';
+      if (diasporaEl) {
+        diasporaEl.required = isDiaspora;
+        if (isDiaspora && diasporaEl.options.length <= 1) populateDiasporaSelect(diasporaEl);
+      }
     }
 
     async function initDashboardPage() {

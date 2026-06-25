@@ -250,7 +250,7 @@
         if (!uploadRes.ok) throw new Error(uploadData.error || 'File upload failed');
 
         // Step 2: create the advert pointing to the uploaded file
-        const res = await fetch('/api/job-adverts/', {
+        const res = await fetch('/api/job-adverts/create/', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ title, company, deadline, file_id: uploadData.id, file_type: fileType }),

@@ -520,10 +520,21 @@ def admin_user_approve_reject(request, user_id):
 @authentication_classes(AUTH)
 @permission_classes(AUTHED)
 def job_adverts_list(request):
-    """Public list — any authenticated user can view active adverts."""
+    """Public list — only show adverts that are still visible.
+
+    An advert is visible when:
+      - its deadline is in the future (or today), OR
+      - it has no deadline AND was posted within the last 30 days.
+    """
     from django.utils import timezone
+    from datetime import timedelta
+
+    today = timezone.now().date()
+    thirty_days_ago = today - timedelta(days=30)
+
     adverts = JobAdvert.objects.select_related('file', 'created_by').filter(
-        models.Q(deadline__isnull=True) | models.Q(deadline__gte=timezone.now().date())
+        models.Q(deadline__gte=today)
+        | models.Q(deadline__isnull=True, created_at__date__gte=thirty_days_ago)
     )
     return Response({'job_adverts': JobAdvertSerializer(adverts, many=True).data})
 

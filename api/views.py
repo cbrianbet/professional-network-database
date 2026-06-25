@@ -516,15 +516,23 @@ def admin_user_approve_reject(request, user_id):
 
 # ── Job Adverts ──────────────────────────────────────────────────────────────
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
+@authentication_classes(AUTH)
+@permission_classes(AUTHED)
+def job_adverts_list(request):
+    """Public list — any authenticated user can view active adverts."""
+    from django.utils import timezone
+    adverts = JobAdvert.objects.select_related('file', 'created_by').filter(
+        models.Q(deadline__isnull=True) | models.Q(deadline__gte=timezone.now().date())
+    )
+    return Response({'job_adverts': JobAdvertSerializer(adverts, many=True).data})
+
+
+@api_view(['POST'])
 @authentication_classes(AUTH)
 @permission_classes(ADMIN)
-def job_adverts_list_create(request):
-    if request.method == 'GET':
-        adverts = JobAdvert.objects.select_related('file', 'created_by').all()
-        return Response({'job_adverts': JobAdvertSerializer(adverts, many=True).data})
-
-    # POST — create advert from a previously-uploaded FileResource
+def job_advert_create(request):
+    """Admin-only — create a new advert from an uploaded FileResource id."""
     sz = JobAdvertWriteSerializer(data=request.data)
     if not sz.is_valid():
         return Response(sz.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -644,10 +652,46 @@ def file_resources_list_create(request):
         return Response(response_data)
 
     elif request.method == 'POST':
+        # Accept an actual uploaded file (multipart) and compute the storage
+        # path server-side. Falls back to the JSON write-serializer when no
+        # file is attached (e.g. for programmatic creation).
+        uploaded_file = request.FILES.get('file')
+        if uploaded_file:
+            file_type = (request.data.get('file_type') or '').lower()
+            if file_type not in ('pdf', 'jpeg', 'png'):
+                return Response({'error': 'file_type must be pdf, jpeg, or png.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Build a storage path under MEDIA_ROOT/uploads/<type>/<name>
+            import os
+            from django.utils import timezone
+            safe_name = os.path.basename(uploaded_file.name)
+            rel_dir = os.path.join('uploads', file_type)
+            rel_path = os.path.join(rel_dir, f"{timezone.now().strftime('%Y%m%d%H%M%S')}_{safe_name}")
+            abs_dir = os.path.join(settings.MEDIA_ROOT, rel_dir)
+            os.makedirs(abs_dir, exist_ok=True)
+            abs_path = os.path.join(settings.MEDIA_ROOT, rel_path)
+            with open(abs_path, 'wb+') as dest:
+                for chunk in uploaded_file.chunks():
+                    dest.write(chunk)
+
+            resource = FileResource.objects.create(
+                user=request.user,
+                original_filename=uploaded_file.name,
+                file_size=uploaded_file.size,
+                file_type=file_type,
+                upload_path=rel_path,
+                permission_level=request.data.get('permission_level', 'authenticated'),
+                uploaded_by=request.user.name or request.user.email,
+            )
+            try:
+                cache.incr('file_resources_list_version')
+            except ValueError:
+                cache.set('file_resources_list_version', 1)
+            return Response(FileResourceSerializer(resource).data, status=status.HTTP_201_CREATED)
+
         serializer = FileResourceWriteSerializer(data=request.data, context={'user': request.user})
         if serializer.is_valid():
             resource = serializer.save()
-            # Increment cache version to invalidate all file resources list caches
             try:
                 cache.incr('file_resources_list_version')
             except ValueError:

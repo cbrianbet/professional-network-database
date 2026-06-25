@@ -543,15 +543,19 @@ def job_adverts_list(request):
 @authentication_classes(AUTH)
 @permission_classes(ADMIN)
 def job_advert_create(request):
-    """Admin-only — create a new advert from an uploaded FileResource id."""
+    """Admin-only — create a new advert. File upload is optional; provide
+    either a file_id (from a prior upload) or a link, or both."""
     sz = JobAdvertWriteSerializer(data=request.data)
     if not sz.is_valid():
         return Response(sz.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    try:
-        file_resource = FileResource.objects.get(id=sz.validated_data['file_id'])
-    except FileResource.DoesNotExist:
-        return Response({'error': 'file_id does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+    file_resource = None
+    file_id = sz.validated_data.get('file_id')
+    if file_id:
+        try:
+            file_resource = FileResource.objects.get(id=file_id)
+        except FileResource.DoesNotExist:
+            return Response({'error': 'file_id does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
 
     advert = JobAdvert.objects.create(
         title=sz.validated_data['title'],
@@ -560,7 +564,7 @@ def job_advert_create(request):
         deadline=sz.validated_data.get('deadline'),
         file=file_resource,
         created_by=request.user,
-        file_type=sz.validated_data['file_type'],
+        file_type=sz.validated_data.get('file_type', ''),
     )
     return Response(
         {'job_advert': JobAdvertSerializer(advert).data},

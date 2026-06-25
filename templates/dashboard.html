@@ -1790,14 +1790,20 @@
         card.className = 'kpi-card gold';
         card.style.animationDelay = '0s';
         const deadline = a.deadline ? `Deadline: ${a.deadline}` : 'No deadline';
-        const fileUrl = a.file_url || '#';
+        const fileUrl = a.file_url || '';
         const type = (a.file_type || '').toUpperCase();
+        const linkRow = a.link
+          ? `<a href="${a.link}" target="_blank" rel="noopener" class="tag-btn" style="display:inline-block;margin-right:0.4rem;text-decoration:none">Apply ↗</a>`
+          : '';
+        const viewBtn = fileUrl
+          ? `<a href="${fileUrl}" target="_blank" rel="noopener" class="tag-btn" style="display:inline-block;text-decoration:none">View ${type}</a>`
+          : '';
         card.innerHTML = `
-          <div class="kpi-icon">${type === 'PDF' ? '📄' : '🖼️'}</div>
+          <div class="kpi-icon">${type === 'PDF' ? '📄' : type === 'JPEG' || type === 'PNG' ? '🖼️' : '📌'}</div>
           <div class="kpi-val" style="font-size:1.25rem;line-height:1.25">${a.title}</div>
           <div class="kpi-label" style="margin-top:0.4rem">${a.company}</div>
           <div class="kpi-delta" style="margin-top:0.5rem">${deadline}</div>
-          <a href="${fileUrl}" target="_blank" rel="noopener" class="tag-btn" style="display:inline-block;margin-top:0.75rem;text-decoration:none">View ${type}</a>
+          <div style="margin-top:0.75rem">${linkRow}${viewBtn}</div>
         `;
         grid.appendChild(card);
       });

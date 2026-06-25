@@ -226,12 +226,13 @@ class JobAdvert(models.Model):
     link = models.URLField(max_length=500, blank=True, default='')
     deadline = models.DateField(null=True, blank=True)
     file = models.ForeignKey(
-        FileResource, on_delete=models.CASCADE, related_name='job_adverts'
+        FileResource, on_delete=models.CASCADE, related_name='job_adverts',
+        null=True, blank=True,
     )
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name='job_adverts'
     )
-    file_type = models.TextField(choices=FILE_TYPE_CHOICES)
+    file_type = models.TextField(choices=FILE_TYPE_CHOICES, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

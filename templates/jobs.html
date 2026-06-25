@@ -86,7 +86,8 @@
               <div class="job-company">${a.company}</div>
               <div class="job-meta">Posted ${a.created_at ? a.created_at.substring(0, 10) : ''}</div>
               ${deadline}
-              <a class="job-view" href="${fileUrl}" target="_blank" rel="noopener">View ${type}</a>
+              ${fileUrl ? `<a class="job-view" href="${fileUrl}" target="_blank" rel="noopener">View ${type}</a>` : ''}
+              ${a.link ? `<a class="job-view" href="${a.link}" target="_blank" rel="noopener" style="background:var(--teal)">Apply ↗</a>` : ''}
             </div>
           `;
         }).join('');

@@ -259,10 +259,11 @@ class JobAdvertWriteSerializer(serializers.Serializer):
     company = serializers.CharField(max_length=255)
     link = serializers.URLField(required=False, allow_blank=True, default='')
     deadline = serializers.DateField(required=False, allow_null=True)
-    file_id = serializers.IntegerField(required=True)
-    file_type = serializers.ChoiceField(choices=[
-        ('pdf', 'PDF'), ('jpeg', 'JPEG'), ('png', 'PNG')
-    ])
+    file_id = serializers.IntegerField(required=False, allow_null=True)
+    file_type = serializers.ChoiceField(
+        choices=[('pdf', 'PDF'), ('jpeg', 'JPEG'), ('png', 'PNG')],
+        required=False, allow_blank=True, default='',
+    )
 
 
 class BulkFileResourceOperationSerializer(serializers.Serializer):

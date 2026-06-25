@@ -69,6 +69,28 @@
         <tbody></tbody>
       </table>
     </div>
+
+    <div class="card" style="margin-top:2rem">
+      <h2 style="color:#e2e8f0;margin-bottom:1rem;font-size:1.05rem">Job Adverts</h2>
+      <div id="jobAdvertForm" style="margin-bottom:1.5rem">
+        <div class="form-grid">
+          <label>Title<input type="text" id="jobTitle" placeholder="e.g. Senior Backend Engineer"></label>
+          <label>Company<input type="text" id="jobCompany" placeholder="e.g. Acme Ltd"></label>
+          <label>Deadline<input type="date" id="jobDeadline"></label>
+          <label>File (PDF / image)
+            <input type="file" id="jobFile" accept=".pdf,image/png,image/jpeg,image/jpg">
+          </label>
+        </div>
+        <button id="createJobAdvertBtn" class="update">Post advert</button>
+        <div id="jobAdvertError" class="error" style="display:none"></div>
+      </div>
+      <table id="jobAdvertsTable" style="display:none">
+        <thead>
+          <tr><th>Title</th><th>Company</th><th>Deadline</th><th>Type</th><th>Action</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </template>
 
   <script src="{% static 'shared-layout.js' %}"></script>
@@ -165,9 +187,126 @@
       }
     }
 
+    async function fetchJobAdverts() {
+      try {
+        const res = await fetch('/api/job-adverts/', {
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Unable to load job adverts');
+        renderJobAdverts(data.job_adverts);
+      } catch (err) {
+        const errEl = document.getElementById('jobAdvertError');
+        errEl.textContent = err.message; errEl.style.display = 'block';
+      }
+    }
+
+    function fileTypeFromExt(name) {
+      const lower = (name || '').toLowerCase();
+      if (lower.endsWith('.pdf')) return 'pdf';
+      if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'jpeg';
+      if (lower.endsWith('.png')) return 'png';
+      return null;
+    }
+
+    async function createJobAdvert() {
+      const title = document.getElementById('jobTitle').value.trim();
+      const company = document.getElementById('jobCompany').value.trim();
+      const deadline = document.getElementById('jobDeadline').value || null;
+      const fileInput = document.getElementById('jobFile');
+      const errEl = document.getElementById('jobAdvertError');
+      errEl.style.display = 'none';
+
+      if (!title || !company) {
+        errEl.textContent = 'Title and company are required.';
+        errEl.style.display = 'block'; return;
+      }
+      if (!fileInput.files.length) {
+        errEl.textContent = 'Please select a PDF or image file.';
+        errEl.style.display = 'block'; return;
+      }
+      const file = fileInput.files[0];
+      const fileType = fileTypeFromExt(file.name);
+      if (!fileType) {
+        errEl.textContent = 'Only PDF, PNG, and JPG files are allowed.';
+        errEl.style.display = 'block'; return;
+      }
+
+      try {
+        // Step 1: upload the file to the existing file-resources endpoint
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('file_type', fileType);
+        fd.append('original_filename', file.name);
+        fd.append('file_size', file.size);
+        fd.append('upload_path', '');  // server computes
+        fd.append('permission_level', 'authenticated');
+        const uploadRes = await fetch('/api/admin/file-resources/', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: fd,
+        });
+        const uploadData = await uploadRes.json();
+        if (!uploadRes.ok) throw new Error(uploadData.error || 'File upload failed');
+
+        // Step 2: create the advert pointing to the uploaded file
+        const res = await fetch('/api/job-adverts/', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, company, deadline, file_id: uploadData.id, file_type: fileType }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Unable to create advert');
+
+        // Clear form
+        document.getElementById('jobTitle').value = '';
+        document.getElementById('jobCompany').value = '';
+        document.getElementById('jobDeadline').value = '';
+        document.getElementById('jobFile').value = '';
+        await fetchJobAdverts();
+      } catch (err) {
+        errEl.textContent = err.message; errEl.style.display = 'block';
+      }
+    }
+
+    function renderJobAdverts(adverts) {
+      const tbody = document.querySelector('#jobAdvertsTable tbody');
+      tbody.innerHTML = adverts.map(a => `<tr>
+        <td>${a.title}</td>
+        <td>${a.company}</td>
+        <td>${a.deadline || '—'}</td>
+        <td>${(a.file_type || '').toUpperCase()}</td>
+        <td><button class="update" data-job-id="${a.id}">Delete</button></td>
+      </tr>`).join('');
+      document.getElementById('jobAdvertsTable').style.display = 'table';
+      tbody.querySelectorAll('button[data-job-id]').forEach(btn =>
+        btn.addEventListener('click', () => deleteJobAdvert(btn.dataset.jobId))
+      );
+    }
+
+    async function deleteJobAdvert(id) {
+      if (!confirm('Delete this job advert?')) return;
+      try {
+        const res = await fetch(`/api/job-adverts/${id}/`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Delete failed');
+        }
+        await fetchJobAdverts();
+      } catch (err) {
+        const errEl = document.getElementById('jobAdvertError');
+        errEl.textContent = err.message; errEl.style.display = 'block';
+      }
+    }
+
     async function initAdminPage() {
       document.getElementById('createUserButton').addEventListener('click', createUser);
+      document.getElementById('createJobAdvertBtn').addEventListener('click', createJobAdvert);
       await fetchUsers();
+      await fetchJobAdverts();
     }
 
     document.addEventListener('DOMContentLoaded', () => {

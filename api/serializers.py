@@ -1,7 +1,7 @@
 from django_countries.serializer_fields import CountryField
 from django_countries.serializers import CountryFieldMixin
 from rest_framework import serializers
-from .models import User, Member, Profile, FileResource
+from .models import User, Member, Profile, FileResource, JobAdvert
 
 
 # ── User ─────────────────────────────────────────────────────────────────────
@@ -233,6 +233,35 @@ class FileResourceWriteSerializer(serializers.Serializer):
         ('private', 'Private'),
     ], default='private')
     uploaded_by = serializers.CharField(allow_blank=True, default='')  # username who uploaded
+
+
+class JobAdvertSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+    thumbnail_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = JobAdvert
+        fields = '__all__'
+
+    def get_file_url(self, obj):
+        if obj.file and obj.file.upload_path:
+            return f"/media/{obj.file.upload_path}"
+        return None
+
+    def get_thumbnail_url(self, obj):
+        if obj.file and obj.file.thumbnail_path:
+            return f"/media/{obj.file.thumbnail_path}"
+        return None
+
+
+class JobAdvertWriteSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length=255)
+    company = serializers.CharField(max_length=255)
+    deadline = serializers.DateField(required=False, allow_null=True)
+    file_id = serializers.IntegerField(required=True)
+    file_type = serializers.ChoiceField(choices=[
+        ('pdf', 'PDF'), ('jpeg', 'JPEG'), ('png', 'PNG')
+    ])
 
 
 class BulkFileResourceOperationSerializer(serializers.Serializer):

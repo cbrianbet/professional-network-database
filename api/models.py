@@ -217,6 +217,30 @@ class FileResource(models.Model):
         return f"{self.original_filename} ({self.file_type})"
 
 
+class JobAdvert(models.Model):
+    """Job opportunity / advert posted by admins, viewable by all users."""
+    FILE_TYPE_CHOICES = [('pdf', 'PDF'), ('jpeg', 'JPEG'), ('png', 'PNG')]
+
+    title = models.CharField(max_length=255)
+    company = models.CharField(max_length=255)
+    deadline = models.DateField(null=True, blank=True)
+    file = models.ForeignKey(
+        FileResource, on_delete=models.CASCADE, related_name='job_adverts'
+    )
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name='job_adverts'
+    )
+    file_type = models.TextField(choices=FILE_TYPE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'job_adverts'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} — {self.company}"
+
+
 class Profile(models.Model):
     """Mirrors the `profiles` table."""
     STATUS_CHOICES = [('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')]

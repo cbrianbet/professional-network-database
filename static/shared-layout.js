@@ -2,6 +2,7 @@ const SHELL_LINKS = [
 	{ href: "dashboard.html", label: "Dashboard" },
 	{ href: "data-form.html", label: "Register" },
 	{ href: "admin.html", label: "Admin" },
+	{ href: "jobs.html", label: "Jobs" },
 ];
 
 const counties = [

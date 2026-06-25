@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .auth_backend import CustomJWTAuthentication, get_tokens_for_user
-from .models import User, Member, Profile, FileResource
+from .models import User, Member, Profile, FileResource, JobAdvert
 from .permissions import IsAdminUser
 from .serializers import (
     UserSerializer,
@@ -30,6 +30,10 @@ from .serializers import (
     MemberWriteSerializer,
     ProfileSerializer,
     ProfileWriteSerializer,
+    FileResourceSerializer,
+    FileResourceWriteSerializer,
+    JobAdvertSerializer,
+    JobAdvertWriteSerializer,
 )
 
 AUTH  = [CustomJWTAuthentication]
@@ -508,6 +512,56 @@ def admin_user_approve_reject(request, user_id):
     user.save()
 
     return Response({'user': UserSerializer(user).data})
+
+
+# ── Job Adverts ──────────────────────────────────────────────────────────────
+
+@api_view(['GET', 'POST'])
+@authentication_classes(AUTH)
+@permission_classes(ADMIN)
+def job_adverts_list_create(request):
+    if request.method == 'GET':
+        adverts = JobAdvert.objects.select_related('file', 'created_by').all()
+        return Response({'job_adverts': JobAdvertSerializer(adverts, many=True).data})
+
+    # POST — create advert from a previously-uploaded FileResource
+    sz = JobAdvertWriteSerializer(data=request.data)
+    if not sz.is_valid():
+        return Response(sz.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        file_resource = FileResource.objects.get(id=sz.validated_data['file_id'])
+    except FileResource.DoesNotExist:
+        return Response({'error': 'file_id does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    advert = JobAdvert.objects.create(
+        title=sz.validated_data['title'],
+        company=sz.validated_data['company'],
+        deadline=sz.validated_data.get('deadline'),
+        file=file_resource,
+        created_by=request.user,
+        file_type=sz.validated_data['file_type'],
+    )
+    return Response(
+        {'job_advert': JobAdvertSerializer(advert).data},
+        status=status.HTTP_201_CREATED,
+    )
+
+
+@api_view(['GET', 'DELETE'])
+@authentication_classes(AUTH)
+@permission_classes(ADMIN)
+def job_advert_detail(request, advert_id):
+    try:
+        advert = JobAdvert.objects.select_related('file').get(id=advert_id)
+    except JobAdvert.DoesNotExist:
+        return Response({'error': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        return Response({'job_advert': JobAdvertSerializer(advert).data})
+
+    advert.delete()
+    return Response({'success': True})
 
 
 # ── File Resources ─────────────────────────────────────────────────────────────

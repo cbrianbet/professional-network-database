@@ -1279,6 +1279,7 @@
         <button class="cohort-btn" data-cohort="unemployed">Unemployed / Seeking</button>
         <button class="cohort-btn" data-cohort="intern">Interns / Attachees</button>
         <button class="cohort-btn" data-cohort="applying">Applying / Shortlisted</button>
+        <button class="cohort-btn" data-cohort="jobs">Jobs</button>
       </div>
 
       <!-- KPIs -->
@@ -1301,6 +1302,17 @@
           <div class="chart-title">Top Skills <span class="chart-sub">Most common</span></div>
           <div class="skills-cloud" id="skillsCloud"></div>
         </div>
+      </div>
+
+      <!-- Jobs section (shown when cohort = 'jobs') -->
+      <div id="jobsSection" style="display:none;margin-top:1rem">
+        <h2 style="color:var(--gold);margin-bottom:1.25rem;font-family:var(--font-head);font-size:1.4rem">
+          Job Opportunities
+        </h2>
+        <div id="jobsGrid" class="kpi-grid"></div>
+        <p id="jobsEmpty" style="display:none;color:var(--muted);font-size:0.95rem">
+          No job adverts have been posted yet.
+        </p>
       </div>
 
       <!-- Filters panel -->
@@ -1724,12 +1736,72 @@
       document.querySelectorAll('.cohort-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeCohort = btn.dataset.cohort;
+
+      // Toggle Jobs section vs. member analytics
+      const isJobs = activeCohort === 'jobs';
+      document.getElementById('kpiGrid').style.display = isJobs ? 'none' : 'grid';
+      const chartsRow = document.querySelector('.charts-row');
+      if (chartsRow) chartsRow.style.display = isJobs ? 'none' : 'grid';
+      document.getElementById('filtersPanel').style.display = isJobs ? 'none' : 'block';
+      document.getElementById('jobsSection').style.display = isJobs ? 'block' : 'none';
+
+      if (isJobs) {
+        loadJobAdverts();
+        return;
+      }
+
       const set = cohortSet();
       buildKPI(set);
       buildEmploymentChart(set);
       buildDonut(set);
       buildSkillsCloud(set);
     });
+
+    /* ═══════════════════════════════════════════════════════
+       Job Adverts (public list)
+    ══════════════════════════════════════════════════════════ */
+    async function loadJobAdverts() {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+      try {
+        const res = await fetch('/api/job-adverts/', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error('Unable to load job adverts');
+        const data = await res.json();
+        renderJobsGrid(data.job_adverts || []);
+      } catch (err) {
+        console.error('Job adverts load failed', err);
+        renderJobsGrid([]);
+      }
+    }
+
+    function renderJobsGrid(adverts) {
+      const grid = document.getElementById('jobsGrid');
+      const empty = document.getElementById('jobsEmpty');
+      grid.innerHTML = '';
+      if (!adverts.length) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+      adverts.forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'kpi-card gold';
+        card.style.animationDelay = '0s';
+        const deadline = a.deadline ? `Deadline: ${a.deadline}` : 'No deadline';
+        const fileUrl = a.file_url || '#';
+        const type = (a.file_type || '').toUpperCase();
+        card.innerHTML = `
+          <div class="kpi-icon">${type === 'PDF' ? '📄' : '🖼️'}</div>
+          <div class="kpi-val" style="font-size:1.25rem;line-height:1.25">${a.title}</div>
+          <div class="kpi-label" style="margin-top:0.4rem">${a.company}</div>
+          <div class="kpi-delta" style="margin-top:0.5rem">${deadline}</div>
+          <a href="${fileUrl}" target="_blank" rel="noopener" class="tag-btn" style="display:inline-block;margin-top:0.75rem;text-decoration:none">View ${type}</a>
+        `;
+        grid.appendChild(card);
+      });
+    }
 
     /* ═══════════════════════════════════════════════════════
        KPIs

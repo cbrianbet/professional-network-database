@@ -1,5 +1,7 @@
 from django.urls import path, include, re_path
 from django.views.generic import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
 
 # Clean URL routes matching the frontend links in shared-layout.js
 def tpl(name):
@@ -19,6 +21,7 @@ urlpatterns = [
     path('admin-panel', tpl('admin.html')),
     path('admin', tpl('admin.html')),
     path('data-form', tpl('data-form.html')),
+    path('jobs',     tpl('jobs.html')),
 
     # Legacy .html paths (backwards compat if any bookmarks exist)
     path('dashboard.html',  tpl('dashboard.html')),
@@ -27,3 +30,6 @@ urlpatterns = [
     path('login.html',      tpl('login.html')),
     path('signup.html',     tpl('signup.html')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

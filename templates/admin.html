@@ -294,6 +294,7 @@
         errEl.style.display = 'block'; return;
       }
 
+      try {
       const hasFile = fileInput.files.length > 0;
       let fileId = null;
       let fileType = '';
@@ -333,7 +334,7 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Unable to create advert');
 
-        // Clear form
+      // Clear form
         document.getElementById('jobTitle').value = '';
         document.getElementById('jobCompany').value = '';
         document.getElementById('jobLink').value = '';

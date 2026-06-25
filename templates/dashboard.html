@@ -1,419 +1,1489 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Professionals Databank — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'shared-layout.css' %}">
-<style>
-:root{
-  --bg:#0b0f14;--surface:#131920;--surface2:#1a2330;--border:rgba(255,255,255,0.07);
-  --gold:#d4a843;--gold2:#f0c96a;--teal:#2ec4b6;--rose:#e05a6b;--sky:#4a9eff;
-  --text:#e8edf3;--muted:#6b7d8f;--dim:#3a4a5c;--radius:12px;
-  --font-head:'Syne',sans-serif;--font-body:'IBM Plex Sans',sans-serif;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--surface)}::-webkit-scrollbar-thumb{background:var(--dim);border-radius:3px}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professionals Databank — Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'shared-layout.css' %}">
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --surface: #131920;
+      --surface2: #1a2330;
+      --border: rgba(255, 255, 255, 0.07);
+      --gold: #d4a843;
+      --gold2: #f0c96a;
+      --teal: #2ec4b6;
+      --rose: #e05a6b;
+      --sky: #4a9eff;
+      --text: #e8edf3;
+      --muted: #6b7d8f;
+      --dim: #3a4a5c;
+      --radius: 12px;
+      --font-head: 'Syne', sans-serif;
+      --font-body: 'IBM Plex Sans', sans-serif;
+    }
 
-/* ── KPI ─────────────────────────────────────────────── */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:1.25rem;}
-.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;position:relative;overflow:hidden;transition:transform 0.2s,border-color 0.2s;animation:fadeUp 0.4s ease both;}
-.kpi-card:hover{transform:translateY(-3px);border-color:rgba(212,168,67,0.3)}
-.kpi-card::before{content:'';position:absolute;inset:0;opacity:0.04;}
-.kpi-card.gold::before{background:linear-gradient(135deg,var(--gold),transparent)}.kpi-card.teal::before{background:linear-gradient(135deg,var(--teal),transparent)}.kpi-card.rose::before{background:linear-gradient(135deg,var(--rose),transparent)}.kpi-card.sky::before{background:linear-gradient(135deg,var(--sky),transparent)}
-.kpi-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:0.9rem;font-size:1rem;}
-.kpi-card.gold .kpi-icon{background:rgba(212,168,67,0.15);color:var(--gold)}.kpi-card.teal .kpi-icon{background:rgba(46,196,182,0.12);color:var(--teal)}.kpi-card.rose .kpi-icon{background:rgba(224,90,107,0.12);color:var(--rose)}.kpi-card.sky .kpi-icon{background:rgba(74,158,255,0.12);color:var(--sky)}
-.kpi-val{font-family:var(--font-head);font-size:2rem;font-weight:800;line-height:1;margin-bottom:0.3rem;}
-.kpi-label{font-size:0.75rem;color:var(--muted);font-weight:500}
-.kpi-delta{margin-top:0.6rem;font-size:0.72rem;font-weight:600;display:flex;align-items:center;gap:0.25rem;}
-.kpi-delta.up{color:var(--teal)}.kpi-delta.down{color:var(--rose)}
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
 
-/* ── Cohort filter bar (for charts + KPIs) ──────────── */
-.cohort-bar{display:flex;align-items:center;gap:0.6rem;margin-bottom:1.5rem;flex-wrap:wrap;}
-.cohort-label{font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;margin-right:0.25rem;}
-.cohort-btn{padding:0.32rem 0.85rem;border-radius:100px;border:1px solid var(--border);background:none;color:var(--muted);font-family:var(--font-body);font-size:0.76rem;font-weight:600;cursor:pointer;transition:all 0.18s;white-space:nowrap;}
-.cohort-btn:hover{border-color:var(--gold);color:var(--gold);}
-.cohort-btn.active{background:rgba(212,168,67,0.15);border-color:var(--gold);color:var(--gold);}
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-/* ── Charts ──────────────────────────────────────────── */
-.charts-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:2rem;}
-@media(max-width:1000px){.charts-row{grid-template-columns:1fr 1fr}}@media(max-width:700px){.charts-row{grid-template-columns:1fr}}
-.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;animation:fadeUp 0.5s ease both;}
-.chart-title{font-family:var(--font-head);font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:1.1rem;display:flex;align-items:center;justify-content:space-between;}
-.chart-sub{font-size:0.7rem;color:var(--muted);font-weight:400;font-family:var(--font-body)}
-.bar-chart{display:flex;flex-direction:column;gap:0.55rem}
-.bar-row{display:flex;align-items:center;gap:0.75rem}
-.bar-label{font-size:0.72rem;color:var(--muted);width:100px;flex-shrink:0;text-align:right}
-.bar-track{flex:1;background:rgba(255,255,255,0.05);border-radius:100px;height:8px;overflow:hidden}
-.bar-fill{height:100%;border-radius:100px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
-.bar-val{font-size:0.72rem;color:var(--muted);width:28px;text-align:right;flex-shrink:0}
-.donut-wrap{display:flex;align-items:center;gap:1.25rem}
-.donut-svg{flex-shrink:0}
-.donut-legend{display:flex;flex-direction:column;gap:0.45rem;flex:1}
-.legend-item{display:flex;align-items:center;gap:0.5rem;font-size:0.73rem;color:var(--muted)}
-.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.legend-val{margin-left:auto;font-weight:600;color:var(--text)}
-.skills-cloud{display:flex;flex-wrap:wrap;gap:0.4rem}
-.skill-tag{padding:0.28rem 0.65rem;border-radius:100px;font-size:0.72rem;font-weight:500;border:1px solid;transition:transform 0.15s;cursor:default;}
-.skill-tag:hover{transform:scale(1.06)}
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px
+    }
 
-/* ── Filters panel ───────────────────────────────────── */
-.filters-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1rem;overflow:hidden;}
-.filters-toggle{display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.25rem;cursor:pointer;user-select:none;gap:0.75rem;}
-.filters-toggle:hover{background:var(--surface2);}
-.filters-toggle-left{display:flex;align-items:center;gap:0.65rem;font-size:0.82rem;font-weight:600;color:var(--text);}
-.filters-toggle-left svg{width:15px;height:15px;color:var(--gold);flex-shrink:0;}
-.filters-active-count{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--gold);color:#0b0f14;font-size:0.65rem;font-weight:800;}
-.filters-toggle-right{display:flex;align-items:center;gap:0.75rem;}
-.filters-clear-btn{padding:0.28rem 0.7rem;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);font-family:var(--font-body);font-size:0.72rem;cursor:pointer;transition:all 0.15s;}
-.filters-clear-btn:hover{color:var(--rose);border-color:var(--rose);}
-.filters-chevron{color:var(--muted);font-size:0.75rem;transition:transform 0.25s;}
-.filters-chevron.open{transform:rotate(180deg);}
-.filters-body{display:none;padding:1rem 1.25rem 1.25rem;border-top:1px solid var(--border);animation:fadeUp 0.2s ease;}
-.filters-body.open{display:block;}
-.filters-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.85rem 1rem;}
-.filter-group{display:flex;flex-direction:column;gap:0.35rem;}
-.filter-group label{font-size:0.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;}
-.filter-select,.filter-input{font-family:var(--font-body);font-size:0.8rem;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.48rem 0.75rem;outline:none;width:100%;transition:border-color 0.18s;}
-.filter-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7d8f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 0.6rem center;appearance:none;padding-right:1.8rem;cursor:pointer;}
-.filter-select:focus,.filter-input:focus{border-color:var(--gold);}
-.filter-range{display:flex;align-items:center;gap:0.4rem;}
-.filter-range input{flex:1;font-family:var(--font-body);font-size:0.8rem;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.48rem 0.55rem;outline:none;min-width:0;transition:border-color 0.18s;}
-.filter-range input:focus{border-color:var(--gold);}
-.filter-range span{color:var(--muted);font-size:0.72rem;flex-shrink:0;}
-/* Skills tag search */
-.skill-filter-wrap{display:flex;gap:0.4rem;align-items:center;}
-.skill-filter-wrap input{flex:1;min-width:0;}
-.skill-filter-add{padding:0.38rem 0.6rem;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);font-family:var(--font-body);font-size:0.72rem;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
-.skill-filter-add:hover{color:var(--gold);border-color:var(--gold);}
-.skill-filter-tags{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.4rem;}
-.skill-filter-tag{display:inline-flex;align-items:center;gap:0.25rem;background:rgba(212,168,67,0.12);border:1px solid rgba(212,168,67,0.25);border-radius:100px;padding:0.18rem 0.5rem;font-size:0.7rem;color:var(--gold);}
-.skill-filter-tag button{background:none;border:none;cursor:pointer;color:var(--gold);font-size:0.8rem;padding:0;line-height:1;opacity:0.7;transition:opacity 0.15s;}
-.skill-filter-tag button:hover{opacity:1;}
-/* Sort row */
-.sort-row{display:flex;align-items:center;gap:0.65rem;margin-top:0.85rem;padding-top:0.85rem;border-top:1px solid var(--border);flex-wrap:wrap;}
-.sort-row label{font-size:0.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;}
+    ::-webkit-scrollbar-track {
+      background: var(--surface)
+    }
 
-/* ── Results bar ─────────────────────────────────────── */
-.results-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.85rem;}
-.results-info{font-size:0.78rem;color:var(--muted);}
-.results-info span{color:var(--gold);font-weight:600;}
-.results-actions{display:flex;align-items:center;gap:0.5rem;}
-.topbar-search{display:flex;align-items:center;gap:0.5rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.45rem 0.85rem;width:200px;transition:border-color 0.2s,width 0.3s;}
-.topbar-search:focus-within{border-color:var(--gold);width:260px;}
-.topbar-search svg{width:14px;height:14px;color:var(--muted);flex-shrink:0;}
-.topbar-search input{background:none;border:none;outline:none;font-family:var(--font-body);font-size:0.82rem;color:var(--text);width:100%;min-width:0;}
-.topbar-search input::placeholder{color:var(--muted);}
-.topbar-btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.52rem 0.9rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0b0f14;font-weight:700;font-size:0.8rem;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity 0.18s,transform 0.18s;}
-.topbar-btn:hover{opacity:0.9;transform:translateY(-1px);}
-.topbar-btn svg{width:13px;height:13px;}
+    ::-webkit-scrollbar-thumb {
+      background: var(--dim);
+      border-radius: 3px
+    }
 
-/* ── Table ───────────────────────────────────────────── */
-.table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;animation:fadeUp 0.6s ease both;}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse}
-thead th{padding:0.85rem 1rem;text-align:left;font-size:0.7rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;transition:color 0.15s;}
-thead th.no-sort{cursor:default;}
-thead th:hover:not(.no-sort){color:var(--gold)}
-thead th .sort-icon{margin-left:4px;opacity:0.4;font-size:0.7rem}
-thead th.sorted .sort-icon{opacity:1;color:var(--gold)}
-tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;animation:fadeUp 0.3s ease both;}
-tbody tr:last-child{border-bottom:none}
-tbody tr:hover:not(.edit-row){background:var(--surface2)}
-tbody td{padding:0.85rem 1rem;font-size:0.82rem;color:var(--text);white-space:nowrap;}
-.avatar{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;}
-.cell-name{display:flex;align-items:center;gap:0.65rem}
-.cell-name-text{font-weight:500}
-.cell-name-sub{font-size:0.7rem;color:var(--muted)}
-.status-pill{display:inline-flex;align-items:center;gap:0.3rem;padding:0.22rem 0.65rem;border-radius:100px;font-size:0.7rem;font-weight:600;white-space:nowrap;}
-.status-pill::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;opacity:0.8;}
-.pill-employed{background:rgba(46,196,182,0.12);color:var(--teal);border:1px solid rgba(46,196,182,0.2)}
-.pill-unemployed{background:rgba(224,90,107,0.12);color:var(--rose);border:1px solid rgba(224,90,107,0.2)}
-.pill-intern{background:rgba(212,168,67,0.12);color:var(--gold);border:1px solid rgba(212,168,67,0.2)}
-.pill-application{background:rgba(74,158,255,0.12);color:var(--sky);border:1px solid rgba(74,158,255,0.2)}
-.pill-shortlisted{background:rgba(180,120,255,0.12);color:#b478ff;border:1px solid rgba(180,120,255,0.2)}
-.pill-voluntary{background:rgba(255,165,60,0.12);color:#ffa53c;border:1px solid rgba(255,165,60,0.2)}
-.edu-badge{display:inline-block;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:6px;padding:0.18rem 0.55rem;font-size:0.7rem;color:var(--muted);}
-.row-actions{display:flex;gap:0.35rem}
-.row-btn{padding:0.3rem 0.6rem;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);font-family:var(--font-body);font-size:0.72rem;cursor:pointer;transition:all 0.15s;}
-.row-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--gold)}
-.row-btn.edit-btn:hover{border-color:var(--sky);color:var(--sky);}
-.row-btn.delete-btn:hover{border-color:var(--rose);color:var(--rose);}
-.row-btn.save-btn{background:rgba(46,196,182,0.15);border-color:var(--teal);color:var(--teal);}
-.row-btn.save-btn:hover{background:rgba(46,196,182,0.25);}
-.row-btn.cancel-btn:hover{border-color:var(--rose);color:var(--rose);}
+    /* ── KPI ─────────────────────────────────────────────── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
 
-/* ── Inline edit row ─────────────────────────────────── */
-.edit-row td{background:rgba(74,158,255,0.04);border-top:1px solid rgba(74,158,255,0.15);border-bottom:1px solid rgba(74,158,255,0.15);padding:0.75rem 0.65rem;vertical-align:top;}
-.edit-row{white-space:normal;}
-.edit-row td:first-child{border-left:3px solid var(--sky);}
-.edit-cells-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.65rem;}
-.edit-field{display:flex;flex-direction:column;gap:0.28rem;}
-.edit-field label{font-size:0.63rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;}
-.edit-field input,.edit-field select{font-family:var(--font-body);font-size:0.78rem;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.42rem 0.6rem;outline:none;width:100%;transition:border-color 0.18s;}
-.edit-field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7d8f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 0.5rem center;padding-right:1.6rem;cursor:pointer;}
-.edit-field input:focus,.edit-field select:focus{border-color:var(--sky);}
-.edit-skills-wrap{display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;}
-.edit-skills-input{flex:1;min-width:100px;}
-.edit-skills-add{padding:0.28rem 0.55rem;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);font-family:var(--font-body);font-size:0.7rem;cursor:pointer;white-space:nowrap;transition:all 0.15s;flex-shrink:0;}
-.edit-skills-add:hover{color:var(--sky);border-color:var(--sky);}
-.edit-skill-tags{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.35rem;}
-.edit-skill-tag{display:inline-flex;align-items:center;gap:0.2rem;background:rgba(74,158,255,0.1);border:1px solid rgba(74,158,255,0.2);border-radius:100px;padding:0.15rem 0.45rem;font-size:0.68rem;color:var(--sky);}
-.edit-skill-tag button{background:none;border:none;cursor:pointer;color:var(--sky);font-size:0.8rem;padding:0;line-height:1;opacity:0.6;transition:opacity 0.15s;}
-.edit-skill-tag button:hover{opacity:1;}
-.edit-actions-row{display:flex;align-items:center;gap:0.5rem;margin-top:0.75rem;padding-top:0.65rem;border-top:1px solid var(--border);}
-.edit-error{font-size:0.72rem;color:var(--rose);margin-left:auto;}
-.edit-saving{font-size:0.72rem;color:var(--muted);margin-left:auto;}
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+      animation: fadeUp 0.4s ease both;
+    }
 
-/* ── Pagination ──────────────────────────────────────── */
-.pagination{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;padding:1rem 1.25rem;border-top:1px solid var(--border);background:var(--surface2);}
-.page-info{font-size:0.75rem;color:var(--muted)}
-.page-btns{display:flex;gap:0.3rem}
-.page-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);font-family:var(--font-body);font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.15s;}
-.page-btn:hover{background:var(--surface);color:var(--text)}
-.page-btn.active{background:var(--gold);color:#0b0f14;border-color:var(--gold)}
+    .kpi-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(212, 168, 67, 0.3)
+    }
 
-/* ── Detail modal ────────────────────────────────────── */
-.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(11,15,20,0.85);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:1rem;}
-.modal-overlay.show{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;animation:popIn 0.3s cubic-bezier(.175,.885,.32,1.275);}
-.modal-header{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);}
-.modal-title{font-family:var(--font-head);font-size:1rem;font-weight:700}
-.modal-close{width:30px;height:30px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
-.modal-close:hover{color:var(--text);border-color:var(--rose)}
-.modal-body{padding:1.5rem}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.detail-item label{font-size:0.68rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:0.2rem}
-.detail-item p{font-size:0.85rem;color:var(--text);font-weight:500}
-.detail-section-title{font-family:var(--font-head);font-size:0.8rem;font-weight:700;color:var(--gold);letter-spacing:0.05em;text-transform:uppercase;margin:1.25rem 0 0.75rem;padding-bottom:0.4rem;border-bottom:1px solid rgba(212,168,67,0.15);}
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.04;
+    }
 
-/* ── Animations ──────────────────────────────────────── */
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-@keyframes popIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
-@media(max-width:900px){.sidebar{display:none}.sidebar.open{display:block;}.topbar{padding:1rem}}
-</style>
+    .kpi-card.gold::before {
+      background: linear-gradient(135deg, var(--gold), transparent)
+    }
+
+    .kpi-card.teal::before {
+      background: linear-gradient(135deg, var(--teal), transparent)
+    }
+
+    .kpi-card.rose::before {
+      background: linear-gradient(135deg, var(--rose), transparent)
+    }
+
+    .kpi-card.sky::before {
+      background: linear-gradient(135deg, var(--sky), transparent)
+    }
+
+    .kpi-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.9rem;
+      font-size: 1rem;
+    }
+
+    .kpi-card.gold .kpi-icon {
+      background: rgba(212, 168, 67, 0.15);
+      color: var(--gold)
+    }
+
+    .kpi-card.teal .kpi-icon {
+      background: rgba(46, 196, 182, 0.12);
+      color: var(--teal)
+    }
+
+    .kpi-card.rose .kpi-icon {
+      background: rgba(224, 90, 107, 0.12);
+      color: var(--rose)
+    }
+
+    .kpi-card.sky .kpi-icon {
+      background: rgba(74, 158, 255, 0.12);
+      color: var(--sky)
+    }
+
+    .kpi-val {
+      font-family: var(--font-head);
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 500
+    }
+
+    .kpi-delta {
+      margin-top: 0.6rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .kpi-delta.up {
+      color: var(--teal)
+    }
+
+    .kpi-delta.down {
+      color: var(--rose)
+    }
+
+    /* ── Cohort filter bar (for charts + KPIs) ──────────── */
+    .cohort-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .cohort-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-right: 0.25rem;
+    }
+
+    .cohort-btn {
+      padding: 0.32rem 0.85rem;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+
+    .cohort-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .cohort-btn.active {
+      background: rgba(212, 168, 67, 0.15);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* ── Charts ──────────────────────────────────────────── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    @media(max-width:1000px) {
+      .charts-row {
+        grid-template-columns: 1fr 1fr
+      }
+    }
+
+    @media(max-width:700px) {
+      .charts-row {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .chart-title {
+      font-family: var(--font-head);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chart-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 400;
+      font-family: var(--font-body)
+    }
+
+    .bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem
+    }
+
+    .bar-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      width: 100px;
+      flex-shrink: 0;
+      text-align: right
+    }
+
+    .bar-track {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 100px;
+      height: 8px;
+      overflow: hidden
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      transition: width 1.2s cubic-bezier(.4, 0, .2, 1)
+    }
+
+    .bar-val {
+      font-size: 0.72rem;
+      color: var(--muted);
+      width: 28px;
+      text-align: right;
+      flex-shrink: 0
+    }
+
+    .donut-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem
+    }
+
+    .donut-svg {
+      flex-shrink: 0
+    }
+
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      flex: 1
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.73rem;
+      color: var(--muted)
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .legend-val {
+      margin-left: auto;
+      font-weight: 600;
+      color: var(--text)
+    }
+
+    .skills-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem
+    }
+
+    .skill-tag {
+      padding: 0.28rem 0.65rem;
+      border-radius: 100px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      border: 1px solid;
+      transition: transform 0.15s;
+      cursor: default;
+    }
+
+    .skill-tag:hover {
+      transform: scale(1.06)
+    }
+
+    /* ── Filters panel ───────────────────────────────────── */
+    .filters-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .filters-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1.25rem;
+      cursor: pointer;
+      user-select: none;
+      gap: 0.75rem;
+    }
+
+    .filters-toggle:hover {
+      background: var(--surface2);
+    }
+
+    .filters-toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .filters-toggle-left svg {
+      width: 15px;
+      height: 15px;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .filters-active-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: #0b0f14;
+      font-size: 0.65rem;
+      font-weight: 800;
+    }
+
+    .filters-toggle-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .filters-clear-btn {
+      padding: 0.28rem 0.7rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filters-clear-btn:hover {
+      color: var(--rose);
+      border-color: var(--rose);
+    }
+
+    .filters-chevron {
+      color: var(--muted);
+      font-size: 0.75rem;
+      transition: transform 0.25s;
+    }
+
+    .filters-chevron.open {
+      transform: rotate(180deg);
+    }
+
+    .filters-body {
+      display: none;
+      padding: 1rem 1.25rem 1.25rem;
+      border-top: 1px solid var(--border);
+      animation: fadeUp 0.2s ease;
+    }
+
+    .filters-body.open {
+      display: block;
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.85rem 1rem;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .filter-group label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .filter-select,
+    .filter-input {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--text);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.48rem 0.75rem;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.18s;
+    }
+
+    .filter-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7d8f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.6rem center;
+      appearance: none;
+      padding-right: 1.8rem;
+      cursor: pointer;
+    }
+
+    .filter-select:focus,
+    .filter-input:focus {
+      border-color: var(--gold);
+    }
+
+    .filter-range {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .filter-range input {
+      flex: 1;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--text);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.48rem 0.55rem;
+      outline: none;
+      min-width: 0;
+      transition: border-color 0.18s;
+    }
+
+    .filter-range input:focus {
+      border-color: var(--gold);
+    }
+
+    .filter-range span {
+      color: var(--muted);
+      font-size: 0.72rem;
+      flex-shrink: 0;
+    }
+
+    /* Skills tag search */
+    .skill-filter-wrap {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .skill-filter-wrap input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .skill-filter-add {
+      padding: 0.38rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .skill-filter-add:hover {
+      color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .skill-filter-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.4rem;
+    }
+
+    .skill-filter-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: rgba(212, 168, 67, 0.12);
+      border: 1px solid rgba(212, 168, 67, 0.25);
+      border-radius: 100px;
+      padding: 0.18rem 0.5rem;
+      font-size: 0.7rem;
+      color: var(--gold);
+    }
+
+    .skill-filter-tag button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gold);
+      font-size: 0.8rem;
+      padding: 0;
+      line-height: 1;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+
+    .skill-filter-tag button:hover {
+      opacity: 1;
+    }
+
+    /* Sort row */
+    .sort-row {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-top: 0.85rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .sort-row label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      white-space: nowrap;
+    }
+
+    /* ── Results bar ─────────────────────────────────────── */
+    .results-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .results-info {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .results-info span {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .results-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .topbar-search {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.45rem 0.85rem;
+      width: 200px;
+      transition: border-color 0.2s, width 0.3s;
+    }
+
+    .topbar-search:focus-within {
+      border-color: var(--gold);
+      width: 260px;
+    }
+
+    .topbar-search svg {
+      width: 14px;
+      height: 14px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .topbar-search input {
+      background: none;
+      border: none;
+      outline: none;
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      color: var(--text);
+      width: 100%;
+      min-width: 0;
+    }
+
+    .topbar-search input::placeholder {
+      color: var(--muted);
+    }
+
+    .topbar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.52rem 0.9rem;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #0b0f14;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: opacity 0.18s, transform 0.18s;
+    }
+
+    .topbar-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .topbar-btn svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    /* ── Table ───────────────────────────────────────────── */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .table-wrap {
+      overflow-x: auto
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    thead th {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s;
+    }
+
+    thead th.no-sort {
+      cursor: default;
+    }
+
+    thead th:hover:not(.no-sort) {
+      color: var(--gold)
+    }
+
+    thead th .sort-icon {
+      margin-left: 4px;
+      opacity: 0.4;
+      font-size: 0.7rem
+    }
+
+    thead th.sorted .sort-icon {
+      opacity: 1;
+      color: var(--gold)
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+      animation: fadeUp 0.3s ease both;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none
+    }
+
+    tbody tr:hover:not(.edit-row) {
+      background: var(--surface2)
+    }
+
+    tbody td {
+      padding: 0.85rem 1rem;
+      font-size: 0.82rem;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .cell-name {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem
+    }
+
+    .cell-name-text {
+      font-weight: 500
+    }
+
+    .cell-name-sub {
+      font-size: 0.7rem;
+      color: var(--muted)
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.22rem 0.65rem;
+      border-radius: 100px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .status-pill::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.8;
+    }
+
+    .pill-employed {
+      background: rgba(46, 196, 182, 0.12);
+      color: var(--teal);
+      border: 1px solid rgba(46, 196, 182, 0.2)
+    }
+
+    .pill-unemployed {
+      background: rgba(224, 90, 107, 0.12);
+      color: var(--rose);
+      border: 1px solid rgba(224, 90, 107, 0.2)
+    }
+
+    .pill-intern {
+      background: rgba(212, 168, 67, 0.12);
+      color: var(--gold);
+      border: 1px solid rgba(212, 168, 67, 0.2)
+    }
+
+    .pill-application {
+      background: rgba(74, 158, 255, 0.12);
+      color: var(--sky);
+      border: 1px solid rgba(74, 158, 255, 0.2)
+    }
+
+    .pill-shortlisted {
+      background: rgba(180, 120, 255, 0.12);
+      color: #b478ff;
+      border: 1px solid rgba(180, 120, 255, 0.2)
+    }
+
+    .pill-voluntary {
+      background: rgba(255, 165, 60, 0.12);
+      color: #ffa53c;
+      border: 1px solid rgba(255, 165, 60, 0.2)
+    }
+
+    .edu-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.18rem 0.55rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 0.35rem
+    }
+
+    .row-btn {
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .row-btn:hover {
+      background: var(--surface2);
+      color: var(--text);
+      border-color: var(--gold)
+    }
+
+    .row-btn.edit-btn:hover {
+      border-color: var(--sky);
+      color: var(--sky);
+    }
+
+    .row-btn.delete-btn:hover {
+      border-color: var(--rose);
+      color: var(--rose);
+    }
+
+    .row-btn.save-btn {
+      background: rgba(46, 196, 182, 0.15);
+      border-color: var(--teal);
+      color: var(--teal);
+    }
+
+    .row-btn.save-btn:hover {
+      background: rgba(46, 196, 182, 0.25);
+    }
+
+    .row-btn.cancel-btn:hover {
+      border-color: var(--rose);
+      color: var(--rose);
+    }
+
+    /* ── Inline edit row ─────────────────────────────────── */
+    .edit-row td {
+      background: rgba(74, 158, 255, 0.04);
+      border-top: 1px solid rgba(74, 158, 255, 0.15);
+      border-bottom: 1px solid rgba(74, 158, 255, 0.15);
+      padding: 0.75rem 0.65rem;
+      vertical-align: top;
+    }
+
+    .edit-row {
+      white-space: normal;
+    }
+
+    .edit-row td:first-child {
+      border-left: 3px solid var(--sky);
+    }
+
+    .edit-cells-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.65rem;
+    }
+
+    .edit-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.28rem;
+    }
+
+    .edit-field label {
+      font-size: 0.63rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .edit-field input,
+    .edit-field select {
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      color: var(--text);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.42rem 0.6rem;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.18s;
+    }
+
+    .edit-field select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7d8f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      padding-right: 1.6rem;
+      cursor: pointer;
+    }
+
+    .edit-field input:focus,
+    .edit-field select:focus {
+      border-color: var(--sky);
+    }
+
+    .edit-skills-wrap {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .edit-skills-input {
+      flex: 1;
+      min-width: 100px;
+    }
+
+    .edit-skills-add {
+      padding: 0.28rem 0.55rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .edit-skills-add:hover {
+      color: var(--sky);
+      border-color: var(--sky);
+    }
+
+    .edit-skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.35rem;
+    }
+
+    .edit-skill-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      background: rgba(74, 158, 255, 0.1);
+      border: 1px solid rgba(74, 158, 255, 0.2);
+      border-radius: 100px;
+      padding: 0.15rem 0.45rem;
+      font-size: 0.68rem;
+      color: var(--sky);
+    }
+
+    .edit-skill-tag button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--sky);
+      font-size: 0.8rem;
+      padding: 0;
+      line-height: 1;
+      opacity: 0.6;
+      transition: opacity 0.15s;
+    }
+
+    .edit-skill-tag button:hover {
+      opacity: 1;
+    }
+
+    .edit-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      padding-top: 0.65rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .edit-error {
+      font-size: 0.72rem;
+      color: var(--rose);
+      margin-left: auto;
+    }
+
+    .edit-saving {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    /* ── Pagination ──────────────────────────────────────── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .page-info {
+      font-size: 0.75rem;
+      color: var(--muted)
+    }
+
+    .page-btns {
+      display: flex;
+      gap: 0.3rem
+    }
+
+    .page-btn {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .page-btn:hover {
+      background: var(--surface);
+      color: var(--text)
+    }
+
+    .page-btn.active {
+      background: var(--gold);
+      color: #0b0f14;
+      border-color: var(--gold)
+    }
+
+    /* ── Detail modal ────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(11, 15, 20, 0.85);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.show {
+      display: flex
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: popIn 0.3s cubic-bezier(.175, .885, .32, 1.275);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 700
+    }
+
+    .modal-close {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .modal-close:hover {
+      color: var(--text);
+      border-color: var(--rose)
+    }
+
+    .modal-body {
+      padding: 1.5rem
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem
+    }
+
+    .detail-item label {
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.2rem
+    }
+
+    .detail-item p {
+      font-size: 0.85rem;
+      color: var(--text);
+      font-weight: 500
+    }
+
+    .detail-section-title {
+      font-family: var(--font-head);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin: 1.25rem 0 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid rgba(212, 168, 67, 0.15);
+    }
+
+    /* ── Animations ──────────────────────────────────────── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.92)
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    @media(max-width:900px) {
+      .sidebar {
+        display: none
+      }
+
+      .sidebar.open {
+        display: block;
+      }
+
+      .topbar {
+        padding: 1rem
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div id="shared-shell"></div>
+  <div id="shared-shell"></div>
 
-<template id="dashboard-content">
-  <div class="page-content">
+  <template id="dashboard-content">
+    <div class="page-content">
 
-    <!-- Cohort filter for charts & KPIs -->
-    <div class="cohort-bar">
-      <span class="cohort-label">View cohort:</span>
-      <button class="cohort-btn active" data-cohort="">All members</button>
-      <button class="cohort-btn" data-cohort="employed">Employed</button>
-      <button class="cohort-btn" data-cohort="unemployed">Unemployed / Seeking</button>
-      <button class="cohort-btn" data-cohort="intern">Interns / Attachees</button>
-      <button class="cohort-btn" data-cohort="applying">Applying / Shortlisted</button>
-    </div>
-
-    <!-- KPIs -->
-    <div class="kpi-grid" id="kpiGrid"></div>
-
-    <!-- Charts -->
-    <div class="charts-row">
-      <div class="chart-card">
-        <div class="chart-title">Employment Status <span class="chart-sub">Distribution</span></div>
-        <div class="bar-chart" id="employmentChart"></div>
+      <!-- Cohort filter for charts & KPIs -->
+      <div class="cohort-bar">
+        <span class="cohort-label">View cohort:</span>
+        <button class="cohort-btn active" data-cohort="">All members</button>
+        <button class="cohort-btn" data-cohort="employed">Employed</button>
+        <button class="cohort-btn" data-cohort="unemployed">Unemployed / Seeking</button>
+        <button class="cohort-btn" data-cohort="intern">Interns / Attachees</button>
+        <button class="cohort-btn" data-cohort="applying">Applying / Shortlisted</button>
       </div>
-      <div class="chart-card">
-        <div class="chart-title">Education Levels <span class="chart-sub">Breakdown</span></div>
-        <div class="donut-wrap">
-          <svg class="donut-svg" width="100" height="100" viewBox="0 0 100 100" id="donutSvg"></svg>
-          <div class="donut-legend" id="donutLegend"></div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid" id="kpiGrid"></div>
+
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Employment Status <span class="chart-sub">Distribution</span></div>
+          <div class="bar-chart" id="employmentChart"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Education Levels <span class="chart-sub">Breakdown</span></div>
+          <div class="donut-wrap">
+            <svg class="donut-svg" width="100" height="100" viewBox="0 0 100 100" id="donutSvg"></svg>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Top Skills <span class="chart-sub">Most common</span></div>
+          <div class="skills-cloud" id="skillsCloud"></div>
         </div>
       </div>
-      <div class="chart-card">
-        <div class="chart-title">Top Skills <span class="chart-sub">Most common</span></div>
-        <div class="skills-cloud" id="skillsCloud"></div>
-      </div>
-    </div>
 
-    <!-- Filters panel -->
-    <div class="filters-panel" id="filtersPanel">
-      <div class="filters-toggle" id="filtersToggle">
-        <div class="filters-toggle-left">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 3H2l8 9.46V19l4 2V12.46L22 3z"/>
-          </svg>
-          Filters &amp; Sort
-          <span class="filters-active-count" id="filtersActiveCount" style="display:none">0</span>
+      <!-- Filters panel -->
+      <div class="filters-panel" id="filtersPanel">
+        <div class="filters-toggle" id="filtersToggle">
+          <div class="filters-toggle-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 3H2l8 9.46V19l4 2V12.46L22 3z" />
+            </svg>
+            Filters &amp; Sort
+            <span class="filters-active-count" id="filtersActiveCount" style="display:none">0</span>
+          </div>
+          <div class="filters-toggle-right">
+            <button class="filters-clear-btn" id="filtersClearBtn" style="display:none"
+              onclick="clearAllFilters(event)">Clear all</button>
+            <span class="filters-chevron" id="filtersChevron">▼</span>
+          </div>
         </div>
-        <div class="filters-toggle-right">
-          <button class="filters-clear-btn" id="filtersClearBtn" style="display:none" onclick="clearAllFilters(event)">Clear all</button>
-          <span class="filters-chevron" id="filtersChevron">▼</span>
-        </div>
-      </div>
-      <div class="filters-body" id="filtersBody">
-        <div class="filters-grid">
+        <div class="filters-body" id="filtersBody">
+          <div class="filters-grid">
 
-          <div class="filter-group">
-            <label>Status</label>
-            <select class="filter-select" id="filterStatus" onchange="applyFilters()">
-              <option value="">Any status</option>
-              <option>Employed (Full-time)</option>
-              <option>Employed (Part-time)</option>
-              <option>Self-employed / Business Owner</option>
-              <option>On Internship</option>
-              <option>On Attachment</option>
-              <option>On Voluntary / Community Service</option>
-              <option>On Contract terms</option>
-              <option>On Casual terms</option>
-              <option>TSC Transfer Request</option>
-              <option>Active Application</option>
-              <option>Shortlisted</option>
-              <option>Attended Interview</option>
-              <option>Unemployed (Actively Seeking)</option>
-              <option>Unemployed (Not Seeking)</option>
-              <option>Student</option>
-              <option>Retired</option>
-            </select>
-          </div>
+            <div class="filter-group">
+              <label>Status</label>
+              <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+                <option value="">Any status</option>
+                <option>Employed (Full-time)</option>
+                <option>Employed (Part-time)</option>
+                <option>Self-employed / Business Owner</option>
+                <option>On Internship</option>
+                <option>On Attachment</option>
+                <option>On Voluntary / Community Service</option>
+                <option>On Contract terms</option>
+                <option>On Casual terms</option>
+                <option>TSC Transfer Request</option>
+                <option>Active Application</option>
+                <option>Shortlisted</option>
+                <option>Attended Interview</option>
+                <option>Unemployed (Actively Seeking)</option>
+                <option>Unemployed (Not Seeking)</option>
+                <option>Student</option>
+                <option>Retired</option>
+              </select>
+            </div>
 
-          <div class="filter-group">
-            <label>Gender</label>
-            <select class="filter-select" id="filterGender" onchange="applyFilters()">
-              <option value="">Any gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-            </select>
-          </div>
+            <div class="filter-group">
+              <label>Gender</label>
+              <select class="filter-select" id="filterGender" onchange="applyFilters()">
+                <option value="">Any gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
 
-          <div class="filter-group">
-            <label>Education Level</label>
-            <select class="filter-select" id="filterEdu" onchange="applyFilters()">
-              <option value="">Any level</option>
-              <option>Primary (KCPE)</option>
-              <option>Secondary (KCSE)</option>
-              <option>Certificate</option>
-              <option>Diploma</option>
-              <option>Higher National Diploma (HND)</option>
-              <option>Bachelor's Degree</option>
-              <option>Postgraduate Diploma</option>
-              <option>Master's Degree</option>
-              <option>PhD / Doctorate</option>
-            </select>
-          </div>
+            <div class="filter-group">
+              <label>Education Level</label>
+              <select class="filter-select" id="filterEdu" onchange="applyFilters()">
+                <option value="">Any level</option>
+                <option>Primary (KCPE)</option>
+                <option>Secondary (KCSE)</option>
+                <option>Certificate</option>
+                <option>Diploma</option>
+                <option>Higher National Diploma (HND)</option>
+                <option>Bachelor's Degree</option>
+                <option>Postgraduate Diploma</option>
+                <option>Master's Degree</option>
+                <option>PhD / Doctorate</option>
+              </select>
+            </div>
 
-          <div class="filter-group">
-            <label>Country</label>
-            <select class="filter-select" id="filterCountry" onchange="applyFilters()">
-              <option value="">Any country</option>
-              <!-- African Countries -->
-              <option value="DZ">Algeria</option>
-              <option value="AO">Angola</option>
-              <option value="BJ">Benin</option>
-              <option value="BW">Botswana</option>
-              <option value="BF">Burkina Faso</option>
-              <option value="BI">Burundi</option>
-              <option value="CV">Cabo Verde</option>
-              <option value="CM">Cameroon</option>
-              <option value="CF">Central African Republic</option>
-              <option value="TD">Chad</option>
-              <option value="KM">Comoros</option>
-              <option value="CD">Democratic Republic of the Congo</option>
-              <option value="CG">Republic of the Congo</option>
-              <option value="DJ">Djibouti</option>
-              <option value="EG">Egypt</option>
-              <option value="GQ">Equatorial Guinea</option>
-              <option value="ER">Eritrea</option>
-              <option value="SZ">Eswatini (Swaziland)</option>
-              <option value="ET">Ethiopia</option>
-              <option value="GA">Gabon</option>
-              <option value="GM">Gambia</option>
-              <option value="GH">Ghana</option>
-              <option value="GN">Guinea</option>
-              <option value="GW">Guinea-Bissau</option>
-              <option value="CI">Ivory Coast</option>
-              <option value="KE">Kenya</option>
-              <option value="LS">Lesotho</option>
-              <option value="LR">Liberia</option>
-              <option value="LY">Libya</option>
-              <option value="MG">Madagascar</option>
-              <option value="MW">Malawi</option>
-              <option value="ML">Mali</option>
-              <option value="MR">Mauritania</option>
-              <option value="MU">Mauritius</option>
-              <option value="YT">Mayotte</option>
-              <option value="MA">Morocco</option>
-              <option value="MZ">Mozambique</option>
-              <option value="NA">Namibia</option>
-              <option value="NE">Niger</option>
-              <option value="NG">Nigeria</option>
-              <option value="RE">Réunion</option>
-              <option value="RW">Rwanda</option>
-              <option value="ST">São Tomé and Príncipe</option>
-              <option value="SN">Senegal</option>
-              <option value="SC">Seychelles</option>
-              <option value="SL">Sierra Leone</option>
-              <option value="SO">Somalia</option>
-              <option value="ZA">South Africa</option>
-              <option value="SS">South Sudan</option>
-              <option value="SD">Sudan</option>
-              <option value="SZ">Swaziland</option>
-              <option value="TZ">Tanzania</option>
-              <option value="TG">Togo</option>
-              <option value="TN">Tunisia</option>
-              <option value="UG">Uganda</option>
-              <option value="ZM">Zambia</option>
-              <option value="ZW">Zimbabwe</option>
-              <!-- Americas -->
-              <option value="US">United States</option>
-              <option value="CA">Canada</option>
-              <option value="MX">Mexico</option>
-              <option value="BR">Brazil</option>
-              <option value="AR">Argentina</option>
-              <option value="CL">Chile</option>
-              <option value="CO">Colombia</option>
-              <option value="PE">Peru</option>
-              <option value="VE">Venezuela</option>
-              <option value="JM">Jamaica</option>
-              <!-- Europe -->
-              <option value="GB">United Kingdom</option>
-              <option value="FR">France</option>
-              <option value="DE">Germany</option>
-              <option value="IT">Italy</option>
-              <option value="ES">Spain</option>
-              <option value="NL">Netherlands</option>
-              <option value="CH">Switzerland</option>
-              <option value="SE">Sweden</option>
-              <option value="NO">Norway</option>
-              <option value="PL">Poland</option>
-              <option value="RU">Russia</option>
-              <option value="TR">Turkey</option>
-              <!-- Asia -->
-              <option value="CN">China</option>
-              <option value="JP">Japan</option>
-              <option value="IN">India</option>
-              <option value="KR">South Korea</option>
-              <option value="SG">Singapore</option>
-              <option value="TH">Thailand</option>
-              <option value="MY">Malaysia</option>
-              <option value="ID">Indonesia</option>
-              <option value="PH">Philippines</option>
-              <option value="VN">Vietnam</option>
-              <option value="IL">Israel</option>
-              <option value="SA">Saudi Arabia</option>
-              <option value="AE">United Arab Emirates</option>
-              <!-- Oceania -->
-              <option value="AU">Australia</option>
-              <option value="NZ">New Zealand</option>
-              <option value="FJ">Fiji</option>
-              <option value="OTHER">Other</option>
-            </select>
-          </div>
+            <div class="filter-group">
+              <label>Country</label>
+              <select class="filter-select" id="filterCountry" onchange="applyFilters()">
+                <option value="">Any country</option>
+                <!-- African Countries -->
+                <option value="DZ">Algeria</option>
+                <option value="AO">Angola</option>
+                <option value="BJ">Benin</option>
+                <option value="BW">Botswana</option>
+                <option value="BF">Burkina Faso</option>
+                <option value="BI">Burundi</option>
+                <option value="CV">Cabo Verde</option>
+                <option value="CM">Cameroon</option>
+                <option value="CF">Central African Republic</option>
+                <option value="TD">Chad</option>
+                <option value="KM">Comoros</option>
+                <option value="CD">Democratic Republic of the Congo</option>
+                <option value="CG">Republic of the Congo</option>
+                <option value="DJ">Djibouti</option>
+                <option value="EG">Egypt</option>
+                <option value="GQ">Equatorial Guinea</option>
+                <option value="ER">Eritrea</option>
+                <option value="SZ">Eswatini (Swaziland)</option>
+                <option value="ET">Ethiopia</option>
+                <option value="GA">Gabon</option>
+                <option value="GM">Gambia</option>
+                <option value="GH">Ghana</option>
+                <option value="GN">Guinea</option>
+                <option value="GW">Guinea-Bissau</option>
+                <option value="CI">Ivory Coast</option>
+                <option value="KE">Kenya</option>
+                <option value="LS">Lesotho</option>
+                <option value="LR">Liberia</option>
+                <option value="LY">Libya</option>
+                <option value="MG">Madagascar</option>
+                <option value="MW">Malawi</option>
+                <option value="ML">Mali</option>
+                <option value="MR">Mauritania</option>
+                <option value="MU">Mauritius</option>
+                <option value="YT">Mayotte</option>
+                <option value="MA">Morocco</option>
+                <option value="MZ">Mozambique</option>
+                <option value="NA">Namibia</option>
+                <option value="NE">Niger</option>
+                <option value="NG">Nigeria</option>
+                <option value="RE">Réunion</option>
+                <option value="RW">Rwanda</option>
+                <option value="ST">São Tomé and Príncipe</option>
+                <option value="SN">Senegal</option>
+                <option value="SC">Seychelles</option>
+                <option value="SL">Sierra Leone</option>
+                <option value="SO">Somalia</option>
+                <option value="ZA">South Africa</option>
+                <option value="SS">South Sudan</option>
+                <option value="SD">Sudan</option>
+                <option value="SZ">Swaziland</option>
+                <option value="TZ">Tanzania</option>
+                <option value="TG">Togo</option>
+                <option value="TN">Tunisia</option>
+                <option value="UG">Uganda</option>
+                <option value="ZM">Zambia</option>
+                <option value="ZW">Zimbabwe</option>
+                <!-- Americas -->
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+                <option value="MX">Mexico</option>
+                <option value="BR">Brazil</option>
+                <option value="AR">Argentina</option>
+                <option value="CL">Chile</option>
+                <option value="CO">Colombia</option>
+                <option value="PE">Peru</option>
+                <option value="VE">Venezuela</option>
+                <option value="JM">Jamaica</option>
+                <!-- Europe -->
+                <option value="GB">United Kingdom</option>
+                <option value="FR">France</option>
+                <option value="DE">Germany</option>
+                <option value="IT">Italy</option>
+                <option value="ES">Spain</option>
+                <option value="NL">Netherlands</option>
+                <option value="CH">Switzerland</option>
+                <option value="SE">Sweden</option>
+                <option value="NO">Norway</option>
+                <option value="PL">Poland</option>
+                <option value="RU">Russia</option>
+                <option value="TR">Turkey</option>
+                <!-- Asia -->
+                <option value="CN">China</option>
+                <option value="JP">Japan</option>
+                <option value="IN">India</option>
+                <option value="KR">South Korea</option>
+                <option value="SG">Singapore</option>
+                <option value="TH">Thailand</option>
+                <option value="MY">Malaysia</option>
+                <option value="ID">Indonesia</option>
+                <option value="PH">Philippines</option>
+                <option value="VN">Vietnam</option>
+                <option value="IL">Israel</option>
+                <option value="SA">Saudi Arabia</option>
+                <option value="AE">United Arab Emirates</option>
+                <!-- Oceania -->
+                <option value="AU">Australia</option>
+                <option value="NZ">New Zealand</option>
+                <option value="FJ">Fiji</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
 
-                    <div class="filter-group">
-            <label>County</label>
-            <select class="filter-input" id="filterCounty" oninput="applyFilters()">
-              <option value="">— All counties —</option>
-            </select>
-          </div>
+            <div class="filter-group">
+              <label>County</label>
+              <select class="filter-input" id="filterCounty" oninput="applyFilters()">
+                <option value="">— All counties —</option>
+              </select>
+            </div>
             <label>Age Range</label>
             <div class="filter-range">
               <input type="number" id="filterAgeMin" placeholder="Min" min="16" max="80" oninput="applyFilters()">
@@ -434,7 +1504,8 @@ tbody td{padding:0.85rem 1rem;font-size:0.82rem;color:var(--text);white-space:no
           <div class="filter-group" style="grid-column:span 2">
             <label>Skills</label>
             <div class="skill-filter-wrap">
-              <input class="filter-input skill-filter-input" id="skillFilterInput" type="text" placeholder="Type a skill and press Enter…"
+              <input class="filter-input skill-filter-input" id="skillFilterInput" type="text"
+                placeholder="Type a skill and press Enter…"
                 onkeydown="if(event.key==='Enter'){event.preventDefault();addSkillFilter();}">
               <button class="skill-filter-add" onclick="addSkillFilter()">+ Add</button>
             </div>
@@ -470,16 +1541,24 @@ tbody td{padding:0.85rem 1rem;font-size:0.82rem;color:var(--text);white-space:no
       <div class="results-actions">
         <div class="topbar-search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <input type="text" id="searchInput" placeholder="Search members…" oninput="applyFilters()">
         </div>
         <button class="topbar-btn" onclick="exportMembersCSV().catch(err => alert('Export failed: ' + err.message))">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
           Export CSV
         </button>
         <button class="topbar-btn" id="addMemberBtn" onclick="window.location.href='/register'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
           Add Member
         </button>
       </div>
@@ -508,454 +1587,455 @@ tbody td{padding:0.85rem 1rem;font-size:0.82rem;color:var(--text);white-space:no
         <div class="page-btns" id="pageBtns"></div>
       </div>
     </div>
-  </div>
-
-  <!-- Detail modal -->
-  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-    <div class="modal" id="modal">
-      <div class="modal-header">
-        <div class="modal-title" id="modalTitle">Member Details</div>
-        <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('show')">✕</button>
-      </div>
-      <div class="modal-body" id="modalBody"></div>
     </div>
-  </div>
-</template>
 
-<script src="{% static 'shared-layout.js' %}"></script>
-<script>
-/* ═══════════════════════════════════════════════════════
-   DATA STORE
-══════════════════════════════════════════════════════════ */
-const MEMBERS = [];
-let filtered  = [];
-let page      = 1;
-const PER_PAGE = 10;
+    <!-- Detail modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+      <div class="modal" id="modal">
+        <div class="modal-header">
+          <div class="modal-title" id="modalTitle">Member Details</div>
+          <button class="modal-close"
+            onclick="document.getElementById('modalOverlay').classList.remove('show')">✕</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+      </div>
+    </div>
+  </template>
 
-/* Active sort state — driven by column clicks OR the sort dropdowns */
-let sortKey = 'name';
-let sortDir = 1;  /* 1 = asc, -1 = desc */
+  <script src="{% static 'shared-layout.js' %}"></script>
+  <script>
+    /* ═══════════════════════════════════════════════════════
+       DATA STORE
+    ══════════════════════════════════════════════════════════ */
+    const MEMBERS = [];
+    let filtered = [];
+    let page = 1;
+    const PER_PAGE = 10;
 
-/* Skill filter tags */
-const skillFilters = [];
+    /* Active sort state — driven by column clicks OR the sort dropdowns */
+    let sortKey = 'name';
+    let sortDir = 1;  /* 1 = asc, -1 = desc */
 
-/* Currently open edit row member id */
-let editingId = null;
+    /* Skill filter tags */
+    const skillFilters = [];
 
-/* Cohort filter for charts/KPIs */
-let activeCohort = '';
+    /* Currently open edit row member id */
+    let editingId = null;
 
-/* ═══════════════════════════════════════════════════════
-   NORMALIZATION
-══════════════════════════════════════════════════════════ */
-function normalizeMember(r) {
-  return {
-    id:             r.id,
-    name:           r.name       || '',
-    phone:          r.phone      || '',
-    email:          r.email      || '',
-    age:            r.age        || 0,
-    gender:         r.gender     || '',
-    nationalId:     r.national_id|| '',
-    subLocation:    r.sub_location|| '',
-    location:       r.location   || '',
-    education:      r.education  || '',
-    formFourYear:   r.form_four_year || null,
-    kcse:           r.kcse       || '',
-    institution:    r.institution|| '',
-    course:         r.course     || '',
-    graduation:     r.graduation || null,
-    status:         r.status     || '',
-    employer:       r.employer   || '',
-    career:         r.career     || '',
-    skills:         Array.isArray(r.skills) ? r.skills : [],
-    country:        r.country    || '',
-    county:         r.county     || '',
-    profession_bodies: Array.isArray(r.profession_bodies) ? r.profession_bodies : [],
-    created_at:     r.created_at || '',
-  };
-}
+    /* Cohort filter for charts/KPIs */
+    let activeCohort = '';
 
-/* ═══════════════════════════════════════════════════════
-   API
-══════════════════════════════════════════════════════════ */
-async function loadMembers() {
-  const token = localStorage.getItem('authToken');
-  if (!token) return;
-  try {
-    const res = await fetch('/api/members/', { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) throw new Error('Unable to load members');
-    const data = await res.json();
-    MEMBERS.splice(0, MEMBERS.length, ...(data.members || []).map(normalizeMember));
-    filtered = [...MEMBERS];
-  } catch (err) {
-    console.error('Member load failed', err);
-    MEMBERS.splice(0, MEMBERS.length);
-    filtered = [];
-  }
-}
+    /* ═══════════════════════════════════════════════════════
+       NORMALIZATION
+    ══════════════════════════════════════════════════════════ */
+    function normalizeMember(r) {
+      return {
+        id: r.id,
+        name: r.name || '',
+        phone: r.phone || '',
+        email: r.email || '',
+        age: r.age || 0,
+        gender: r.gender || '',
+        nationalId: r.national_id || '',
+        subLocation: r.sub_location || '',
+        location: r.location || '',
+        education: r.education || '',
+        formFourYear: r.form_four_year || null,
+        kcse: r.kcse || '',
+        institution: r.institution || '',
+        course: r.course || '',
+        graduation: r.graduation || null,
+        status: r.status || '',
+        employer: r.employer || '',
+        career: r.career || '',
+        skills: Array.isArray(r.skills) ? r.skills : [],
+        country: r.country || '',
+        county: r.county || '',
+        profession_bodies: Array.isArray(r.profession_bodies) ? r.profession_bodies : [],
+        created_at: r.created_at || '',
+      };
+    }
 
-async function saveMemberEdit(id, payload) {
-  const token = localStorage.getItem('authToken');
-  const res = await fetch(`/api/members/${id}/`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Save failed');
-  return normalizeMember(data.member);
-}
+    /* ═══════════════════════════════════════════════════════
+       API
+    ══════════════════════════════════════════════════════════ */
+    async function loadMembers() {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+      try {
+        const res = await fetch('/api/members/', { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) throw new Error('Unable to load members');
+        const data = await res.json();
+        MEMBERS.splice(0, MEMBERS.length, ...(data.members || []).map(normalizeMember));
+        filtered = [...MEMBERS];
+      } catch (err) {
+        console.error('Member load failed', err);
+        MEMBERS.splice(0, MEMBERS.length);
+        filtered = [];
+      }
+    }
 
-async function deleteMember(id) {
-  if (!confirm('Delete this member record? This cannot be undone.')) return;
-  const token = localStorage.getItem('authToken');
-  try {
-    const res = await fetch(`/api/members/${id}/`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
+    async function saveMemberEdit(id, payload) {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`/api/members/${id}/`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
+      return normalizeMember(data.member);
+    }
+
+    async function deleteMember(id) {
+      if (!confirm('Delete this member record? This cannot be undone.')) return;
+      const token = localStorage.getItem('authToken');
+      try {
+        const res = await fetch(`/api/members/${id}/`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const body = await res.json();
+        if (!res.ok) throw new Error(body.error || 'Delete failed');
+        const idx = MEMBERS.findIndex(m => m.id === id);
+        if (idx !== -1) MEMBERS.splice(idx, 1);
+        applyFilters();
+        rebuildCharts(cohortSet());
+      } catch (err) {
+        alert(err.message || 'Unable to delete member');
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       COHORT
+    ══════════════════════════════════════════════════════════ */
+    function cohortSet() {
+      if (!activeCohort) return MEMBERS;
+      if (activeCohort === 'employed') return MEMBERS.filter(m => m.status.startsWith('Employed') || m.status === 'Self-employed / Business Owner' || m.status === 'On Contract terms' || m.status === 'On Casual terms');
+      if (activeCohort === 'unemployed') return MEMBERS.filter(m => m.status.includes('Unemployed'));
+      if (activeCohort === 'intern') return MEMBERS.filter(m => m.status.includes('Internship') || m.status.includes('Attachment') || m.status.includes('Voluntary'));
+      if (activeCohort === 'applying') return MEMBERS.filter(m => m.status.includes('Application') || m.status === 'Shortlisted' || m.status.includes('Interview') || m.status === 'TSC Transfer Request');
+      return MEMBERS;
+    }
+
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('.cohort-btn');
+      if (!btn) return;
+      document.querySelectorAll('.cohort-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeCohort = btn.dataset.cohort;
+      const set = cohortSet();
+      buildKPI(set);
+      buildEmploymentChart(set);
+      buildDonut(set);
+      buildSkillsCloud(set);
     });
-    const body = await res.json();
-    if (!res.ok) throw new Error(body.error || 'Delete failed');
-    const idx = MEMBERS.findIndex(m => m.id === id);
-    if (idx !== -1) MEMBERS.splice(idx, 1);
-    applyFilters();
-    rebuildCharts(cohortSet());
-  } catch (err) {
-    alert(err.message || 'Unable to delete member');
-  }
-}
 
-/* ═══════════════════════════════════════════════════════
-   COHORT
-══════════════════════════════════════════════════════════ */
-function cohortSet() {
-  if (!activeCohort) return MEMBERS;
-  if (activeCohort === 'employed')    return MEMBERS.filter(m => m.status.startsWith('Employed') || m.status === 'Self-employed / Business Owner' || m.status === 'On Contract terms' || m.status === 'On Casual terms');
-  if (activeCohort === 'unemployed')  return MEMBERS.filter(m => m.status.includes('Unemployed'));
-  if (activeCohort === 'intern')      return MEMBERS.filter(m => m.status.includes('Internship') || m.status.includes('Attachment') || m.status.includes('Voluntary'));
-  if (activeCohort === 'applying')    return MEMBERS.filter(m => m.status.includes('Application') || m.status === 'Shortlisted' || m.status.includes('Interview') || m.status === 'TSC Transfer Request');
-  return MEMBERS;
-}
-
-document.addEventListener('click', e => {
-  const btn = e.target.closest('.cohort-btn');
-  if (!btn) return;
-  document.querySelectorAll('.cohort-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  activeCohort = btn.dataset.cohort;
-  const set = cohortSet();
-  buildKPI(set);
-  buildEmploymentChart(set);
-  buildDonut(set);
-  buildSkillsCloud(set);
-});
-
-/* ═══════════════════════════════════════════════════════
-   KPIs
-══════════════════════════════════════════════════════════ */
-function buildKPI(set) {
-  set = set || MEMBERS;
-  const total    = set.length;
-  const employed = set.filter(m => m.status.startsWith('Employed') || m.status === 'Self-employed / Business Owner' || m.status === 'On Contract terms' || m.status === 'On Casual terms').length;
-  const seeking  = set.filter(m => m.status.includes('Unemployed') || m.status.includes('Application') || m.status === 'Shortlisted' || m.status.includes('Interview') || m.status === 'TSC Transfer Request').length;
-  const interns  = set.filter(m => m.status.includes('Internship') || m.status.includes('Attachment')).length;
-  const kpis = [
-    { label:'Total Members',       val:total,    icon:'👥', cls:'gold', delta:`${MEMBERS.length} overall`,      up:true },
-    { label:'Employed',            val:employed, icon:'💼', cls:'teal', delta:`${total?Math.round(employed/total*100):0}% of cohort`,  up:true },
-    { label:'Seeking Work',        val:seeking,  icon:'🔍', cls:'rose', delta:`${total?Math.round(seeking/total*100):0}% of cohort`,   up:false },
-    { label:'Interns / Attachees', val:interns,  icon:'🎓', cls:'sky',  delta:'Active placements', up:true },
-  ];
-  document.getElementById('kpiGrid').innerHTML = kpis.map((k,i) =>
-    `<div class="kpi-card ${k.cls}" style="animation-delay:${i*0.08}s">
+    /* ═══════════════════════════════════════════════════════
+       KPIs
+    ══════════════════════════════════════════════════════════ */
+    function buildKPI(set) {
+      set = set || MEMBERS;
+      const total = set.length;
+      const employed = set.filter(m => m.status.startsWith('Employed') || m.status === 'Self-employed / Business Owner' || m.status === 'On Contract terms' || m.status === 'On Casual terms').length;
+      const seeking = set.filter(m => m.status.includes('Unemployed') || m.status.includes('Application') || m.status === 'Shortlisted' || m.status.includes('Interview') || m.status === 'TSC Transfer Request').length;
+      const interns = set.filter(m => m.status.includes('Internship') || m.status.includes('Attachment')).length;
+      const kpis = [
+        { label: 'Total Members', val: total, icon: '👥', cls: 'gold', delta: `${MEMBERS.length} overall`, up: true },
+        { label: 'Employed', val: employed, icon: '💼', cls: 'teal', delta: `${total ? Math.round(employed / total * 100) : 0}% of cohort`, up: true },
+        { label: 'Seeking Work', val: seeking, icon: '🔍', cls: 'rose', delta: `${total ? Math.round(seeking / total * 100) : 0}% of cohort`, up: false },
+        { label: 'Interns / Attachees', val: interns, icon: '🎓', cls: 'sky', delta: 'Active placements', up: true },
+      ];
+      document.getElementById('kpiGrid').innerHTML = kpis.map((k, i) =>
+        `<div class="kpi-card ${k.cls}" style="animation-delay:${i * 0.08}s">
       <div class="kpi-icon">${k.icon}</div>
       <div class="kpi-val">${k.val}</div>
       <div class="kpi-label">${k.label}</div>
-      <div class="kpi-delta ${k.up?'up':'down'}">${k.up?'▲':'▼'} ${k.delta}</div>
+      <div class="kpi-delta ${k.up ? 'up' : 'down'}">${k.up ? '▲' : '▼'} ${k.delta}</div>
     </div>`
-  ).join('');
-}
+      ).join('');
+    }
 
-/* ═══════════════════════════════════════════════════════
-   CHARTS
-══════════════════════════════════════════════════════════ */
-function rebuildCharts(set) {
-  buildEmploymentChart(set);
-  buildDonut(set);
-  buildSkillsCloud(set);
-}
+    /* ═══════════════════════════════════════════════════════
+       CHARTS
+    ══════════════════════════════════════════════════════════ */
+    function rebuildCharts(set) {
+      buildEmploymentChart(set);
+      buildDonut(set);
+      buildSkillsCloud(set);
+    }
 
-const CHART_COLORS = ['var(--gold)','var(--teal)','var(--sky)','var(--rose)','#b478ff','#ffa53c','#3db07a'];
+    const CHART_COLORS = ['var(--gold)', 'var(--teal)', 'var(--sky)', 'var(--rose)', '#b478ff', '#ffa53c', '#3db07a'];
 
-function buildEmploymentChart(set) {
-  set = set || MEMBERS;
-  const counts = {};
-  set.forEach(m => { counts[m.status] = (counts[m.status] || 0) + 1; });
-  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,7);
-  if (!sorted.length) { document.getElementById('employmentChart').innerHTML = '<div style="color:var(--muted);font-size:0.8rem;padding:1rem 0;">No data for this cohort.</div>'; return; }
-  const max = sorted[0][1];
-  document.getElementById('employmentChart').innerHTML = sorted.map(([s,v],i) =>
-    `<div class="bar-row">
+    function buildEmploymentChart(set) {
+      set = set || MEMBERS;
+      const counts = {};
+      set.forEach(m => { counts[m.status] = (counts[m.status] || 0) + 1; });
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 7);
+      if (!sorted.length) { document.getElementById('employmentChart').innerHTML = '<div style="color:var(--muted);font-size:0.8rem;padding:1rem 0;">No data for this cohort.</div>'; return; }
+      const max = sorted[0][1];
+      document.getElementById('employmentChart').innerHTML = sorted.map(([s, v], i) =>
+        `<div class="bar-row">
       <div class="bar-label">${shortStatus(s)}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${v/max*100}%;background:${CHART_COLORS[i%CHART_COLORS.length]}"></div></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${v / max * 100}%;background:${CHART_COLORS[i % CHART_COLORS.length]}"></div></div>
       <div class="bar-val">${v}</div>
     </div>`
-  ).join('');
-}
+      ).join('');
+    }
 
-function buildDonut(set) {
-  set = set || MEMBERS;
-  const counts = {};
-  set.forEach(m => { counts[m.education] = (counts[m.education]||0)+1; });
-  const entries = Object.entries(counts).sort((a,b) => b[1]-a[1]);
-  const total   = set.length || 1;
-  const r=38,cx=50,cy=50,circ=2*Math.PI*r;
-  let offset=0,paths='';
-  entries.forEach(([label,val],i) => {
-    const pct=val/total; const dash=pct*circ;
-    paths += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${CHART_COLORS[i%CHART_COLORS.length]}" stroke-width="14" stroke-dasharray="${dash} ${circ-dash}" stroke-dashoffset="${-offset*circ}" transform="rotate(-90 ${cx} ${cy})" opacity="0.85"/>`;
-    offset += pct;
-  });
-  document.getElementById('donutSvg').innerHTML =
-    `<circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="14"/>
+    function buildDonut(set) {
+      set = set || MEMBERS;
+      const counts = {};
+      set.forEach(m => { counts[m.education] = (counts[m.education] || 0) + 1; });
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      const total = set.length || 1;
+      const r = 38, cx = 50, cy = 50, circ = 2 * Math.PI * r;
+      let offset = 0, paths = '';
+      entries.forEach(([label, val], i) => {
+        const pct = val / total; const dash = pct * circ;
+        paths += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${CHART_COLORS[i % CHART_COLORS.length]}" stroke-width="14" stroke-dasharray="${dash} ${circ - dash}" stroke-dashoffset="${-offset * circ}" transform="rotate(-90 ${cx} ${cy})" opacity="0.85"/>`;
+        offset += pct;
+      });
+      document.getElementById('donutSvg').innerHTML =
+        `<circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="14"/>
      ${paths}
      <text x="50" y="54" text-anchor="middle" font-size="11" font-family="Syne,sans-serif" font-weight="700" fill="#e8edf3">${set.length}</text>`;
-  document.getElementById('donutLegend').innerHTML = entries.slice(0,5).map(([l,v],i) =>
-    `<div class="legend-item">
-      <div class="legend-dot" style="background:${CHART_COLORS[i%CHART_COLORS.length]}"></div>
-      ${l.replace("'s Degree"," Deg.")} <span class="legend-val">${v}</span>
+      document.getElementById('donutLegend').innerHTML = entries.slice(0, 5).map(([l, v], i) =>
+        `<div class="legend-item">
+      <div class="legend-dot" style="background:${CHART_COLORS[i % CHART_COLORS.length]}"></div>
+      ${l.replace("'s Degree", " Deg.")} <span class="legend-val">${v}</span>
     </div>`
-  ).join('');
-}
+      ).join('');
+    }
 
-function buildSkillsCloud(set) {
-  set = set || MEMBERS;
-  const counts = {};
-  set.forEach(m => m.skills.forEach(s => { counts[s] = (counts[s]||0)+1; }));
-  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,18);
-  if (!sorted.length) { document.getElementById('skillsCloud').innerHTML = '<div style="color:var(--muted);font-size:0.8rem;">No skills in this cohort.</div>'; return; }
-  const max = sorted[0][1];
-  const C = [
-    ['rgba(212,168,67,0.15)','var(--gold)','rgba(212,168,67,0.3)'],
-    ['rgba(46,196,182,0.12)','var(--teal)','rgba(46,196,182,0.25)'],
-    ['rgba(74,158,255,0.12)','var(--sky)','rgba(74,158,255,0.25)'],
-    ['rgba(224,90,107,0.12)','var(--rose)','rgba(224,90,107,0.25)'],
-    ['rgba(180,120,255,0.12)','#b478ff','rgba(180,120,255,0.25)'],
-  ];
-  document.getElementById('skillsCloud').innerHTML = sorted.map(([s,v],i) => {
-    const [bg,col,border] = C[i%C.length];
-    const sz = 0.68 + v/max*0.2;
-    return `<span class="skill-tag" style="background:${bg};color:${col};border-color:${border};font-size:${sz}rem">${s} <strong>${v}</strong></span>`;
-  }).join('');
-}
+    function buildSkillsCloud(set) {
+      set = set || MEMBERS;
+      const counts = {};
+      set.forEach(m => m.skills.forEach(s => { counts[s] = (counts[s] || 0) + 1; }));
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 18);
+      if (!sorted.length) { document.getElementById('skillsCloud').innerHTML = '<div style="color:var(--muted);font-size:0.8rem;">No skills in this cohort.</div>'; return; }
+      const max = sorted[0][1];
+      const C = [
+        ['rgba(212,168,67,0.15)', 'var(--gold)', 'rgba(212,168,67,0.3)'],
+        ['rgba(46,196,182,0.12)', 'var(--teal)', 'rgba(46,196,182,0.25)'],
+        ['rgba(74,158,255,0.12)', 'var(--sky)', 'rgba(74,158,255,0.25)'],
+        ['rgba(224,90,107,0.12)', 'var(--rose)', 'rgba(224,90,107,0.25)'],
+        ['rgba(180,120,255,0.12)', '#b478ff', 'rgba(180,120,255,0.25)'],
+      ];
+      document.getElementById('skillsCloud').innerHTML = sorted.map(([s, v], i) => {
+        const [bg, col, border] = C[i % C.length];
+        const sz = 0.68 + v / max * 0.2;
+        return `<span class="skill-tag" style="background:${bg};color:${col};border-color:${border};font-size:${sz}rem">${s} <strong>${v}</strong></span>`;
+      }).join('');
+    }
 
-/* ═══════════════════════════════════════════════════════
-   FILTERS
-══════════════════════════════════════════════════════════ */
-/* Filters panel open/close */
-document.addEventListener('click', e => {
-  if (!e.target.closest('#filtersToggle')) return;
-  if (e.target.closest('#filtersClearBtn')) return;
-  const body    = document.getElementById('filtersBody');
-  const chevron = document.getElementById('filtersChevron');
-  const isOpen  = body.classList.contains('open');
-  body.classList.toggle('open', !isOpen);
-  chevron.classList.toggle('open', !isOpen);
-});
+    /* ═══════════════════════════════════════════════════════
+       FILTERS
+    ══════════════════════════════════════════════════════════ */
+    /* Filters panel open/close */
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#filtersToggle')) return;
+      if (e.target.closest('#filtersClearBtn')) return;
+      const body = document.getElementById('filtersBody');
+      const chevron = document.getElementById('filtersChevron');
+      const isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      chevron.classList.toggle('open', !isOpen);
+    });
 
-function addSkillFilter() {
-  const inp = document.getElementById('skillFilterInput');
-  const val = inp.value.trim().toLowerCase();
-  if (!val || skillFilters.includes(val)) { inp.value=''; return; }
-  skillFilters.push(val);
-  renderSkillFilterTags();
-  inp.value = '';
-  applyFilters();
-}
+    function addSkillFilter() {
+      const inp = document.getElementById('skillFilterInput');
+      const val = inp.value.trim().toLowerCase();
+      if (!val || skillFilters.includes(val)) { inp.value = ''; return; }
+      skillFilters.push(val);
+      renderSkillFilterTags();
+      inp.value = '';
+      applyFilters();
+    }
 
-function removeSkillFilter(idx) {
-  skillFilters.splice(idx, 1);
-  renderSkillFilterTags();
-  applyFilters();
-}
+    function removeSkillFilter(idx) {
+      skillFilters.splice(idx, 1);
+      renderSkillFilterTags();
+      applyFilters();
+    }
 
-function renderSkillFilterTags() {
-  document.getElementById('skillFilterTags').innerHTML = skillFilters.map((s,i) =>
-    `<span class="skill-filter-tag">${s}<button onclick="removeSkillFilter(${i})" title="Remove">×</button></span>`
-  ).join('');
-}
+    function renderSkillFilterTags() {
+      document.getElementById('skillFilterTags').innerHTML = skillFilters.map((s, i) =>
+        `<span class="skill-filter-tag">${s}<button onclick="removeSkillFilter(${i})" title="Remove">×</button></span>`
+      ).join('');
+    }
 
-function clearAllFilters(e) {
-  if (e) e.stopPropagation();
-  ['filterStatus','filterGender','filterEdu','filterCareer','filterCountry','filterCounty'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  ['filterSubLocation','filterAgeMin','filterAgeMax','filterGradMin','filterGradMax'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  skillFilters.splice(0);
-  renderSkillFilterTags();
-  document.getElementById('sortField').value = 'name';
-  document.getElementById('sortDir').value   = 'asc';
-  sortKey = 'name'; sortDir = 1;
-  applyFilters();
-}
+    function clearAllFilters(e) {
+      if (e) e.stopPropagation();
+      ['filterStatus', 'filterGender', 'filterEdu', 'filterCareer', 'filterCountry', 'filterCounty'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+      });
+      ['filterSubLocation', 'filterAgeMin', 'filterAgeMax', 'filterGradMin', 'filterGradMax'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+      });
+      skillFilters.splice(0);
+      renderSkillFilterTags();
+      document.getElementById('sortField').value = 'name';
+      document.getElementById('sortDir').value = 'asc';
+      sortKey = 'name'; sortDir = 1;
+      applyFilters();
+    }
 
-function countActiveFilters() {
-  let count = 0;
-  ['filterStatus','filterGender','filterEdu','filterCareer','filterLocation','filterProfessionBodies','filterCountry','filterCounty'].forEach(id => {
-    if (document.getElementById(id)?.value) count++;
-  });
-  if (document.getElementById('filterSubLocation')?.value.trim()) count++;
-  if (document.getElementById('filterAgeMin')?.value   || document.getElementById('filterAgeMax')?.value)   count++;
-  if (document.getElementById('filterGradMin')?.value  || document.getElementById('filterGradMax')?.value)  count++;
-  count += skillFilters.length;
-  return count;
-}
+    function countActiveFilters() {
+      let count = 0;
+      ['filterStatus', 'filterGender', 'filterEdu', 'filterCareer', 'filterLocation', 'filterProfessionBodies', 'filterCountry', 'filterCounty'].forEach(id => {
+        if (document.getElementById(id)?.value) count++;
+      });
+      if (document.getElementById('filterSubLocation')?.value.trim()) count++;
+      if (document.getElementById('filterAgeMin')?.value || document.getElementById('filterAgeMax')?.value) count++;
+      if (document.getElementById('filterGradMin')?.value || document.getElementById('filterGradMax')?.value) count++;
+      count += skillFilters.length;
+      return count;
+    }
 
-function applyFilters() {
-  const q        = (document.getElementById('searchInput')?.value || '').toLowerCase();
-  const status   = document.getElementById('filterStatus')?.value  || '';
-  const gender   = document.getElementById('filterGender')?.value  || '';
-  const edu      = document.getElementById('filterEdu')?.value     || '';
-  const career   = document.getElementById('filterCareer')?.value  || '';
-  const subloc   = (document.getElementById('filterSubLocation')?.value || '').trim().toLowerCase();
-  const loc      = document.getElementById('filterLocation')?.value || '';
-  const country  = document.getElementById('filterCountry')?.value || '';
-  const county   = (document.getElementById('filterCounty')?.value || '').trim().toLowerCase();
-  const profB    = (document.getElementById('filterProfessionBodies')?.value || '').trim().toLowerCase();
-  const ageMin   = Number(document.getElementById('filterAgeMin')?.value)  || 0;
-  const ageMax   = Number(document.getElementById('filterAgeMax')?.value)  || 999;
-  const gradMin  = Number(document.getElementById('filterGradMin')?.value) || 0;
-  const gradMax  = Number(document.getElementById('filterGradMax')?.value) || 9999;
+    function applyFilters() {
+      const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+      const status = document.getElementById('filterStatus')?.value || '';
+      const gender = document.getElementById('filterGender')?.value || '';
+      const edu = document.getElementById('filterEdu')?.value || '';
+      const career = document.getElementById('filterCareer')?.value || '';
+      const subloc = (document.getElementById('filterSubLocation')?.value || '').trim().toLowerCase();
+      const loc = document.getElementById('filterLocation')?.value || '';
+      const country = document.getElementById('filterCountry')?.value || '';
+      const county = (document.getElementById('filterCounty')?.value || '').trim().toLowerCase();
+      const profB = (document.getElementById('filterProfessionBodies')?.value || '').trim().toLowerCase();
+      const ageMin = Number(document.getElementById('filterAgeMin')?.value) || 0;
+      const ageMax = Number(document.getElementById('filterAgeMax')?.value) || 999;
+      const gradMin = Number(document.getElementById('filterGradMin')?.value) || 0;
+      const gradMax = Number(document.getElementById('filterGradMax')?.value) || 9999;
 
-  /* Read sort from dropdowns (may have changed) */
-  const sf = document.getElementById('sortField')?.value || 'name';
-  const sd = document.getElementById('sortDir')?.value   || 'asc';
-  sortKey = sf; sortDir = (sd === 'desc' ? -1 : 1);
+      /* Read sort from dropdowns (may have changed) */
+      const sf = document.getElementById('sortField')?.value || 'name';
+      const sd = document.getElementById('sortDir')?.value || 'asc';
+      sortKey = sf; sortDir = (sd === 'desc' ? -1 : 1);
 
-  filtered = MEMBERS.filter(m => {
-    const txt = (m.name + m.career + m.skills.join(' ') + m.subLocation + m.institution + m.email + ' ' + m.profession_bodies.join(' ')).toLowerCase();
-    if (q      && !txt.includes(q))                             return false;
-    if (status && m.status    !== status)                       return false;
-    if (gender && m.gender    !== gender)                       return false;
-    if (edu    && m.education !== edu)                          return false;
-    if (career && m.career    !== career)                       return false;
-    if (subloc && !m.subLocation.toLowerCase().includes(subloc)) return false;
-    if (loc      && m.location    !== loc)                      return false;
-    if (country  && m.country    !== country)                   return false;
-    if (county   && !m.county.toLowerCase().includes(county))   return false;
-    if (profB    && !m.profession_bodies.some(pb => pb.toLowerCase().includes(profB))) return false;
-    if (m.age  < ageMin || m.age  > ageMax)                    return false;
-    if (m.graduation && (m.graduation < gradMin || m.graduation > gradMax)) return false;
-    if (skillFilters.length && !skillFilters.every(sf =>
-      m.skills.some(s => s.toLowerCase().includes(sf))))       return false;
-    return true;
-  });
+      filtered = MEMBERS.filter(m => {
+        const txt = (m.name + m.career + m.skills.join(' ') + m.subLocation + m.institution + m.email + ' ' + m.profession_bodies.join(' ')).toLowerCase();
+        if (q && !txt.includes(q)) return false;
+        if (status && m.status !== status) return false;
+        if (gender && m.gender !== gender) return false;
+        if (edu && m.education !== edu) return false;
+        if (career && m.career !== career) return false;
+        if (subloc && !m.subLocation.toLowerCase().includes(subloc)) return false;
+        if (loc && m.location !== loc) return false;
+        if (country && m.country !== country) return false;
+        if (county && !m.county.toLowerCase().includes(county)) return false;
+        if (profB && !m.profession_bodies.some(pb => pb.toLowerCase().includes(profB))) return false;
+        if (m.age < ageMin || m.age > ageMax) return false;
+        if (m.graduation && (m.graduation < gradMin || m.graduation > gradMax)) return false;
+        if (skillFilters.length && !skillFilters.every(sf =>
+          m.skills.some(s => s.toLowerCase().includes(sf)))) return false;
+        return true;
+      });
 
-  filtered.sort((a,b) => {
-    let av = a[sortKey], bv = b[sortKey];
-    if (av == null) av = ''; if (bv == null) bv = '';
-    if (typeof av === 'number') return (av - bv) * sortDir;
-    return String(av).localeCompare(String(bv)) * sortDir;
-  });
+      filtered.sort((a, b) => {
+        let av = a[sortKey], bv = b[sortKey];
+        if (av == null) av = ''; if (bv == null) bv = '';
+        if (typeof av === 'number') return (av - bv) * sortDir;
+        return String(av).localeCompare(String(bv)) * sortDir;
+      });
 
-  /* Sync sort dropdown to match current state */
-  const sfEl = document.getElementById('sortField');
-  const sdEl = document.getElementById('sortDir');
-  if (sfEl) sfEl.value = sortKey;
-  if (sdEl) sdEl.value = sortDir === -1 ? 'desc' : 'asc';
+      /* Sync sort dropdown to match current state */
+      const sfEl = document.getElementById('sortField');
+      const sdEl = document.getElementById('sortDir');
+      if (sfEl) sfEl.value = sortKey;
+      if (sdEl) sdEl.value = sortDir === -1 ? 'desc' : 'asc';
 
-  /* Update active filter count badge */
-  const count = countActiveFilters();
-  const badge = document.getElementById('filtersActiveCount');
-  const clearBtn = document.getElementById('filtersClearBtn');
-  if (badge)    { badge.textContent = count; badge.style.display = count ? 'inline-flex' : 'none'; }
-  if (clearBtn) clearBtn.style.display = count ? 'inline-block' : 'none';
+      /* Update active filter count badge */
+      const count = countActiveFilters();
+      const badge = document.getElementById('filtersActiveCount');
+      const clearBtn = document.getElementById('filtersClearBtn');
+      if (badge) { badge.textContent = count; badge.style.display = count ? 'inline-flex' : 'none'; }
+      if (clearBtn) clearBtn.style.display = count ? 'inline-block' : 'none';
 
-  page = 1;
-  renderTable();
-}
+      page = 1;
+      renderTable();
+    }
 
-function sortByCol(key) {
-  /* Column header click: toggle direction if same key */
-  if (sortKey === key) sortDir *= -1;
-  else { sortKey = key; sortDir = 1; }
-  /* Sync dropdown */
-  const sfEl = document.getElementById('sortField');
-  const sdEl = document.getElementById('sortDir');
-  if (sfEl) sfEl.value = sortKey;
-  if (sdEl) sdEl.value = sortDir === -1 ? 'desc' : 'asc';
-  applyFilters();
-  /* Update header icons */
-  document.querySelectorAll('thead th').forEach(th => {
-    th.classList.remove('sorted');
-    const si = th.querySelector('.sort-icon'); if (si) si.textContent = '↕';
-  });
-  const colMap = {name:0,career:1,education:2,status:3,age:4,subLocation:5};
-  if (colMap[key] !== undefined) {
-    const th = document.querySelectorAll('thead th')[colMap[key]];
-    if (th) { th.classList.add('sorted'); const si = th.querySelector('.sort-icon'); if (si) si.textContent = sortDir===1?'↑':'↓'; }
-  }
-}
+    function sortByCol(key) {
+      /* Column header click: toggle direction if same key */
+      if (sortKey === key) sortDir *= -1;
+      else { sortKey = key; sortDir = 1; }
+      /* Sync dropdown */
+      const sfEl = document.getElementById('sortField');
+      const sdEl = document.getElementById('sortDir');
+      if (sfEl) sfEl.value = sortKey;
+      if (sdEl) sdEl.value = sortDir === -1 ? 'desc' : 'asc';
+      applyFilters();
+      /* Update header icons */
+      document.querySelectorAll('thead th').forEach(th => {
+        th.classList.remove('sorted');
+        const si = th.querySelector('.sort-icon'); if (si) si.textContent = '↕';
+      });
+      const colMap = { name: 0, career: 1, education: 2, status: 3, age: 4, subLocation: 5 };
+      if (colMap[key] !== undefined) {
+        const th = document.querySelectorAll('thead th')[colMap[key]];
+        if (th) { th.classList.add('sorted'); const si = th.querySelector('.sort-icon'); if (si) si.textContent = sortDir === 1 ? '↑' : '↓'; }
+      }
+    }
 
-/* Build career filter dropdown from data */
-function buildCareerFilter() {
-  const careers = [...new Set(MEMBERS.map(m => m.career).filter(Boolean))].sort();
-  const sel = document.getElementById('filterCareer');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">Any career</option>' +
-    careers.map(c => `<option value="${c}">${c}</option>`).join('');
-}
+    /* Build career filter dropdown from data */
+    function buildCareerFilter() {
+      const careers = [...new Set(MEMBERS.map(m => m.career).filter(Boolean))].sort();
+      const sel = document.getElementById('filterCareer');
+      if (!sel) return;
+      sel.innerHTML = '<option value="">Any career</option>' +
+        careers.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
 
-/* ═══════════════════════════════════════════════════════
-   TABLE RENDERING
-══════════════════════════════════════════════════════════ */
-const AVATAR_COLORS = [
-  ["#d4a843","#0b0f14"],["#2ec4b6","#0b0f14"],["#e05a6b","#fff"],
-  ["#4a9eff","#0b0f14"],["#b478ff","#0b0f14"],["#ffa53c","#0b0f14"],
-  ["#3db07a","#0b0f14"],["#e87c5a","#0b0f14"],
-];
-function avatarColor(i) { return AVATAR_COLORS[i % AVATAR_COLORS.length]; }
-function initials(name) { return name.split(' ').slice(0,2).map(w=>w[0]).join(''); }
+    /* ═══════════════════════════════════════════════════════
+       TABLE RENDERING
+    ══════════════════════════════════════════════════════════ */
+    const AVATAR_COLORS = [
+      ["#d4a843", "#0b0f14"], ["#2ec4b6", "#0b0f14"], ["#e05a6b", "#fff"],
+      ["#4a9eff", "#0b0f14"], ["#b478ff", "#0b0f14"], ["#ffa53c", "#0b0f14"],
+      ["#3db07a", "#0b0f14"], ["#e87c5a", "#0b0f14"],
+    ];
+    function avatarColor(i) { return AVATAR_COLORS[i % AVATAR_COLORS.length]; }
+    function initials(name) { return name.split(' ').slice(0, 2).map(w => w[0]).join(''); }
 
-const STATUS_PILL = {
-  "Employed (Full-time)":"pill-employed","Employed (Part-time)":"pill-employed",
-  "Unemployed (Actively Seeking)":"pill-unemployed","Unemployed (Not Seeking)":"pill-unemployed",
-  "On Internship":"pill-intern","On Attachment":"pill-intern",
-  "Active Application":"pill-application","Attended Interview":"pill-application",
-  "Shortlisted":"pill-shortlisted",
-  "On Voluntary / Community Service":"pill-voluntary",
-  "Self-employed / Business Owner":"pill-employed",
-};
-function pillClass(s) { return STATUS_PILL[s] || "pill-application"; }
-function shortStatus(s) {
-  return {
-    "Employed (Full-time)":"Employed FT","Employed (Part-time)":"Employed PT",
-    "Unemployed (Actively Seeking)":"Unemployed","On Voluntary / Community Service":"Voluntary",
-    "Self-employed / Business Owner":"Self-employed","Active Application":"Applying",
-    "Attended Interview":"Interviewed",
-    "On Contract terms":"On Contract","On Casual terms":"On Casual","TSC Transfer Request":"TSC Transfer",
-  }[s] || s;
-}
+    const STATUS_PILL = {
+      "Employed (Full-time)": "pill-employed", "Employed (Part-time)": "pill-employed",
+      "Unemployed (Actively Seeking)": "pill-unemployed", "Unemployed (Not Seeking)": "pill-unemployed",
+      "On Internship": "pill-intern", "On Attachment": "pill-intern",
+      "Active Application": "pill-application", "Attended Interview": "pill-application",
+      "Shortlisted": "pill-shortlisted",
+      "On Voluntary / Community Service": "pill-voluntary",
+      "Self-employed / Business Owner": "pill-employed",
+    };
+    function pillClass(s) { return STATUS_PILL[s] || "pill-application"; }
+    function shortStatus(s) {
+      return {
+        "Employed (Full-time)": "Employed FT", "Employed (Part-time)": "Employed PT",
+        "Unemployed (Actively Seeking)": "Unemployed", "On Voluntary / Community Service": "Voluntary",
+        "Self-employed / Business Owner": "Self-employed", "Active Application": "Applying",
+        "Attended Interview": "Interviewed",
+        "On Contract terms": "On Contract", "On Casual terms": "On Casual", "TSC Transfer Request": "TSC Transfer",
+      }[s] || s;
+    }
 
-function renderTable() {
-  document.getElementById('rowCount').textContent = filtered.length;
-  const total  = filtered.length;
-  const pages  = Math.ceil(total / PER_PAGE) || 1;
-  if (page > pages) page = pages;
-  const slice  = filtered.slice((page-1)*PER_PAGE, page*PER_PAGE);
-  const isAdmin = window.currentUser && window.currentUser.role === 'admin';
+    function renderTable() {
+      document.getElementById('rowCount').textContent = filtered.length;
+      const total = filtered.length;
+      const pages = Math.ceil(total / PER_PAGE) || 1;
+      if (page > pages) page = pages;
+      const slice = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+      const isAdmin = window.currentUser && window.currentUser.role === 'admin';
 
-  document.getElementById('tableBody').innerHTML = slice.map((m, i) => {
-    const [bg,fg] = avatarColor(m.id);
-    return `<tr data-id="${m.id}" style="animation-delay:${i*0.03}s">
+      document.getElementById('tableBody').innerHTML = slice.map((m, i) => {
+        const [bg, fg] = avatarColor(m.id);
+        return `<tr data-id="${m.id}" style="animation-delay:${i * 0.03}s">
       <td><div class="cell-name">
         <div class="avatar" style="background:${bg};color:${fg}">${initials(m.name)}</div>
         <div><div class="cell-name-text">${m.name}</div><div class="cell-name-sub">${m.email}</div></div>
       </div></td>
       <td>${m.career}</td>
-      <td><span class="edu-badge">${m.education.replace("Bachelor's Degree","B. Degree").replace("Master's Degree","M. Degree")}</span></td>
+      <td><span class="edu-badge">${m.education.replace("Bachelor's Degree", "B. Degree").replace("Master's Degree", "M. Degree")}</span></td>
       <td><span class="status-pill ${pillClass(m.status)}">${shortStatus(m.status)}</span></td>
       <td>${m.age}</td>
       <td>${m.subLocation || '—'}</td>
@@ -965,53 +2045,53 @@ function renderTable() {
         ${isAdmin ? `<button class="row-btn delete-btn" onclick="deleteMember(${m.id})">Delete</button>` : ''}
       </div></td>
     </tr>`;
-  }).join('');
+      }).join('');
 
-  /* Pagination */
-  document.getElementById('pageInfo').textContent = `${(page-1)*PER_PAGE+1}–${Math.min(page*PER_PAGE,total)} of ${total}`;
-  let pbhtml = '';
-  if (page > 1) pbhtml += `<button class="page-btn" onclick="goPage(${page-1})">‹</button>`;
-  for (let p=1; p<=pages; p++) {
-    if (pages<=7 || p===1 || p===pages || Math.abs(p-page)<=1)
-      pbhtml += `<button class="page-btn ${p===page?'active':''}" onclick="goPage(${p})">${p}</button>`;
-    else if (Math.abs(p-page)===2)
-      pbhtml += `<button class="page-btn" style="pointer-events:none">…</button>`;
-  }
-  if (page < pages) pbhtml += `<button class="page-btn" onclick="goPage(${page+1})">›</button>`;
-  document.getElementById('pageBtns').innerHTML = pbhtml;
-}
+      /* Pagination */
+      document.getElementById('pageInfo').textContent = `${(page - 1) * PER_PAGE + 1}–${Math.min(page * PER_PAGE, total)} of ${total}`;
+      let pbhtml = '';
+      if (page > 1) pbhtml += `<button class="page-btn" onclick="goPage(${page - 1})">‹</button>`;
+      for (let p = 1; p <= pages; p++) {
+        if (pages <= 7 || p === 1 || p === pages || Math.abs(p - page) <= 1)
+          pbhtml += `<button class="page-btn ${p === page ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
+        else if (Math.abs(p - page) === 2)
+          pbhtml += `<button class="page-btn" style="pointer-events:none">…</button>`;
+      }
+      if (page < pages) pbhtml += `<button class="page-btn" onclick="goPage(${page + 1})">›</button>`;
+      document.getElementById('pageBtns').innerHTML = pbhtml;
+    }
 
-function goPage(p) {
-  page = p;
-  renderTable();
-  document.querySelector('.table-card').scrollIntoView({behavior:'smooth',block:'nearest'});
-}
+    function goPage(p) {
+      page = p;
+      renderTable();
+      document.querySelector('.table-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
 
-/* ═══════════════════════════════════════════════════════
-   INLINE EDIT ROW
-══════════════════════════════════════════════════════════ */
-/* Separate skills array per edit session */
-let editSkills = [];
+    /* ═══════════════════════════════════════════════════════
+       INLINE EDIT ROW
+    ══════════════════════════════════════════════════════════ */
+    /* Separate skills array per edit session */
+    let editSkills = [];
 
-function openEditRow(id) {
-  /* Close any existing edit row first */
-  closeEditRow();
-  editingId = id;
-  const m = MEMBERS.find(x => x.id === id);
-  if (!m) return;
+    function openEditRow(id) {
+      /* Close any existing edit row first */
+      closeEditRow();
+      editingId = id;
+      const m = MEMBERS.find(x => x.id === id);
+      if (!m) return;
 
-  editSkills = [...m.skills];
+      editSkills = [...m.skills];
 
-  const tr = document.querySelector(`tr[data-id="${id}"]`);
-  if (!tr) return;
+      const tr = document.querySelector(`tr[data-id="${id}"]`);
+      if (!tr) return;
 
-  /* Highlight source row */
-  tr.style.opacity = '0.4';
+      /* Highlight source row */
+      tr.style.opacity = '0.4';
 
-  const editTr = document.createElement('tr');
-  editTr.classList.add('edit-row');
-  editTr.dataset.editId = id;
-  editTr.innerHTML = `
+      const editTr = document.createElement('tr');
+      editTr.classList.add('edit-row');
+      editTr.dataset.editId = id;
+      editTr.innerHTML = `
     <td colspan="7">
       <div class="edit-cells-grid">
         <div class="edit-field">
@@ -1038,8 +2118,8 @@ function openEditRow(id) {
           <label>Gender</label>
           <select id="ei-gender">
             <option value="">—</option>
-            <option value="male"  ${m.gender==='male'  ?'selected':''}>Male</option>
-            <option value="female"${m.gender==='female'?'selected':''}>Female</option>
+            <option value="male"  ${m.gender === 'male' ? 'selected' : ''}>Male</option>
+            <option value="female"${m.gender === 'female' ? 'selected' : ''}>Female</option>
           </select>
         </div>
         <div class="edit-field">
@@ -1110,143 +2190,143 @@ function openEditRow(id) {
       </div>
     </td>`;
 
-  tr.insertAdjacentElement('afterend', editTr);
-  renderEditSkillTags();
+      tr.insertAdjacentElement('afterend', editTr);
+      renderEditSkillTags();
 
-  /* Populate country dropdown and pre-select the member's current value */
-  const countryEl = document.getElementById('ei-country');
-  if (countryEl) {
-    populateCountrySelect(countryEl, '— Select country —');
-    countryEl.value = m.country || '';
-  }
+      /* Populate country dropdown and pre-select the member's current value */
+      const countryEl = document.getElementById('ei-country');
+      if (countryEl) {
+        populateCountrySelect(countryEl, '— Select country —');
+        countryEl.value = m.country || '';
+      }
 
-  /* Show/populate county dropdown and pre-select the member's current value */
-  toggleCountyField();
-  const countyEl = document.getElementById('ei-county');
-  if (countyEl && m.county) {
-    countyEl.value = m.county;
-  }
+      /* Show/populate county dropdown and pre-select the member's current value */
+      toggleCountyField();
+      const countyEl = document.getElementById('ei-county');
+      if (countyEl && m.county) {
+        countyEl.value = m.county;
+      }
 
-  editTr.scrollIntoView({ behavior:'smooth', block:'nearest' });
-}
+      editTr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
 
-function closeEditRow() {
-  if (editingId !== null) {
-    const src = document.querySelector(`tr[data-id="${editingId}"]`);
-    if (src) src.style.opacity = '';
-    editingId = null;
-  }
-  document.querySelectorAll('tr.edit-row').forEach(r => r.remove());
-  editSkills = [];
-}
+    function closeEditRow() {
+      if (editingId !== null) {
+        const src = document.querySelector(`tr[data-id="${editingId}"]`);
+        if (src) src.style.opacity = '';
+        editingId = null;
+      }
+      document.querySelectorAll('tr.edit-row').forEach(r => r.remove());
+      editSkills = [];
+    }
 
-function addEditSkill() {
-  const inp = document.getElementById('ei-skill-input');
-  const val = inp.value.trim();
-  if (!val || editSkills.includes(val)) { inp.value=''; return; }
-  editSkills.push(val);
-  renderEditSkillTags();
-  inp.value = '';
-}
+    function addEditSkill() {
+      const inp = document.getElementById('ei-skill-input');
+      const val = inp.value.trim();
+      if (!val || editSkills.includes(val)) { inp.value = ''; return; }
+      editSkills.push(val);
+      renderEditSkillTags();
+      inp.value = '';
+    }
 
-function removeEditSkill(idx) {
-  editSkills.splice(idx, 1);
-  renderEditSkillTags();
-}
+    function removeEditSkill(idx) {
+      editSkills.splice(idx, 1);
+      renderEditSkillTags();
+    }
 
-function renderEditSkillTags() {
-  const wrap = document.getElementById('ei-skill-tags');
-  if (!wrap) return;
-  wrap.innerHTML = editSkills.map((s,i) =>
-    `<span class="edit-skill-tag">${s}<button onclick="removeEditSkill(${i})" title="Remove">×</button></span>`
-  ).join('');
-}
+    function renderEditSkillTags() {
+      const wrap = document.getElementById('ei-skill-tags');
+      if (!wrap) return;
+      wrap.innerHTML = editSkills.map((s, i) =>
+        `<span class="edit-skill-tag">${s}<button onclick="removeEditSkill(${i})" title="Remove">×</button></span>`
+      ).join('');
+    }
 
-async function commitEdit(id) {
-  const errEl   = document.getElementById('ei-error');
-  const savEl   = document.getElementById('ei-saving');
-  const saveBtn = document.getElementById('ei-save-btn');
-  errEl.style.display = 'none';
-  savEl.style.display = 'inline';
-  saveBtn.disabled    = true;
+    async function commitEdit(id) {
+      const errEl = document.getElementById('ei-error');
+      const savEl = document.getElementById('ei-saving');
+      const saveBtn = document.getElementById('ei-save-btn');
+      errEl.style.display = 'none';
+      savEl.style.display = 'inline';
+      saveBtn.disabled = true;
 
-  const payload = {
-    name:        document.getElementById('ei-name').value.trim(),
-    phone:       document.getElementById('ei-phone').value.trim(),
-    email:       document.getElementById('ei-email').value.trim(),
-    age:         Number(document.getElementById('ei-age').value) || null,
-    nationalId:  document.getElementById('ei-national-id').value.trim(),
-    gender:      document.getElementById('ei-gender').value,
-    subLocation: document.getElementById('ei-subloc').value.trim(),
-    status:      document.getElementById('ei-status').value,
-    career:      document.getElementById('ei-career').value.trim(),
-    employer:    document.getElementById('ei-employer').value.trim(),
-    education:   document.getElementById('ei-education').value,
-    institution: document.getElementById('ei-institution').value.trim(),
-    course:      document.getElementById('ei-course').value.trim(),
-    graduation:  Number(document.getElementById('ei-graduation').value) || null,
-    country:     document.getElementById('ei-country').value,
-    county:      document.getElementById('ei-county').value.trim(),
-    profession_bodies: document.getElementById('ei-profession-bodies')?.value.split(',').map(s => s.trim()).filter(s => s.length > 0) || [],
-    skills:      editSkills,
-  };
+      const payload = {
+        name: document.getElementById('ei-name').value.trim(),
+        phone: document.getElementById('ei-phone').value.trim(),
+        email: document.getElementById('ei-email').value.trim(),
+        age: Number(document.getElementById('ei-age').value) || null,
+        nationalId: document.getElementById('ei-national-id').value.trim(),
+        gender: document.getElementById('ei-gender').value,
+        subLocation: document.getElementById('ei-subloc').value.trim(),
+        status: document.getElementById('ei-status').value,
+        career: document.getElementById('ei-career').value.trim(),
+        employer: document.getElementById('ei-employer').value.trim(),
+        education: document.getElementById('ei-education').value,
+        institution: document.getElementById('ei-institution').value.trim(),
+        course: document.getElementById('ei-course').value.trim(),
+        graduation: Number(document.getElementById('ei-graduation').value) || null,
+        country: document.getElementById('ei-country').value,
+        county: document.getElementById('ei-county').value.trim(),
+        profession_bodies: document.getElementById('ei-profession-bodies')?.value.split(',').map(s => s.trim()).filter(s => s.length > 0) || [],
+        skills: editSkills,
+      };
 
-  try {
-    const updated = await saveMemberEdit(id, payload);
-    /* Patch in-memory store */
-    const idx = MEMBERS.findIndex(m => m.id === id);
-    if (idx !== -1) MEMBERS[idx] = updated;
-    closeEditRow();
-    applyFilters();
-    rebuildCharts(cohortSet());
-    buildKPI(cohortSet());
-  } catch (err) {
-    errEl.textContent = err.message;
-    errEl.style.display = 'inline';
-  } finally {
-    savEl.style.display = 'none';
-    saveBtn.disabled = false;
-  }
-}
+      try {
+        const updated = await saveMemberEdit(id, payload);
+        /* Patch in-memory store */
+        const idx = MEMBERS.findIndex(m => m.id === id);
+        if (idx !== -1) MEMBERS[idx] = updated;
+        closeEditRow();
+        applyFilters();
+        rebuildCharts(cohortSet());
+        buildKPI(cohortSet());
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.style.display = 'inline';
+      } finally {
+        savEl.style.display = 'none';
+        saveBtn.disabled = false;
+      }
+    }
 
-/* ═══════════════════════════════════════════════════════
-   HELPERS
-══════════════════════════════════════════════════════════ */
-function esc(s) { return String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+    /* ═══════════════════════════════════════════════════════
+       HELPERS
+    ══════════════════════════════════════════════════════════ */
+    function esc(s) { return String(s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
 
-function statusOptions(current) {
-  return [
-    'Employed (Full-time)','Employed (Part-time)','Self-employed / Business Owner',
-    'On Internship','On Attachment','On Voluntary / Community Service',
-    'On Contract terms','On Casual terms','TSC Transfer Request',
-    'Active Application','Shortlisted','Attended Interview',
-    'Unemployed (Actively Seeking)','Unemployed (Not Seeking)','Student','Retired',
-  ].map(s => `<option value="${s}" ${s===current?'selected':''}>${s}</option>`).join('');
-}
+    function statusOptions(current) {
+      return [
+        'Employed (Full-time)', 'Employed (Part-time)', 'Self-employed / Business Owner',
+        'On Internship', 'On Attachment', 'On Voluntary / Community Service',
+        'On Contract terms', 'On Casual terms', 'TSC Transfer Request',
+        'Active Application', 'Shortlisted', 'Attended Interview',
+        'Unemployed (Actively Seeking)', 'Unemployed (Not Seeking)', 'Student', 'Retired',
+      ].map(s => `<option value="${s}" ${s === current ? 'selected' : ''}>${s}</option>`).join('');
+    }
 
-function educationOptions(current) {
-  return [
-    'Certificate','Diploma',
-    'Higher National Diploma (HND)',"Bachelor's Degree",'Postgraduate Diploma',
-    "Master's Degree",'PhD / Doctorate',
-  ].map(s => `<option value="${s}" ${s===current?'selected':''}>${s}</option>`).join('');
-}
+    function educationOptions(current) {
+      return [
+        'Certificate', 'Diploma',
+        'Higher National Diploma (HND)', "Bachelor's Degree", 'Postgraduate Diploma',
+        "Master's Degree", 'PhD / Doctorate',
+      ].map(s => `<option value="${s}" ${s === current ? 'selected' : ''}>${s}</option>`).join('');
+    }
 
-/* ═══════════════════════════════════════════════════════
-   DETAIL MODAL
-══════════════════════════════════════════════════════════ */
-function openModal(id) {
-  const m = MEMBERS.find(x => x.id === id);
-  if (!m) return;
-  const [bg,fg] = avatarColor(m.id);
-  document.getElementById('modalTitle').textContent = m.name;
-  const C = [
-    ['rgba(212,168,67,0.15)','var(--gold)','rgba(212,168,67,0.3)'],
-    ['rgba(46,196,182,0.12)','var(--teal)','rgba(46,196,182,0.25)'],
-    ['rgba(74,158,255,0.12)','var(--sky)','rgba(74,158,255,0.25)'],
-    ['rgba(224,90,107,0.12)','var(--rose)','rgba(224,90,107,0.25)'],
-  ];
-  document.getElementById('modalBody').innerHTML = `
+    /* ═══════════════════════════════════════════════════════
+       DETAIL MODAL
+    ══════════════════════════════════════════════════════════ */
+    function openModal(id) {
+      const m = MEMBERS.find(x => x.id === id);
+      if (!m) return;
+      const [bg, fg] = avatarColor(m.id);
+      document.getElementById('modalTitle').textContent = m.name;
+      const C = [
+        ['rgba(212,168,67,0.15)', 'var(--gold)', 'rgba(212,168,67,0.3)'],
+        ['rgba(46,196,182,0.12)', 'var(--teal)', 'rgba(46,196,182,0.25)'],
+        ['rgba(74,158,255,0.12)', 'var(--sky)', 'rgba(74,158,255,0.25)'],
+        ['rgba(224,90,107,0.12)', 'var(--rose)', 'rgba(224,90,107,0.25)'],
+      ];
+      document.getElementById('modalBody').innerHTML = `
     <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem">
       <div class="avatar" style="width:52px;height:52px;font-size:1.1rem;border-radius:12px;background:${bg};color:${fg}">${initials(m.name)}</div>
       <div>
@@ -1276,136 +2356,137 @@ function openModal(id) {
       <div class="detail-item"><label>Employer</label><p>${m.employer || '—'}</p></div>
     </div>
     <div class="detail-section-title">Skills</div>
-    <div class="skills-cloud">${m.skills.map((s,i) => {
-      const [bg,col,border] = C[i%4];
-      return `<span class="skill-tag" style="background:${bg};color:${col};border-color:${border}">${s}</span>`;
-    }).join('')}</div>`;
-  document.getElementById('modalOverlay').classList.add('show');
-}
+    <div class="skills-cloud">${m.skills.map((s, i) => {
+        const [bg, col, border] = C[i % 4];
+        return `<span class="skill-tag" style="background:${bg};color:${col};border-color:${border}">${s}</span>`;
+      }).join('')}</div>`;
+      document.getElementById('modalOverlay').classList.add('show');
+    }
 
-function closeModal(e) {
-  if (e.target === document.getElementById('modalOverlay'))
-    document.getElementById('modalOverlay').classList.remove('show');
-}
+    function closeModal(e) {
+      if (e.target === document.getElementById('modalOverlay'))
+        document.getElementById('modalOverlay').classList.remove('show');
+    }
 
-/* ═══════════════════════════════════════════════════════
-   EXPORT
-══════════════════════════════════════════════════════════ */
-async function exportMembersCSV() {
-  try {
-    const token = localStorage.getItem('authToken');
-    const response = await fetch('/api/admin/export/members', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
+    /* ═══════════════════════════════════════════════════════
+       EXPORT
+    ══════════════════════════════════════════════════════════ */
+    async function exportMembersCSV() {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch('/api/admin/export/members', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        const password = result.password; // 10-char alphanumeric password
+        const zipDataB64 = result.data; // base64 encoded zip file
+
+        // Convert base64 string to Uint8Array
+        function base64ToUint8Array(base64) {
+          const binary_string = atob(base64);
+          const len = binary_string.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binary_string.charCodeAt(i);
+          }
+          return bytes;
+        }
+
+        const zipBytes = base64ToUint8Array(zipDataB64);
+        const blob = new Blob([zipBytes], { type: 'application/zip' });
+
+        // Show the password to the user
+        const copyMessage = 'Click OK to download the password-protected ZIP file. The password is shown below and will be copied to your clipboard.';
+        const passwordMessage = `Your export is ready.\n\nPassword (save this to decrypt the ZIP):\n${password}\n\n${copyMessage}`;
+        alert(passwordMessage);
+        // Attempt to copy to clipboard
+        try {
+          await navigator.clipboard.writeText(password);
+          alert('Password copied to clipboard!');
+        } catch (err) {
+          console.warn('Failed to copy to clipboard: ', err);
+        }
+
+        // Create download link
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        // Use a filename with .zip extension
+        a.download = 'members-export.zip';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        throw error;
       }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       INIT
+    ══════════════════════════════════════════════════════════ */
+    /**
+     * Toggle county field visibility based on country selection
+     */
+    function toggleCountyField() {
+      const sel = document.getElementById('ei-country');
+      const wrap = document.getElementById('ei-county-wrapper');
+      const inp = document.getElementById('ei-county');
+      if (!wrap || !inp) return;
+      const isKenya = sel && sel.value === 'KE';
+      if (isKenya) {
+        populateCountySelect(inp);
+      }
+      wrap.style.display = isKenya ? '' : 'none';
+      inp.required = isKenya;
+    }
+
+    async function initDashboardPage() {
+      await loadMembers();
+      const set = cohortSet();
+      buildKPI(set);
+      buildEmploymentChart(set);
+      buildDonut(set);
+      buildSkillsCloud(set);
+      buildCareerFilter();
+      // Populate county filter with dynamic data
+      const countySelect = document.getElementById('filterCounty');
+      if (countySelect) {
+        populateCountySelect(countySelect);
+      }
+      // Populate country dropdown with dynamic data
+      const countrySelect = document.getElementById('filterCountry');
+      if (countrySelect) {
+        populateCountrySelect(countrySelect, 'Any country');
+      }
+      applyFilters();
+      /* Hide Add Member for non-admins */
+      try {
+        if (!(window.currentUser && window.currentUser.role === 'admin')) {
+          const b = document.getElementById('addMemberBtn');
+          if (b) b.style.display = 'none';
+        }
+      } catch (e) { }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await renderProtectedPage({
+        title: 'Dashboard',
+        activeHref: 'dashboard.html',
+        contentHtml: document.getElementById('dashboard-content').innerHTML,
+        onMount: async () => { await initDashboardPage(); },
+      });
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    const password = result.password; // 10-char alphanumeric password
-    const zipDataB64 = result.data; // base64 encoded zip file
-
-    // Convert base64 string to Uint8Array
-    function base64ToUint8Array(base64) {
-      const binary_string = atob(base64);
-      const len = binary_string.length;
-      const bytes = new Uint8Array(len);
-      for (let i = 0; i < len; i++) {
-        bytes[i] = binary_string.charCodeAt(i);
-      }
-      return bytes;
-    }
-
-    const zipBytes = base64ToUint8Array(zipDataB64);
-    const blob = new Blob([zipBytes], { type: 'application/zip' });
-
-    // Show the password to the user
-    const copyMessage = 'Click OK to download the password-protected ZIP file. The password is shown below and will be copied to your clipboard.';
-    const passwordMessage = `Your export is ready.\n\nPassword (save this to decrypt the ZIP):\n${password}\n\n${copyMessage}`;
-    alert(passwordMessage);
-    // Attempt to copy to clipboard
-    try {
-      await navigator.clipboard.writeText(password);
-      alert('Password copied to clipboard!');
-    } catch (err) {
-      console.warn('Failed to copy to clipboard: ', err);
-    }
-
-    // Create download link
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    // Use a filename with .zip extension
-    a.download = 'members-export.zip';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    throw error;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════
-   INIT
-══════════════════════════════════════════════════════════ */
-/**
- * Toggle county field visibility based on country selection
- */
-function toggleCountyField(){
-  const sel=document.getElementById('ei-country');
-  const wrap=document.getElementById('ei-county-wrapper');
-  const inp=document.getElementById('ei-county');
-  if(!wrap||!inp)return;
-  const isKenya=sel&&sel.value==='KE';
-  if(isKenya){
-    populateCountySelect(inp);
-  }
-  wrap.style.display=isKenya?'':'none';
-  inp.required=isKenya;
-}
-
-async function initDashboardPage() {
-  await loadMembers();
-  const set = cohortSet();
-  buildKPI(set);
-  buildEmploymentChart(set);
-  buildDonut(set);
-  buildSkillsCloud(set);
-  buildCareerFilter();
-  // Populate county filter with dynamic data
-  const countySelect = document.getElementById('filterCounty');
-  if (countySelect) {
-    populateCountySelect(countySelect);
-  }
-  // Populate country dropdown with dynamic data
-  const countrySelect = document.getElementById('filterCountry');
-  if (countrySelect) {
-    populateCountrySelect(countrySelect, 'Any country');
-  }
-  applyFilters();
-  /* Hide Add Member for non-admins */
-  try {
-    if (!(window.currentUser && window.currentUser.role === 'admin')) {
-      const b = document.getElementById('addMemberBtn');
-      if (b) b.style.display = 'none';
-    }
-  } catch(e) {}
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
-  await renderProtectedPage({
-    title: 'Dashboard',
-    activeHref: 'dashboard.html',
-    contentHtml: document.getElementById('dashboard-content').innerHTML,
-    onMount: async () => { await initDashboardPage(); },
-  });
-});
-</script>
+  </script>
 </body>
+
 </html>

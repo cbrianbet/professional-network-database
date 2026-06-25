@@ -51,9 +51,7 @@ class SignupSerializer(serializers.Serializer):
         user.set_password(validated_data['password'])
         user.save()
 
-        # Create member record if national_id provided
-        national_id = validated_data.get('national_id')
-        if national_id:
+        if national_id := validated_data.get('national_id'):
             national_id = national_id.replace(' ', '').upper()
             # Use provided name for member, empty strings for other required text fields, 0 for age
             Member.objects.create(
@@ -84,7 +82,6 @@ class LoginSerializer(serializers.Serializer):
             # Basic email validation - should have @ and at least one . after @
             if '@' not in value or '.' not in value.split('@')[1]:
                 raise serializers.ValidationError('Enter a valid email address.')
-            return value
         else:
             # Treat as national_id - basic validation
             if not value:
@@ -93,7 +90,8 @@ class LoginSerializer(serializers.Serializer):
             value = value.replace(' ', '').upper()
             if len(value) < 6:  # Assuming minimum national ID length
                 raise serializers.ValidationError('National ID is too short.')
-            return value
+
+        return value
 
 
 class AdminCreateUserSerializer(serializers.Serializer):
@@ -257,8 +255,7 @@ class BulkFileResourceOperationSerializer(serializers.Serializer):
         # Check if all IDs exist in the database
         existing_ids = set(FileResource.objects.filter(id__in=value).values_list('id', flat=True))
         input_ids = set(value)
-        missing_ids = input_ids - existing_ids
-        if missing_ids:
+        if missing_ids := input_ids - existing_ids:
             raise serializers.ValidationError(
                 f"The following file resource IDs do not exist: {sorted(missing_ids)}"
             )

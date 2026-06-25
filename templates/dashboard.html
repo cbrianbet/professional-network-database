@@ -1112,6 +1112,21 @@ function openEditRow(id) {
 
   tr.insertAdjacentElement('afterend', editTr);
   renderEditSkillTags();
+
+  /* Populate country dropdown and pre-select the member's current value */
+  const countryEl = document.getElementById('ei-country');
+  if (countryEl) {
+    populateCountrySelect(countryEl, '— Select country —');
+    countryEl.value = m.country || '';
+  }
+
+  /* Show/populate county dropdown and pre-select the member's current value */
+  toggleCountyField();
+  const countyEl = document.getElementById('ei-county');
+  if (countyEl && m.county) {
+    countyEl.value = m.county;
+  }
+
   editTr.scrollIntoView({ behavior:'smooth', block:'nearest' });
 }
 
@@ -1375,15 +1390,6 @@ async function initDashboardPage() {
   }
   applyFilters();
   /* Hide Add Member for non-admins */
-  const cSelect = document.getElementById('ei-county');
-  if (cSelect) {
-    populateCountySelect(cSelect);
-  }
-  // Populate country dropdown with dynamic data
-  const ctSelect = document.getElementById('ei-country');
-  if (ctSelect) {
-    populateCountrySelect(ctSelect, 'Any country');
-  }
   try {
     if (!(window.currentUser && window.currentUser.role === 'admin')) {
       const b = document.getElementById('addMemberBtn');

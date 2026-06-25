@@ -28,6 +28,19 @@
     button.update { background:#22c55e; color:#0f172a; border:none; cursor:pointer; }
     button.update:hover { opacity:0.95; }
     .error { color:#fb7185; margin-top:1rem; }
+    .pagination { display:flex; align-items:center; justify-content:space-between; margin-top:1rem; flex-wrap:wrap; gap:0.5rem; }
+    .page-info { color:#94a3b8; font-size:0.85rem; }
+    .page-btns { display:flex; gap:0.25rem; flex-wrap:wrap; }
+    .page-btn {
+      min-width:32px; height:32px; padding:0 0.5rem; border-radius:8px;
+      border:1px solid rgba(148,163,184,0.18); background:#0f172a; color:#cbd5e1;
+      font-size:0.85rem; cursor:pointer; transition:all 0.15s;
+    }
+    .page-btn:hover { border-color:#d4a843; color:#d4a843; }
+    .page-btn.active { background:#22c55e; color:#0f172a; border-color:#22c55e; font-weight:700; }
+    .link-cell { color:#4a9eff; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .link-cell a { color:#4a9eff; text-decoration:none; }
+    .link-cell a:hover { text-decoration:underline; }
   </style>
 </head>
 <body>
@@ -68,6 +81,10 @@
         </thead>
         <tbody></tbody>
       </table>
+      <div class="pagination" id="usersPagination" style="display:none">
+        <div class="page-info" id="usersPageInfo"></div>
+        <div class="page-btns" id="usersPageBtns"></div>
+      </div>
     </div>
 
     <div class="card" style="margin-top:2rem">
@@ -76,6 +93,7 @@
         <div class="form-grid">
           <label>Title<input type="text" id="jobTitle" placeholder="e.g. Senior Backend Engineer"></label>
           <label>Company<input type="text" id="jobCompany" placeholder="e.g. Acme Ltd"></label>
+          <label>Link (optional)<input type="url" id="jobLink" placeholder="https://..."></label>
           <label>Deadline<input type="date" id="jobDeadline"></label>
           <label>File (PDF / image)
             <input type="file" id="jobFile" accept=".pdf,image/png,image/jpeg,image/jpg">
@@ -86,10 +104,14 @@
       </div>
       <table id="jobAdvertsTable" style="display:none">
         <thead>
-          <tr><th>Title</th><th>Company</th><th>Deadline</th><th>Type</th><th>Action</th></tr>
+          <tr><th>Title</th><th>Company</th><th>Link</th><th>Deadline</th><th>Type</th><th>Action</th></tr>
         </thead>
         <tbody></tbody>
       </table>
+      <div class="pagination" id="jobAdvertsPagination" style="display:none">
+        <div class="page-info" id="jobAdvertsPageInfo"></div>
+        <div class="page-btns" id="jobAdvertsPageBtns"></div>
+      </div>
     </div>
   </template>
 
@@ -99,6 +121,38 @@
 
     const ROLE_LABELS = { admin: 'Administrator (full access)', user: 'Standard user (limited access)' };
     const STATUS_LABELS = { active: 'Active — can sign in', pending: 'Pending — approval needed', disabled: 'Disabled — no access' };
+
+    /* ── Pagination ──────────────────────────────────────────────────────── */
+    const ADMIN_PER_PAGE = 10;
+    let usersPage = 1;
+    let jobAdvertsPage = 1;
+    let ALL_USERS = [];
+    let ALL_JOB_ADVERTS = [];
+
+    function paginate(items, page) {
+      const pages = Math.ceil(items.length / ADMIN_PER_PAGE) || 1;
+      if (page > pages) page = pages;
+      if (page < 1) page = 1;
+      const slice = items.slice((page - 1) * ADMIN_PER_PAGE, page * ADMIN_PER_PAGE);
+      return { slice, page, pages, total: items.length };
+    }
+
+    function renderPagination(infoId, btnsId, currentPage, pages, total, goFn) {
+      const info = document.getElementById(infoId);
+      const btns = document.getElementById(btnsId);
+      if (!info || !btns) return;
+      info.textContent = `${(currentPage - 1) * ADMIN_PER_PAGE + 1}–${Math.min(currentPage * ADMIN_PER_PAGE, total)} of ${total}`;
+      let html = '';
+      if (currentPage > 1) html += `<button class="page-btn" onclick="${goFn}(${currentPage - 1})">‹</button>`;
+      for (let p = 1; p <= pages; p++) {
+        if (pages <= 7 || p === 1 || p === pages || Math.abs(p - currentPage) <= 1)
+          html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="${goFn}(${p})">${p}</button>`;
+        else if (Math.abs(p - currentPage) === 2)
+          html += `<button class="page-btn" style="pointer-events:none">…</button>`;
+      }
+      if (currentPage < pages) html += `<button class="page-btn" onclick="${goFn}(${currentPage + 1})">›</button>`;
+      btns.innerHTML = html;
+    }
 
     async function fetchUsers() {
       try {
@@ -116,9 +170,19 @@
     }
 
     function renderUsers(users) {
-      document.getElementById('statusText').textContent = `${users.length} registered users`;
+      ALL_USERS = users || [];
+      document.getElementById('statusText').textContent = `${ALL_USERS.length} registered users`;
+      usersPage = 1;
+      renderUsersPage();
+      document.getElementById('usersTable').style.display = 'table';
+      document.getElementById('usersPagination').style.display = ALL_USERS.length > ADMIN_PER_PAGE ? 'flex' : 'none';
+    }
+
+    function renderUsersPage() {
+      const { slice, page, pages, total } = paginate(ALL_USERS, usersPage);
+      usersPage = page;
       const tbody = document.querySelector('#usersTable tbody');
-      tbody.innerHTML = users.map(user => {
+      tbody.innerHTML = slice.map(user => {
         const statuses = ['active','pending','disabled'].map(v =>
           `<option value="${v}" ${user.status===v?'selected':''}>${STATUS_LABELS[v]||v}</option>`).join('');
         const roles = ['user','admin'].map(v =>
@@ -131,8 +195,14 @@
           <td><button class="update" data-user-id="${user.id}">Update</button></td>
         </tr>`;
       }).join('');
-      document.getElementById('usersTable').style.display = 'table';
-      document.querySelectorAll('button.update').forEach(btn => btn.addEventListener('click', updateUser));
+      tbody.querySelectorAll('button.update').forEach(btn => btn.addEventListener('click', updateUser));
+      renderPagination('usersPageInfo', 'usersPageBtns', page, pages, total, 'goUsersPage');
+    }
+
+    function goUsersPage(p) {
+      usersPage = p;
+      renderUsersPage();
+      document.querySelector('#usersTable').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     async function updateUser(event) {
@@ -181,6 +251,7 @@
         document.getElementById('newUserName').value = '';
         document.getElementById('newUserEmail').value = '';
         document.getElementById('newUserPassword').value = '';
+        usersPage = 1;
         await fetchUsers();
       } catch (err) {
         errEl.textContent = `Failed to create user: ${err.message}`; errEl.style.display = 'block';
@@ -212,6 +283,7 @@
     async function createJobAdvert() {
       const title = document.getElementById('jobTitle').value.trim();
       const company = document.getElementById('jobCompany').value.trim();
+      const link = document.getElementById('jobLink').value.trim();
       const deadline = document.getElementById('jobDeadline').value || null;
       const fileInput = document.getElementById('jobFile');
       const errEl = document.getElementById('jobAdvertError');
@@ -253,7 +325,7 @@
         const res = await fetch('/api/job-adverts/create/', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, company, deadline, file_id: uploadData.id, file_type: fileType }),
+          body: JSON.stringify({ title, company, link, deadline, file_id: uploadData.id, file_type: fileType }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Unable to create advert');
@@ -261,8 +333,10 @@
         // Clear form
         document.getElementById('jobTitle').value = '';
         document.getElementById('jobCompany').value = '';
+        document.getElementById('jobLink').value = '';
         document.getElementById('jobDeadline').value = '';
         document.getElementById('jobFile').value = '';
+        jobAdvertsPage = 1;
         await fetchJobAdverts();
       } catch (err) {
         errEl.textContent = err.message; errEl.style.display = 'block';
@@ -270,18 +344,40 @@
     }
 
     function renderJobAdverts(adverts) {
-      const tbody = document.querySelector('#jobAdvertsTable tbody');
-      tbody.innerHTML = adverts.map(a => `<tr>
-        <td>${a.title}</td>
-        <td>${a.company}</td>
-        <td>${a.deadline || '—'}</td>
-        <td>${(a.file_type || '').toUpperCase()}</td>
-        <td><button class="update" data-job-id="${a.id}">Delete</button></td>
-      </tr>`).join('');
+      ALL_JOB_ADVERTS = adverts || [];
+      jobAdvertsPage = 1;
+      renderJobAdvertsPage();
       document.getElementById('jobAdvertsTable').style.display = 'table';
+      document.getElementById('jobAdvertsPagination').style.display = ALL_JOB_ADVERTS.length > ADMIN_PER_PAGE ? 'flex' : 'none';
+    }
+
+    function renderJobAdvertsPage() {
+      const { slice, page, pages, total } = paginate(ALL_JOB_ADVERTS, jobAdvertsPage);
+      jobAdvertsPage = page;
+      const tbody = document.querySelector('#jobAdvertsTable tbody');
+      tbody.innerHTML = slice.map(a => {
+        const linkCell = a.link
+          ? `<td class="link-cell"><a href="${a.link}" target="_blank" rel="noopener">${a.link}</a></td>`
+          : `<td>—</td>`;
+        return `<tr>
+          <td>${a.title}</td>
+          <td>${a.company}</td>
+          ${linkCell}
+          <td>${a.deadline || '—'}</td>
+          <td>${(a.file_type || '').toUpperCase()}</td>
+          <td><button class="update" data-job-id="${a.id}">Delete</button></td>
+        </tr>`;
+      }).join('');
       tbody.querySelectorAll('button[data-job-id]').forEach(btn =>
         btn.addEventListener('click', () => deleteJobAdvert(btn.dataset.jobId))
       );
+      renderPagination('jobAdvertsPageInfo', 'jobAdvertsPageBtns', page, pages, total, 'goJobAdvertsPage');
+    }
+
+    function goJobAdvertsPage(p) {
+      jobAdvertsPage = p;
+      renderJobAdvertsPage();
+      document.querySelector('#jobAdvertsTable').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     async function deleteJobAdvert(id) {

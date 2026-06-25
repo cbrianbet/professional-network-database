@@ -556,6 +556,7 @@ def job_advert_create(request):
     advert = JobAdvert.objects.create(
         title=sz.validated_data['title'],
         company=sz.validated_data['company'],
+        link=sz.validated_data.get('link', ''),
         deadline=sz.validated_data.get('deadline'),
         file=file_resource,
         created_by=request.user,

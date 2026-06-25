@@ -223,6 +223,7 @@ class JobAdvert(models.Model):
 
     title = models.CharField(max_length=255)
     company = models.CharField(max_length=255)
+    link = models.URLField(max_length=500, blank=True, default='')
     deadline = models.DateField(null=True, blank=True)
     file = models.ForeignKey(
         FileResource, on_delete=models.CASCADE, related_name='job_adverts'

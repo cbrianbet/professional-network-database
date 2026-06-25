@@ -257,6 +257,7 @@ class JobAdvertSerializer(serializers.ModelSerializer):
 class JobAdvertWriteSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=255)
     company = serializers.CharField(max_length=255)
+    link = serializers.URLField(required=False, allow_blank=True, default='')
     deadline = serializers.DateField(required=False, allow_null=True)
     file_id = serializers.IntegerField(required=True)
     file_type = serializers.ChoiceField(choices=[

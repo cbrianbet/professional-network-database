@@ -1,13 +1,13 @@
 const SHELL_LINKS = [
-  { href: 'dashboard.html', label: 'Dashboard' },
-  { href: 'data-form.html', label: 'Register' },
-  { href: 'admin.html',     label: 'Admin' },
+	{ href: "dashboard.html", label: "Dashboard" },
+	{ href: "data-form.html", label: "Register" },
+	{ href: "admin.html", label: "Admin" },
 ];
 
 const counties = [
 	{
 		name: "Mombasa",
-		code: 1
+		code: 1,
 	},
 	{
 		name: "Kwale",
@@ -23,7 +23,7 @@ const counties = [
 	},
 	{
 		name: "Lamu",
-		code: 5
+		code: 5,
 	},
 	{
 		name: "Taita-Taveta",
@@ -164,7 +164,7 @@ const counties = [
 	},
 	{
 		name: "Busia",
-		code: 40
+		code: 40,
 	},
 	{
 		name: "Siaya",
@@ -176,23 +176,23 @@ const counties = [
 	},
 	{
 		name: "Homa Bay",
-		code: 43
+		code: 43,
 	},
 	{
 		name: "Migori",
-		code: 44
+		code: 44,
 	},
 	{
 		name: "Kisii",
-		code: 45
+		code: 45,
 	},
 	{
 		name: "Nyamira",
-		code: 46
+		code: 46,
 	},
 	{
 		name: "Nairobi",
-		code: 47
+		code: 47,
 	},
 ];
 
@@ -294,7 +294,7 @@ const countries = [
 	{ value: "GW", label: "Guinea-Bissau" },
 	{ value: "GY", label: "Guyana" },
 	{ value: "HT", label: "Haiti" },
-	{ value: "HM", label: "Heard Island and McDonald Mcdonald Islands" },
+	{ value: "HM", label: "Heard Island and McDonald Islands" },
 	{ value: "VA", label: "Holy See (Vatican City State)" },
 	{ value: "HN", label: "Honduras" },
 	{ value: "HK", label: "Hong Kong" },
@@ -449,118 +449,151 @@ const countries = [
 ];
 
 async function ensureAuthenticated() {
-  const token = localStorage.getItem('authToken');
-  if (!token) { window.location.href = '/login'; return false; }
-  try {
-    const res = await fetch('/api/auth/me/', { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) throw new Error('Unauthorized');
-    return true;
-  } catch {
-    localStorage.removeItem('authToken');
-    window.location.href = '/login';
-    return false;
-  }
+	const token = localStorage.getItem("authToken");
+	if (!token) {
+		window.location.href = "/login";
+		return false;
+	}
+	try {
+		const res = await fetch("/api/auth/me/", { headers: { Authorization: `Bearer ${token}` } });
+		if (!res.ok) throw new Error("Unauthorized");
+		return true;
+	} catch {
+		localStorage.removeItem("authToken");
+		window.location.href = "/login";
+		return false;
+	}
 }
 
 function renderSidebar(activeHref) {
-  return `
+	return `
     <div class="sidebar-logo">
       <div class="logo-name">Professionals Databank</div>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
     </div>
     <nav class="sidebar-nav">
-      ${SHELL_LINKS.map(link => `
-        <a href="/${link.href.replace('.html','')}"
-           class="nav-item ${link.href === activeHref ? 'active' : ''}"
+      ${SHELL_LINKS.map(
+			(link) => `
+        <a href="/${link.href.replace(".html", "")}"
+           class="nav-item ${link.href === activeHref ? "active" : ""}"
            data-route="${link.href}">${link.label}</a>
-      `).join('')}
+      `,
+		).join("")}
     </nav>
     <div class="sidebar-footer">Professionals Databank</div>
   `;
 }
 
 function initMobileNav() {
-  const hamburger = document.getElementById('hamburgerBtn');
-  const overlay   = document.getElementById('sidebarOverlay');
-  const sidebar   = document.querySelector('.sidebar');
+	const hamburger = document.getElementById("hamburgerBtn");
+	const overlay = document.getElementById("sidebarOverlay");
+	const sidebar = document.querySelector(".sidebar");
 
-  function open()  { 
-    sidebar.style.removeProperty("display");
-    sidebar?.classList.add('open'); overlay?.classList.add('show'); document.body.style.overflow = 'hidden'; }
-  function close() { sidebar?.classList.remove('open'); overlay?.classList.remove('show'); document.body.style.overflow = ''; }
+	function open() {
+		sidebar.style.removeProperty("display");
+		sidebar?.classList.add("open");
+		overlay?.classList.add("show");
+		document.body.style.overflow = "hidden";
+	}
+	function close() {
+		sidebar?.classList.remove("open");
+		overlay?.classList.remove("show");
+		document.body.style.overflow = "";
+	}
 
-  hamburger?.addEventListener('click', open);
-  document.getElementById('sidebarClose')?.addEventListener('click', close);
-  overlay?.addEventListener('click', close);
-  // Close on nav tap (mobile)
-  sidebar?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { if (window.innerWidth < 900) close(); }));
+	hamburger?.addEventListener("click", open);
+	document.getElementById("sidebarClose")?.addEventListener("click", close);
+	overlay?.addEventListener("click", close);
+	// Close on nav tap (mobile)
+	sidebar?.querySelectorAll("a").forEach((a) =>
+		a.addEventListener("click", () => {
+			if (window.innerWidth < 900) close();
+		}),
+	);
 }
 
 async function loadCurrentUser() {
-  const token = localStorage.getItem('authToken');
-  if (!token) return null;
-  try {
-    const res = await fetch('/api/auth/me/', { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) throw new Error('Unauthorized');
-    const data = await res.json();
-    window.currentUser = data.user;
-    const node = document.getElementById('authUserName');
-    if (node) node.textContent = data.user.name || 'Member';
-    return data.user;
-  } catch {
-    localStorage.removeItem('authToken');
-    window.location.href = '/login';
-    return null;
-  }
+	const token = localStorage.getItem("authToken");
+	if (!token) return null;
+	try {
+		const res = await fetch("/api/auth/me/", { headers: { Authorization: `Bearer ${token}` } });
+		if (!res.ok) throw new Error("Unauthorized");
+		const data = await res.json();
+		window.currentUser = data.user;
+		const node = document.getElementById("authUserName");
+		if (node) node.textContent = data.user.name || "Member";
+		return data.user;
+	} catch {
+		localStorage.removeItem("authToken");
+		window.location.href = "/login";
+		return null;
+	}
 }
 
 /**
- * Populates a given HTMLSelectElement with the list of countries from the `countries` array.
- * @param {HTMLSelectElement} selectElement - The select element to populate.
- * @param {string} [placeholder='— Select country —'] - Optional placeholder text for the first option.
+ * Populates a given HTMLSelectElement with the list of countries.
+ * @param {HTMLSelectElement} selectElement
+ * @param {string} [placeholder]
+ * @param {string} [selectedValue] - option value to pre-select
  */
-function populateCountrySelect(selectElement, placeholder) {
-  placeholder = placeholder || '— Select country —';
-  if (!selectElement) return;
-  selectElement.innerHTML = '';
-  let o = document.createElement('option');
-  o.value = ''; o.disabled = true; o.selected = true; o.textContent = placeholder;
-  selectElement.appendChild(o);
-  countries.forEach(function(c) {
-    let opt = document.createElement('option');
-    opt.value = c.value; opt.textContent = c.label;
-    selectElement.appendChild(opt);
-  });
+function populateCountrySelect(selectElement, placeholder, selectedValue) {
+	placeholder = placeholder || "— Select country —";
+	if (!selectElement) return;
+	selectElement.innerHTML = "";
+	let o = document.createElement("option");
+	o.value = "";
+	o.disabled = true;
+	o.textContent = placeholder;
+	if (!selectedValue) o.selected = true;
+	selectElement.appendChild(o);
+	countries.forEach(function (c) {
+		let opt = document.createElement("option");
+		opt.value = c.value;
+		opt.textContent = c.label;
+		if (selectedValue && c.value === selectedValue) opt.selected = true;
+		selectElement.appendChild(opt);
+	});
 }
 
-function populateCountySelect(selectElement, placeholder) {
-  placeholder = placeholder || '— Select county —';
-  if (!selectElement) return;
-  selectElement.innerHTML = '';
-  let o = document.createElement('option');
-  o.value = ''; o.disabled = true; o.selected = true; o.textContent = placeholder;
-  selectElement.appendChild(o);
-  counties.forEach(function(c) {
-    let opt = document.createElement('option');
-    opt.value = c.name; opt.textContent = c.name;
-    selectElement.appendChild(opt);
-  });
+/**
+ * Populates a given HTMLSelectElement with the list of Kenyan counties.
+ * @param {HTMLSelectElement} selectElement
+ * @param {string} [placeholder]
+ * @param {string} [selectedValue] - county name to pre-select
+ */
+function populateCountySelect(selectElement, placeholder, selectedValue) {
+	placeholder = placeholder || "— Select county —";
+	if (!selectElement) return;
+	selectElement.innerHTML = "";
+	let o = document.createElement("option");
+	o.value = "";
+	o.disabled = true;
+	o.textContent = placeholder;
+	if (!selectedValue) o.selected = true;
+	selectElement.appendChild(o);
+	counties.forEach(function (c) {
+		let opt = document.createElement("option");
+		opt.value = c.name;
+		opt.textContent = c.name;
+		if (selectedValue && c.name === selectedValue) opt.selected = true;
+		selectElement.appendChild(opt);
+	});
 }
 
 function logout() {
-  localStorage.removeItem('authToken');
-  window.location.href = '/login';
+	localStorage.removeItem("authToken");
+	window.location.href = "/login";
 }
 
 async function renderProtectedPage({ title, activeHref, contentHtml, onMount, topbarHtml }) {
-  document.title = `${title} — Professionals Databank`;
-  const shell = document.getElementById('shared-shell');
-  if (!shell) return;
+	document.title = `${title} — Professionals Databank`;
+	const shell = document.getElementById("shared-shell");
+	if (!shell) return;
 
-  const authOk = await ensureAuthenticated();
-  if (!authOk) return;
+	const authOk = await ensureAuthenticated();
+	if (!authOk) return;
 
-  shell.innerHTML = `
+	shell.innerHTML = `
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="layout">
       <aside class="sidebar">${renderSidebar(activeHref)}</aside>
@@ -574,7 +607,7 @@ async function renderProtectedPage({ title, activeHref, contentHtml, onMount, to
             </svg>
           </button>
           <div class="page-title" id="pageTitle">${title}</div>
-          ${topbarHtml || ''}
+          ${topbarHtml || ""}
           <div class="auth-user">
             <span id="authUserName">…</span>
             <button id="logoutButton" type="button">Log out</button>
@@ -585,8 +618,8 @@ async function renderProtectedPage({ title, activeHref, contentHtml, onMount, to
     </div>
   `;
 
-  document.getElementById('logoutButton')?.addEventListener('click', logout);
-  initMobileNav();
-  await loadCurrentUser();
-  if (typeof onMount === 'function') onMount();
+	document.getElementById("logoutButton")?.addEventListener("click", logout);
+	initMobileNav();
+	await loadCurrentUser();
+	if (typeof onMount === "function") onMount();
 }

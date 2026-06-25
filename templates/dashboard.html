@@ -2196,16 +2196,18 @@
       /* Populate country dropdown and pre-select the member's current value */
       const countryEl = document.getElementById('ei-country');
       if (countryEl) {
-        populateCountrySelect(countryEl, '— Select country —');
-        countryEl.value = m.country || '';
+        populateCountrySelect(countryEl, '— Select country —', m.country || '');
       }
 
-      /* Show/populate county dropdown and pre-select the member's current value */
-      toggleCountyField();
+      /* Show county wrapper and populate, pre-selecting the member's current value */
+      const countyWrap = document.getElementById('ei-county-wrapper');
       const countyEl = document.getElementById('ei-county');
-      if (countyEl && m.county) {
-        countyEl.value = m.county;
+      const isKenya = (m.country || '') === 'KE';
+      if (countyEl) {
+        populateCountySelect(countyEl, '— Select county —', m.county || '');
       }
+      if (countyWrap) countyWrap.style.display = isKenya ? '' : 'none';
+      if (countyEl) countyEl.required = isKenya;
 
       editTr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }

@@ -27,7 +27,6 @@
     select, button { border-radius:12px; border:1px solid rgba(148,163,184,0.18); background:#0f172a; color:#f8fafc; padding:0.7rem 0.85rem; }
     button.update { background:#22c55e; color:#0f172a; border:none; cursor:pointer; }
     button.update:hover { opacity:0.95; }
-    .error { color:#fb7185; margin-top:1rem; }
     .pagination { display:flex; align-items:center; justify-content:space-between; margin-top:1rem; flex-wrap:wrap; gap:0.5rem; }
     .page-info { color:#94a3b8; font-size:0.85rem; }
     .page-btns { display:flex; gap:0.25rem; flex-wrap:wrap; }
@@ -48,7 +47,6 @@
   <template id="page-body-template">
     <div class="card">
       <div id="statusText">Loading users...</div>
-      <div id="adminError" class="error" style="display:none"></div>
       <div id="createUserSection" class="create-user-section">
         <h2>Create new user</h2>
         <div class="form-grid">
@@ -100,7 +98,6 @@
           </label>
         </div>
         <button id="createJobAdvertBtn" class="update">Post advert</button>
-        <div id="jobAdvertError" class="error" style="display:none"></div>
       </div>
       <table id="jobAdvertsTable" style="display:none">
         <thead>
@@ -129,7 +126,6 @@
         <button id="bulkUploadBtn" class="update">Upload members</button>
       </div>
       <div id="bulkUploadResults" style="display:none;margin-top:1rem"></div>
-      <div id="bulkUploadError" class="error" style="display:none"></div>
     </div>
   </template>
 
@@ -182,8 +178,7 @@
         renderUsers(data.users);
       } catch (err) {
         document.getElementById('statusText').textContent = 'Unable to load users.';
-        const errEl = document.getElementById('adminError');
-        errEl.textContent = err.message; errEl.style.display = 'block';
+        AppOverlay.error('Error', err.message);
       }
     }
 
@@ -241,8 +236,7 @@
         event.currentTarget.textContent = 'Saved';
         setTimeout(() => { event.currentTarget.textContent = 'Update'; }, 1200);
       } catch (err) {
-        const errEl = document.getElementById('adminError');
-        errEl.textContent = `Failed to update user: ${err.message}`; errEl.style.display = 'block';
+        AppOverlay.error('Error', `Failed to update user: ${err.message}`);
       }
     }
 
@@ -252,11 +246,9 @@
       const password = document.getElementById('newUserPassword').value;
       const role     = document.getElementById('newUserRole').value;
       const status   = document.getElementById('newUserStatus').value;
-      const errEl    = document.getElementById('adminError');
-      errEl.style.display = 'none';
       if (!name || !email || !password) {
-        errEl.textContent = 'Name, email, and password are required.';
-        errEl.style.display = 'block'; return;
+        AppOverlay.error('Validation', 'Name, email, and password are required.');
+        return;
       }
       try {
         const res = await fetch('/api/admin/users/', {
@@ -272,7 +264,7 @@
         usersPage = 1;
         await fetchUsers();
       } catch (err) {
-        errEl.textContent = `Failed to create user: ${err.message}`; errEl.style.display = 'block';
+        AppOverlay.error('Error', `Failed to create user: ${err.message}`);
       }
     }
 
@@ -285,8 +277,7 @@
         if (!res.ok) throw new Error(data.error || 'Unable to load job adverts');
         renderJobAdverts(data.job_adverts);
       } catch (err) {
-        const errEl = document.getElementById('jobAdvertError');
-        errEl.textContent = err.message; errEl.style.display = 'block';
+        AppOverlay.error('Error', err.message);
       }
     }
 
@@ -304,12 +295,9 @@
       const link = document.getElementById('jobLink').value.trim();
       const deadline = document.getElementById('jobDeadline').value || null;
       const fileInput = document.getElementById('jobFile');
-      const errEl = document.getElementById('jobAdvertError');
-      errEl.style.display = 'none';
-
       if (!title || !company) {
-        errEl.textContent = 'Title and company are required.';
-        errEl.style.display = 'block'; return;
+        AppOverlay.error('Validation', 'Title and company are required.');
+        return;
       }
 
       try {
@@ -321,8 +309,8 @@
         const file = fileInput.files[0];
         fileType = fileTypeFromExt(file.name);
         if (!fileType) {
-          errEl.textContent = 'Only PDF, PNG, and JPG files are allowed.';
-          errEl.style.display = 'block'; return;
+          AppOverlay.error('Validation', 'Only PDF, PNG, and JPG files are allowed.');
+          return;
         }
 
         // Upload the file to the existing file-resources endpoint
@@ -361,7 +349,7 @@
         jobAdvertsPage = 1;
         await fetchJobAdverts();
       } catch (err) {
-        errEl.textContent = err.message; errEl.style.display = 'block';
+        AppOverlay.error('Error', err.message);
       }
     }
 
@@ -404,7 +392,7 @@
     }
 
     async function deleteJobAdvert(id) {
-      if (!confirm('Delete this job advert?')) return;
+      if (!await AppOverlay.confirm('Delete Job Advert?', 'This action cannot be undone.')) return;
       try {
         const res = await fetch(`/api/job-adverts/${id}/`, {
           method: 'DELETE',
@@ -416,8 +404,7 @@
         }
         await fetchJobAdverts();
       } catch (err) {
-        const errEl = document.getElementById('jobAdvertError');
-        errEl.textContent = err.message; errEl.style.display = 'block';
+        AppOverlay.error('Error', err.message);
       }
     }
 
@@ -436,22 +423,17 @@
         a.click();
         URL.revokeObjectURL(url);
       } catch (err) {
-        const errEl = document.getElementById('bulkUploadError');
-        errEl.textContent = err.message;
-        errEl.style.display = 'block';
+        AppOverlay.error('Error', err.message);
       }
     }
 
     async function bulkUploadMembers() {
       const fileInput = document.getElementById('bulkMemberFile');
       const resultsEl = document.getElementById('bulkUploadResults');
-      const errEl = document.getElementById('bulkUploadError');
       resultsEl.style.display = 'none';
-      errEl.style.display = 'none';
 
       if (!fileInput.files.length) {
-        errEl.textContent = 'Please select a CSV file.';
-        errEl.style.display = 'block';
+        AppOverlay.error('Validation', 'Please select a CSV file.');
         return;
       }
 
@@ -490,8 +472,7 @@
         // Refresh users table in case admin wants to see new placeholder users
         await fetchUsers();
       } catch (err) {
-        errEl.textContent = err.message;
-        errEl.style.display = 'block';
+        AppOverlay.error('Error', err.message);
       }
     }
 

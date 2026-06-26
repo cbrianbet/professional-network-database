@@ -1558,7 +1558,7 @@
           </svg>
           <input type="text" id="searchInput" placeholder="Search members…" oninput="applyFilters()">
         </div>
-        <button class="topbar-btn" onclick="exportMembersCSV().catch(err => alert('Export failed: ' + err.message))">
+        <button class="topbar-btn" onclick="exportMembersCSV().catch(err => AppOverlay.error('Export Failed', err.message))">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
@@ -1700,7 +1700,7 @@
     }
 
     async function deleteMember(id) {
-      if (!confirm('Delete this member record? This cannot be undone.')) return;
+      if (!await AppOverlay.confirm('Delete Member?', 'This cannot be undone.')) return;
       const token = localStorage.getItem('authToken');
       try {
         const res = await fetch(`/api/members/${id}/`, {
@@ -1714,7 +1714,7 @@
         applyFilters();
         rebuildCharts(cohortSet());
       } catch (err) {
-        alert(err.message || 'Unable to delete member');
+        AppOverlay.error('Delete Failed', err.message || 'Unable to delete member');
       }
     }
 
@@ -2504,11 +2504,11 @@
         // Show the password to the user
         const copyMessage = 'Click OK to download the password-protected ZIP file. The password is shown below and will be copied to your clipboard.';
         const passwordMessage = `Your export is ready.\n\nPassword (save this to decrypt the ZIP):\n${password}\n\n${copyMessage}`;
-        alert(passwordMessage);
+        AppOverlay.success('Export Ready', passwordMessage, 'Download');
         // Attempt to copy to clipboard
         try {
           await navigator.clipboard.writeText(password);
-          alert('Password copied to clipboard!');
+          AppOverlay.success('Copied!', 'Password has been copied to your clipboard.');
         } catch (err) {
           console.warn('Failed to copy to clipboard: ', err);
         }

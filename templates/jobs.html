@@ -35,7 +35,6 @@
     .job-view:hover { opacity: 0.88; }
     .empty { color: var(--muted); font-size: 0.95rem; padding: 3rem 0; text-align: center; }
     .loading { color: var(--muted); font-size: 0.95rem; padding: 3rem 0; text-align: center; }
-    .error { color: #fb7185; font-size: 0.95rem; padding: 3rem 0; text-align: center; }
   </style>
 </head>
 <body>
@@ -43,7 +42,7 @@
   <template id="page-body-template">
     <div class="page-pad">
       <h1 class="page-title">Job Opportunities</h1>
-      <div id="jobsStatus" class="loading">Loading…</div>
+      <div id="jobsStatus" class="loading" style="display:none">Loading…</div>
       <div id="jobsGrid" class="jobs-grid" style="display:none"></div>
       <div id="jobsEmpty" class="empty" style="display:none">No job adverts have been posted yet.</div>
     </div>
@@ -60,6 +59,7 @@
         statusEl.style.display = 'none';
         return;
       }
+      statusEl.style.display = 'block';
       try {
         const res = await fetch('/api/job-adverts/', {
           headers: { Authorization: `Bearer ${token}` },
@@ -93,9 +93,7 @@
         }).join('');
       } catch (err) {
         statusEl.style.display = 'none';
-        statusEl.classList.add('error');
-        statusEl.textContent = err.message;
-        statusEl.style.display = 'block';
+        AppOverlay.error('Unable to load jobs', err.message);
       }
     }
 

@@ -638,6 +638,97 @@ function logout() {
 	window.location.href = "/login";
 }
 
+/* ── App Overlay (alerts, confirms, success) ───────── */
+window.AppOverlay = (function () {
+  let overlay = null;
+
+  function ensureEl() {
+    if (overlay) return overlay;
+    overlay = document.createElement("div");
+    overlay.className = "app-overlay";
+    overlay.id = "appOverlay";
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) hide();
+    });
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
+  function buildIcon(type) {
+    if (type === "success") return "✓";
+    if (type === "error") return "✕";
+    return "?";
+  }
+
+  function show({ type = "success", title, message, actions = [] }) {
+    const el = ensureEl();
+    el.className = `app-overlay ${type}`;
+
+    const btns = actions
+      .map(
+        (a) =>
+          `<button class="app-overlay-btn ${a.class || "primary"}" data-action="${a.label}">${a.label}</button>`
+      )
+      .join("");
+
+    el.innerHTML = `
+      <div class="app-overlay-card ${type}">
+        <div class="app-overlay-icon">${buildIcon(type)}</div>
+        <h3>${title || ""}</h3>
+        ${message ? `<p>${message}</p>` : ""}
+        ${actions.length ? `<div class="app-overlay-actions">${btns}</div>` : ""}
+      </div>
+    `;
+
+    el.querySelectorAll(".app-overlay-btn").forEach((btn, i) => {
+      btn.addEventListener("click", () => actions[i]?.onClick?.());
+    });
+
+    // Force reflow so the animation plays
+    void el.offsetWidth;
+    el.classList.add("show");
+  }
+
+  function hide() {
+    if (!overlay) return;
+    overlay.classList.remove("show");
+  }
+
+  return {
+    show,
+    hide,
+    success(title, message, closeLabel = "OK") {
+      return show({
+        type: "success",
+        title,
+        message,
+        actions: [{ label: closeLabel, class: "success", onClick: hide }],
+      });
+    },
+    error(title, message, closeLabel = "Dismiss") {
+      return show({
+        type: "error",
+        title,
+        message,
+        actions: [{ label: closeLabel, class: "danger", onClick: hide }],
+      });
+    },
+    confirm(title, message) {
+      return new Promise((resolve) => {
+        show({
+          type: "confirm",
+          title,
+          message,
+          actions: [
+            { label: "Cancel", class: "secondary", onClick: () => { hide(); resolve(false); } },
+            { label: "Confirm", class: "danger", onClick: () => { hide(); resolve(true); } },
+          ],
+        });
+      });
+    },
+  };
+})();
+
 async function renderProtectedPage({ title, activeHref, contentHtml, onMount, topbarHtml }) {
 	document.title = `${title} — Professionals Databank`;
 	const shell = document.getElementById("shared-shell");

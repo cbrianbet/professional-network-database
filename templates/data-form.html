@@ -383,90 +383,6 @@
       transform: none;
     }
 
-    .success-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 200;
-      background: rgba(15, 25, 35, 0.65);
-      backdrop-filter: blur(4px);
-      align-items: center;
-      justify-content: center;
-    }
-
-    .success-overlay.show {
-      display: flex;
-    }
-
-    .success-card {
-      background: var(--white);
-      border-radius: 20px;
-      padding: 3rem 2.5rem;
-      max-width: 420px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 24px 80px rgba(15, 25, 35, 0.25);
-      animation: popIn 0.4s cubic-bezier(.175, .885, .32, 1.275);
-    }
-
-    @keyframes popIn {
-      from {
-        opacity: 0;
-        transform: scale(0.85);
-      }
-
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    .success-icon {
-      width: 68px;
-      height: 68px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--sage), #4f9980);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.5rem;
-      font-size: 2rem;
-    }
-
-    .success-card h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.5rem;
-      margin-bottom: 0.6rem;
-      color: var(--ink);
-    }
-
-    .success-card p {
-      color: var(--mist);
-      font-size: 0.92rem;
-      line-height: 1.6;
-    }
-
-    .success-close {
-      margin-top: 1.75rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--ink);
-      color: var(--paper);
-      border: none;
-      border-radius: var(--radius);
-      padding: 0.75rem 2rem;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .success-close:hover {
-      background: var(--sage);
-    }
-
     @media(max-width:600px) {
       .form-footer {
         flex-direction: column-reverse;
@@ -685,14 +601,6 @@
         </div>
       </form>
     </div>
-    <div class="success-overlay" id="successOverlay">
-      <div class="success-card">
-        <div class="success-icon">✓</div>
-        <h3>Registration Complete</h3>
-        <p>Your details have been securely submitted to the Professionals Databank.</p>
-        <button class="success-close" onclick="resetForm()">Register Another</button>
-      </div>
-    </div>
   </template>
 
   <script src="{% static 'shared-layout.js' %}"></script>
@@ -798,7 +706,7 @@
         submitBtn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Update Record';
       toggleEmployerField(document.querySelector('select[name="employmentStatus"]'));
     }
-    function resetForm() { document.getElementById('dataForm').reset(); skills.length = 0; renderTags(); document.getElementById('successOverlay').classList.remove('show'); updateProgress(); }
+    function resetForm() { document.getElementById('dataForm').reset(); skills.length = 0; renderTags(); updateProgress(); }
 
     async function initDataFormPage() {
       const token = localStorage.getItem('authToken');
@@ -821,8 +729,8 @@
         const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerHTML = 'Submitting…';
         const method = currentMemberId ? 'PATCH' : 'POST';
         const endpoint = currentMemberId ? `/api/members/${currentMemberId}/` : '/api/members/';
-        try { const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) }); const result = await res.json(); if (!res.ok) throw new Error(result.error || 'Submission failed'); document.getElementById('successOverlay').classList.add('show'); }
-        catch (err) { alert(err.message || 'Unable to submit registration'); }
+        try { const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) }); const result = await res.json(); if (!res.ok) throw new Error(result.error || 'Submission failed'); AppOverlay.success('Registration Complete', 'Your details have been securely submitted to the Professionals Databank.'); }
+        catch (err) { AppOverlay.error('Submission Failed', err.message || 'Unable to submit registration'); }
         finally { btn.disabled = false; btn.innerHTML = currentMemberId ? 'Update Record' : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Submit Registration'; }
       });
       // Cascading dropdown for Location and Sub-Location

@@ -237,6 +237,217 @@ def admin_members_create(request):
     return Response({'member': MemberSerializer(member).data}, status=status.HTTP_201_CREATED)
 
 
+# ── Admin — Bulk Member Upload ────────────────────────────────────────────────
+
+@api_view(['GET'])
+@authentication_classes(AUTH)
+@permission_classes(ADMIN)
+def admin_members_csv_template(request):
+    """Return a CSV template with headers and one sample row for bulk upload."""
+    columns = [
+        'name', 'phone', 'email', 'age', 'national_id', 'career', 'status',
+        'gender', 'sub_location', 'location', 'education', 'form_four_year',
+        'kcse', 'institution', 'course', 'graduation', 'employer',
+        'skills', 'country', 'county', 'profession_bodies',
+    ]
+    sample = {
+        'name': 'Jane Wanjiku',
+        'phone': '0712345678',
+        'email': 'jane.wanjiku@example.com',
+        'age': '32',
+        'national_id': '12345678',
+        'career': 'Software Engineer',
+        'status': 'employed (full-time)',
+        'gender': 'female',
+        'sub_location': 'Westlands',
+        'location': 'Nairobi',
+        'education': 'BSc Computer Science',
+        'form_four_year': '2014',
+        'kcse': 'A',
+        'institution': 'University of Nairobi',
+        'course': 'Computer Science',
+        'graduation': '2018',
+        'employer': 'Acme Ltd',
+        'skills': 'Python;Django;React',
+        'country': 'KE',
+        'county': 'Nairobi',
+        'profession_bodies': 'IEEE;ACM',
+    }
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=columns)
+    writer.writeheader()
+    writer.writerow(sample)
+    response = HttpResponse(output.getvalue(), content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="members-bulk-template.csv"'
+    return response
+
+
+@api_view(['POST'])
+@authentication_classes(AUTH)
+@permission_classes(ADMIN)
+def admin_members_bulk_upload(request):
+    """Accept a CSV file and bulk-create members (with placeholder users)."""
+    uploaded_file = request.FILES.get('file')
+    if not uploaded_file:
+        return Response({'error': 'No file uploaded. Please attach a CSV file.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    if not uploaded_file.name.lower().endswith('.csv'):
+        return Response({'error': 'Only .csv files are accepted.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+    if uploaded_file.size > MAX_FILE_SIZE:
+        return Response({'error': 'File too large. Maximum size is 5 MB.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    MAX_ROWS = 10_000
+    REQUIRED_FIELDS = ['name', 'phone', 'email', 'age', 'national_id', 'career', 'status']
+    VALID_STATUSES = [s for s in Member.STATUS_CHOICES]  # already a list of strings
+    VALID_GENDERS = ['male', 'female']
+
+    # Track national_ids seen in this upload for within-batch dedup
+    seen_national_ids = set()
+    # Pre-load existing national_ids for fast lookup
+    existing_national_ids = set(
+        Member.objects.exclude(national_id='').values_list('national_id', flat=True)
+    )
+
+    created = 0
+    errors = []
+
+    try:
+        decoded = uploaded_file.read().decode('utf-8-sig')
+    except UnicodeDecodeError:
+        return Response({'error': 'Could not decode file. Please upload a UTF-8 CSV.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    reader = csv.DictReader(io.StringIO(decoded))
+    if not reader.fieldnames:
+        return Response({'error': 'CSV file is empty or has no headers.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    for row_num, row in enumerate(reader, start=2):  # row 1 is header
+        if row_num > MAX_ROWS + 1:
+            errors.append({'row': row_num, 'error': f'Row limit exceeded ({MAX_ROWS} max).'})
+            break
+
+        # Strip whitespace from all values
+        row = {k.strip(): (v.strip() if v else '') for k, v in row.items() if k}
+
+        row_errors = []
+
+        # Check required fields
+        for field in REQUIRED_FIELDS:
+            if not row.get(field):
+                row_errors.append(f'Missing required field: {field}')
+
+        # Validate status
+        if row.get('status') and row['status'] not in VALID_STATUSES:
+            row_errors.append(
+                f'Invalid status "{row["status"]}". Must be one of: {", ".join(VALID_STATUSES)}'
+            )
+
+        # Validate gender if provided
+        if row.get('gender') and row['gender'] not in VALID_GENDERS:
+            row_errors.append(f'Invalid gender "{row["gender"]}". Must be "male" or "female".')
+
+        # Validate age if provided
+        if row.get('age'):
+            try:
+                age = int(row['age'])
+                if age < 1 or age > 150:
+                    row_errors.append(f'Invalid age "{row["age"]}". Must be between 1 and 150.')
+            except ValueError:
+                row_errors.append(f'Invalid age "{row["age"]}". Must be a number.')
+
+        # Validate national_id uniqueness (DB + within batch)
+        national_id = row.get('national_id', '').replace(' ', '').upper()
+        if national_id:
+            if national_id in existing_national_ids:
+                row_errors.append(f'National ID "{national_id}" already exists.')
+            elif national_id in seen_national_ids:
+                row_errors.append(f'National ID "{national_id}" is duplicated in this file.')
+
+        if row_errors:
+            errors.append({'row': row_num, 'error': '; '.join(row_errors)})
+            continue
+
+        # All checks passed — create placeholder user + member
+        try:
+            with transaction.atomic():
+                # Create placeholder user
+                placeholder_email = f"bulk_{national_id.lower()}_{secrets.token_hex(4)}@placeholder.local"
+                user = User(
+                    name=row['name'].strip(),
+                    email=placeholder_email,
+                    role='user',
+                    status='pending',
+                )
+                # Generate a random password the admin won't know — user must reset
+                temp_password = secrets.token_urlsafe(16)
+                user.set_password(temp_password)
+                user.save()
+                seen_national_ids.add(national_id)
+                existing_national_ids.add(national_id)  # prevent future collisions
+
+                # Parse list fields
+                skills = [s.strip() for s in row.get('skills', '').split(';') if s.strip()]
+                profession_bodies = [p.strip() for p in row.get('profession_bodies', '').split(';') if p.strip()]
+
+                # Parse optional integers
+                form_four_year = None
+                if row.get('form_four_year'):
+                    try:
+                        form_four_year = int(row['form_four_year'])
+                    except ValueError:
+                        pass
+
+                graduation = None
+                if row.get('graduation'):
+                    try:
+                        graduation = int(row['graduation'])
+                    except ValueError:
+                        pass
+
+                # Country: accept ISO code directly, or try to match name
+                country = row.get('country', 'KE') or 'KE'
+
+                Member.objects.create(
+                    user=user,
+                    name=row['name'].strip(),
+                    phone=row.get('phone', '').strip(),
+                    email=row.get('email', '').strip().lower(),
+                    age=int(row['age']),
+                    gender=row.get('gender', ''),
+                    national_id=national_id,
+                    sub_location=row.get('sub_location', ''),
+                    location=row.get('location', ''),
+                    education=row.get('education', ''),
+                    form_four_year=form_four_year,
+                    kcse=row.get('kcse', ''),
+                    institution=row.get('institution', ''),
+                    course=row.get('course', ''),
+                    graduation=graduation,
+                    status=row['status'].strip(),
+                    employer=row.get('employer', ''),
+                    career=row.get('career', '').strip(),
+                    skills=skills,
+                    country=country,
+                    county=row.get('county', ''),
+                    profession_bodies=profession_bodies,
+                )
+                created += 1
+        except Exception as e:
+            errors.append({'row': row_num, 'error': f'Unexpected error: {str(e)}'})
+
+    return Response({
+        'created': created,
+        'skipped': len(errors),
+        'errors': errors,
+    })
+
+
 # ── Profiles ──────────────────────────────────────────────────────────────────
 
 @api_view(['GET', 'POST'])

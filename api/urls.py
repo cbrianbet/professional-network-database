@@ -13,6 +13,8 @@ urlpatterns = [
 
     # ── Admin — members (explicit userId) ─────────────────────────────────
     path('admin/members/', views.admin_members_create),
+    path('admin/members/bulk-upload/', views.admin_members_bulk_upload),
+    path('admin/members/csv-template/', views.admin_members_csv_template),
 
     # ── Admin — exports ───────────────────────────────────────────────────
     path('admin/export/members/', views.export_members),

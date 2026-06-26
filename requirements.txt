@@ -14,3 +14,9 @@ whitenoise==6.12.0
 cryptography==44.0.0
 pyzipper==0.3.6
 django-countries==9.0.0
+
+# ── Testing ──────────────────────────────────────────────────────────────────
+pytest>=8.0
+pytest-django>=4.7
+pytest-xdist>=3.5
+coverage>=7.4

@@ -27,3 +27,16 @@ class DisableMigrations:
         return None
 
 MIGRATION_MODULES = DisableMigrations()
+
+# ── DRF / Auth for tests ────────────────────────────────────────────────────
+# Use JWT authentication (same as production) so tests exercise the real
+# permission classes. Tests authenticate via force_authenticate() or by
+# logging in through the auth endpoint.
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}

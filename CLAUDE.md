@@ -34,12 +34,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - `api` - contains models, views, serializers for the application
 - **Models** (`api/models.py`):
   - `User`: Custom user model (email-based, role/status fields)
-  - `Member`: Member records linked to a user
+  - `Member`: Member records linked to a user (required ForeignKey)
   - `Profile`: Professional profiles (similar to LinkedIn) linked to a user
+  - `FileResource`: Uploaded files (PDF/image) with thumbnail support
+  - `JobAdvert`: Job postings with optional file (FK to FileResource) and optional link
 - **Views** (`api/views.py`): 
   - Authentication: login, signup, me (current user)
   - CRUD operations for members, profiles, admin endpoints
-  - Export endpoints for CSV
+  - Job Adverts: public list (with deadline/30-day filter), admin create/delete
+  - Bulk Member Upload: CSV upload with validation report, auto-creates placeholder users
+  - Export endpoints for CSV (members, users) — password-protected zip via `_encrypt_and_stream_csv`
 - **Serializers** (`api/serializers.py`): DRF serializers for models
 - **Authentication**: JWT via `djangorestframework-simplejwt`; token stored in `localStorage` on frontend
 - **Permissions**: Custom permissions in `api/permissions.py` (e.g., IsAdminUser)
@@ -116,14 +120,36 @@ See `api/urls.py` for full list. Key endpoints:
 - **Admin**:
   - GET/POST `/api/admin/users` - list/create users (admin only)
   - PATCH `/api/admin/users/<int:user_id>` - update user (admin only)
-  - GET `/api/admin/members` - create member (admin only)
-  - GET `/api/admin/export/members` - export members CSV
-  - GET `/api/admin/export/users` - export users CSV
+  - POST `/api/admin/members` - create member for a specific user (admin only)
+  - POST `/api/admin/members/bulk-upload/` - bulk member upload via CSV (admin only)
+  - GET `/api/admin/members/csv-template/` - download CSV template for bulk upload
+  - GET `/api/admin/export/members` - export members CSV (password-protected zip)
+  - GET `/api/admin/export/users` - export users CSV (password-protected zip)
+  - GET `/api/admin/stats` - dashboard statistics
+  - POST `/api/admin/file-resources/` - upload file (multipart, server computes path)
+  - GET `/api/admin/file-resources/` - list file resources (cached)
+- **Job Adverts**:
+  - GET `/api/job-adverts/` - public list (auth required, filters expired/30-day)
+  - POST `/api/job-adverts/create/` - create advert (admin only, file optional)
+  - GET/DELETE `/api/job-adverts/<int:advert_id>/` - advert detail (admin only)
+
+## Admin Page Patterns
+
+The admin page (`templates/admin.html`) has its own patterns distinct from the shared-layout system:
+
+- **Layout**: Uses `.card` sections with `.form-grid` for inputs, `.pagination` for tables
+- **Pagination**: Client-side only — `paginate()`, `renderPagination()`, `goPage()` helpers
+  - State: `ALL_USERS`, `ALL_JOB_ADVERTS` arrays + `usersPage`, `jobAdvertsPage` counters
+  - `ADMIN_PER_PAGE = 10`
+- **File upload**: Two-step pattern — upload file via `FormData` to `/api/admin/file-resources/`,
+  get `id`, then POST with `file_id` to the resource-creation endpoint
+- **Bulk upload**: CSV via `FormData`, server returns `{created, skipped, errors}` report
+- **Tables**: Inline editing with `data-field` and `data-user-id` attributes; update via PATCH
 
 ## Database
 
 - Uses PostgreSQL (configured via `DATABASE_URL` in `.env`)
-- Tables: `users`, `members`, `profiles` (matches existing Node project schema)
+- Tables: `users`, `members`, `profiles`, `file_resources`, `job_adverts` (matches existing Node project schema)
 - Migrations are in `api/migrations/`
 
 ## Environment Variables
@@ -141,4 +167,8 @@ See `api/urls.py` for full list. Key endpoints:
 - The frontend is served directly by Django via `TemplateView` (see root `urls.py`)
 - Static files are served by WhiteNoise in production
 - No build step required for frontend; HTML/CSS/JS are served as static files
+- `MEDIA_URL = '/media/'` and `MEDIA_ROOT = BASE_DIR / 'media'` — uploaded files served in DEBUG only
+- CSV exports use `_encrypt_and_stream_csv()` — wraps CSV in a password-protected AES zip, returns JSON with base64 + password
+- Login response uses `token` (access) and `refresh` keys — not `access`/`refresh` like default simplejwt
+- `Member.user` is a required ForeignKey — bulk uploads auto-create placeholder users (role=user, status=pending) with random emails
 - For production, set `DEBUG=False` and ensure `ALLOWED_HOSTS` is set appropriately

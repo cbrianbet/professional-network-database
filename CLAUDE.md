@@ -141,6 +141,46 @@ All protected pages (`dashboard.html`, `data-form.html`, `admin.html`) use a cen
   5. If invalid/expired, user redirected to `login.html`
   6. Logout button clears token and redirects to `login.html`
 
+## Alert & Notification System
+
+All user-facing alerts use a centralized `AppOverlay` system — **never use `alert()` or
+`confirm()` directly**. The overlay is already included in `shared-layout.js` and
+`shared-layout.css`, so it's available on every API
+
+```javascript
+// Success modal (green checkmark)
+AppOverlay.success('Export Ready', 'Your file is ready.', 'Download');
+
+// Error modal (red X)
+AppOverlay.error('Delete Failed', err.message);
+
+// Confirmation modal (returns Promise<boolean>)
+const confirmed = await AppOverlay.confirm('Delete Member?', 'This cannot be undone.');
+if (!confirmed) return;
+```
+
+### Usage rules
+
+- **Protected pages** (dashboard, admin, data-form, jobs): `AppOverlay` is auto-loaded
+  via `shared-layout.js`. Use it directly.
+- **Standalone pages** (login.html, signup.html): include the inline `AppOverlay` CSS + JS
+  block directly in the template (copy from data-form.html's pre-2026-06-26 version or
+  extract from shared-layout.js). The global `window.AppOverlay` object is the same API.
+- **Confirm for destructive actions**: always `await AppOverlay.confirm(...)` before
+  deletes, unpublishes, or irreversible operations. The function is async — mark the
+  containing function `async`.
+- **Never** add a per-page success/error overlay. If you find a `.success-overlay`,
+  `.error-message`, or inline `alert()` in new code, replace it with `AppOverlay`.
+
+### Adding AppOverlay to a standalone page
+
+For pages that don't import `shared-layout.js` (e.g., a new standalone landing page),
+paste the `.app-overlay` CSS into the page `<style>` block and the `window.AppOverlay`
+IIFE into a `<script>` tag. The CSS lives in `static/shared-layout.css`
+(lines 278-381) and the JS in `static/shared-layout.js`. Both are ~80-40 lines. Since
+the API is global, there's no conflict if a page loads both the shared and inline
+versions.
+
 ## Key Benefits of Shared Layout
 
 - **DRY**: No duplicate sidebar/topbar code across pages

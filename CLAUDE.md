@@ -16,11 +16,76 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Start Development Server**: `python manage.py runserver`
 - **Run Migrations**: `python manage.py migrate`
 - **Create Migration**: `python manage.py makemigrations`
-- **Run Tests**: `python manage.py test` (Note: No tests are currently configured; this command will run if tests are added)
+- **Run Tests (pytest — preferred)**: `pytest` (uses SQLite via `test_settings.py`, discovers `api/tests/`)
+- **Run specific test file**: `pytest api/tests/test_bulk_upload.py -v`
+- **Run tests in parallel**: `pytest -n auto`
+- **Run with coverage**: `coverage run -m pytest && coverage report -m`
+- **Run Tests (Django runner, legacy)**: `python manage.py test` (still works for backward compat)
 - **Shell**: `python manage.py shell` for Django shell
 - **Collect Static**: `python manage.py collectstatic`
 - **Check**: `python manage.py check` for common errors
 - **Lint**: No linter configured; consider adding flake8 or pylint
+
+## Test-Driven Development
+
+The project uses **pytest + pytest-django** as the primary test framework, with
+`test_settings.py` providing a fast SQLite in-memory database and migration-free
+setup.
+
+### Test layout
+
+```
+pytest.ini                         # config: DJANGO_SETTINGS_MODULE=test_settings
+conftest.py                        # project-level fixtures (admin_user, regular_user, make_user, make_member)
+api/tests/
+├── __init__.py
+├── conftest.py                    # re-exports conftest.py fixtures
+├── helpers.py                     # auth_client(), admin_client(), make_csv() utilities
+├── test_models.py                 # existing Django TestCase tests
+├── test_serializers.py            # existing Django TestCase tests
+├── test_views.py                  # existing Django TestCase tests
+├── test_file_resources.py         # existing Django TestCase tests (some pre-existing failures)
+└── test_bulk_upload.py            # new pytest-native tests for bulk upload + CSV template
+```
+
+### Fixtures and helpers
+
+```python
+# conftest.py — available in all test files
+def test_creates_member(admin_user, make_member):
+    make_member(national_id='UNIQUE123')  # auto-increments unique IDs
+
+# helpers.py — for API tests
+from api.tests.helpers import admin_client, make_csv
+client = admin_client(admin_user)
+csv_file, _ = make_csv([{'name': 'Test', 'national_id': 'X1', ...}])
+res = client.post(reverse('api:admin-members-bulk-upload'), {'file': csv_file}, format='multipart')
+```
+
+### Key TDD conventions
+
+- Use **pytest-style** (plain `assert`, `db` fixture) for new tests — not `TestCase.setUp`
+- All URL `reverse()` calls use namespaced names: `reverse('api:admin-members-bulk-upload')`
+  — `app_name = 'api'` is set in `api/urls.py`
+- Tests run against SQLite in-memory — no Postgres required
+- For file upload tests, `make_csv()` builds a `BytesIO` with `.name = 'members.csv'`
+  set (the view checks `uploaded_file.name.lower().endswith('.csv')`)
+- Placeholder users created by bulk upload have emails starting with `bulk_` — assert
+  with `User.objects.filter(email__startswith='bulk_').exists()`
+- Existing `manage.py test` command still works (backward compat with Django TestCase tests)
+
+### Running tests during development
+
+```bash
+# Fast iteration — run only the file you're working on
+pytest api/tests/test_bulk_upload.py -v --tb=short
+
+# Full suite before commit
+pytest -q
+
+# Parallel + coverage
+coverage run -m pytest -n auto -q && coverage report -m
+```
 
 ## Code Architecture
 

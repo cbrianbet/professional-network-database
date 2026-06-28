@@ -114,32 +114,41 @@ coverage run -m pytest -n auto -q && coverage report -m
 - **Permissions**: Custom permissions in `api/permissions.py` (e.g., IsAdminUser)
 - **CORS**: Configured to allow all origins (for development)
 
-### Frontend (Shared Layout System)
+### Frontend (Django Template Inheritance)
 
-All protected pages (`dashboard.html`, `data-form.html`, `admin.html`) use a centralized layout system:
+Protected pages use standard Django template inheritance — a `base.html` provides the
+shared shell (sidebar, topbar, mobile nav), and each page extends it with `{% block %}`.
 
-- **Shared Files** (`static/`):
-  - `shared-layout.js`: Core rendering and auth helpers
-    - `renderProtectedPage({ title, activeHref, contentHtml, onMount })` - Main shell renderer
-    - `ensureAuthenticated()` - JWT token validation
-    - `loadCurrentUser()` - Fetch and display current user info
-    - `logout()` - Clear auth and redirect to login
-    - `renderSidebar(activeHref)` - Generate sidebar with active link highlighting
-    - `SHELL_LINKS` - Navigation menu config
-  - `shared-layout.css`: Unified styling for layout (sidebar, topbar, main content)
-    - Uses CSS variables for theming (see `shared-layout.css` for values)
-- **Page-Specific Files** (`templates/`):
-  - Each page has minimal markup: `<div id="shared-shell"></div>` + `<template id="page-body-template">`
-  - On `DOMContentLoaded`, calls `renderProtectedPage()` with page-specific config
-  - Content HTML (from template) is injected into `.page-content`
-  - `onMount` callback attaches page-specific event listeners
+- **Base template** (`templates/base.html`):
+  - Full HTML document with `<head>`, sidebar, topbar, mobile overlay
+  - Loads `shared-layout.css` and `shared-layout.js`
+  - Defines blocks: `title`, `page_title`, `extra_css`, `topbar_actions`, `content`, `extra_js`
+  - Sidebar links are passed via `sidebar_links` context variable (with `active` flag)
+- **Page templates** (`templates/dashboard.html`, `admin.html`, `data-form.html`, `jobs.html`):
+  - Start with `{% extends "base.html" %}` and `{% load static %}`
+  - Provide page-specific CSS in `{% block extra_css %}`
+  - Provide page HTML in `{% block content %}`
+  - Provide page JS in `{% block extra_js %}`
+  - Use `{% url %}` tags for all API endpoints and page links (never hardcode URLs)
+- **Standalone pages** (`templates/login.html`, `templates/signup.html`):
+  - Full HTML documents (no sidebar shell) — these are auth pages
+  - Include inline `AppOverlay` CSS + JS (they don't load `shared-layout.js`)
+  - Use `{% url %}` tags for links and API calls
+- **Shared JS** (`static/shared-layout.js`):
+  - `AppOverlay` — alert/confirm/success overlay system
+  - `initMobileNav()` — hamburger menu toggle
+  - `loadCurrentUser()` — fetch and display user name in topbar
+  - `logout()` — clear token and redirect to login
+  - `populateCountrySelect()`, `populateCountySelect()` — form helpers
+  - Auto-bootstraps on `DOMContentLoaded`: redirects to login if no token, inits mobile nav
+- **Shared CSS** (`static/shared-layout.css`):
+  - Layout, sidebar, topbar, mobile responsive, `.app-overlay` styles
 - **Authentication Flow**:
   1. User logs in at `login.html`, receives JWT token
   2. Token stored in `localStorage.authToken`
-  3. On protected page load, `ensureAuthenticated()` validates token with `/api/auth/me`
-  4. If valid, user info loaded and shell rendered
-  5. If invalid/expired, user redirected to `login.html`
-  6. Logout button clears token and redirects to `login.html`
+  3. On protected page load, `shared-layout.js` redirects to login if no token
+  4. Page JS validates token with `/api/auth/me` for API calls
+  5. Logout button clears token and redirects to `login.html`
 
 ## Alert & Notification System
 
@@ -181,31 +190,55 @@ IIFE into a `<script>` tag. The CSS lives in `static/shared-layout.css`
 the API is global, there's no conflict if a page loads both the shared and inline
 versions.
 
-## Key Benefits of Shared Layout
+## Key Benefits
 
-- **DRY**: No duplicate sidebar/topbar code across pages
+- **DRY**: Single `base.html` defines the shell — no duplication
+- **URL safety**: `{% url %}` tags validate routes at Django startup
 - **Consistency**: All pages share identical shell styling and navigation
-- **Maintainability**: Change shell once, apply everywhere
-- **Scalability**: New pages reuse the skeleton immediately
-- **Auth Centralization**: Token validation in one place
-- **Theme Support**: CSS variables in `shared-layout.css` define all colors
+- **Maintainability**: Change shell once in `base.html`, applies everywhere
+- **Scalability**: New pages extend `base.html` immediately
+- **Standard Django**: Future developers understand the architecture instantly
 
 ## Adding a New Protected Page
 
-1. Create `new-page.html` in `templates/` with:
-   - Link to `shared-layout.css` and `shared-layout.js`
-   - `<div id="shared-shell"></div>` container
-   - `<template id="page-body-template">` with page content
-   - Script that calls `renderProtectedPage({ title, activeHref: 'new-page.html', ... })`
-   - `onMount` callback for event wiring
-2. Add entry to `SHELL_LINKS` in `shared-layout.js`:
-   ```javascript
-   const SHELL_LINKS = [
-     { href: 'dashboard.html', label: 'Dashboard' },
-     { href: 'data-form.html', label: 'Register' },
-     { href: 'admin.html', label: 'Admin' },
-     { href: 'new-page.html', label: 'New Page' },
-   ];
+1. Add a view function in `pages/views.py`:
+   ```python
+   def new_page(request):
+       return render(request, 'new-page.html', {
+           'sidebar_links': _sidebar_links('/new-page'),
+           'active_path': '/new-page',
+       })
+   ```
+2. Add a named URL in `urls.py`:
+   ```python
+   path('new-page', views.new_page, name='new-page'),
+   ```
+3. Add the link to `SHELL_LINKS` in `pages/views.py`:
+   ```python
+   SHELL_LINKS = [
+       {'href': '/dashboard', 'label': 'Dashboard'},
+       {'href': '/register', 'label': 'Register'},
+       {'href': '/admin', 'label': 'Admin'},
+       {'href': '/jobs', 'label': 'Jobs'},
+       {'href': '/new-page', 'label': 'New Page'},
+   ]
+   ```
+4. Create `templates/new-page.html`:
+   ```html
+   {% extends "base.html" %}
+   {% load static %}
+   {% block title %}New Page — Professionals Databank{% endblock %}
+   {% block page_title %}New Page{% endblock %}
+   {% block content %}
+     <!-- Page HTML here -->
+   {% endblock %}
+   {% block extra_js %}
+   <script>
+     const token = localStorage.getItem('authToken');
+     if (!token) { window.location.href = '{% url "login" %}'; }
+     // Page JS here — use {% url %} for all API calls
+   </script>
+   {% endblock %}
    ```
 
 ## API Endpoints

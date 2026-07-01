@@ -19,6 +19,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .auth_backend import CustomJWTAuthentication, get_tokens_for_user
 from .models import User, Member, Profile, FileResource, JobAdvert
+from .queries import visible_job_adverts
 from .permissions import IsAdminUser
 from .serializers import (
     UserSerializer,
@@ -737,16 +738,7 @@ def job_adverts_list(request):
       - its deadline is in the future (or today), OR
       - it has no deadline AND was posted within the last 30 days.
     """
-    from django.utils import timezone
-    from datetime import timedelta
-
-    today = timezone.now().date()
-    thirty_days_ago = today - timedelta(days=30)
-
-    adverts = JobAdvert.objects.select_related('file', 'created_by').filter(
-        models.Q(deadline__gte=today)
-        | models.Q(deadline__isnull=True, created_at__date__gte=thirty_days_ago)
-    )
+    adverts = visible_job_adverts()
     return Response({'job_adverts': JobAdvertSerializer(adverts, many=True).data})
 
 

@@ -19,86 +19,7 @@
     .links { display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-top:1rem; font-size:0.9rem; color:#94a3b8; }
     a { color:#f8fafc; text-decoration:none; }
     a:hover { text-decoration:underline; }
-    /* ── App Overlay ────────────────────────────── */
-    .app-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: rgba(15, 25, 35, 0.65);
-      backdrop-filter: blur(4px);
-      align-items: center;
-      justify-content: center;
-    }
-    .app-overlay.show { display: flex; }
-    .app-overlay-card {
-      background: #ffffff;
-      border-radius: 20px;
-      padding: 3rem 2.5rem;
-      max-width: 460px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 24px 80px rgba(15, 25, 35, 0.45);
-      animation: appOverlayPopIn 0.35s cubic-bezier(.175, .885, .32, 1.275);
-    }
-    @keyframes appOverlayPopIn {
-      from { opacity: 0; transform: scale(0.85); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-    .app-overlay-icon {
-      width: 68px;
-      height: 68px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.5rem;
-      font-size: 2rem;
-      font-weight: 700;
-      color: #fff;
-    }
-    .app-overlay-card.error .app-overlay-icon { background: linear-gradient(135deg, #ef4444, #dc2626); }
-    .app-overlay-card.success .app-overlay-icon { background: linear-gradient(135deg, #22c55e, #16a34a); }
-    .app-overlay-card h3 {
-      font-size: 1.35rem;
-      font-weight: 700;
-      margin-bottom: 0.6rem;
-      color: #1e293b;
-    }
-    .app-overlay-card p {
-      color: #64748b;
-      font-size: 0.92rem;
-      line-height: 1.6;
-    }
-    .app-overlay-actions {
-      margin-top: 1.75rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
-    }
-    .app-overlay-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      border: none;
-      border-radius: 10px;
-      padding: 0.72rem 2rem;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-    .app-overlay-btn:active { transform: scale(0.97); }
-    .app-overlay-btn.primary {
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      color: #fff;
-    }
-    .app-overlay-btn.primary:hover { background: #334155; }
-    @media (max-width: 600px) {
-      .app-overlay-card { padding: 2rem 1.5rem; }
-      .app-overlay-icon { width: 56px; height: 56px; font-size: 1.5rem; }
-    }
+    .form-error { background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.35); color:#fca5a5; border-radius:12px; padding:0.85rem 1rem; margin-bottom:1.15rem; font-size:0.9rem; line-height:1.5; }
   </style>
 </head>
 <body>
@@ -108,104 +29,21 @@
   <div class="panel">
     <h1>Member login</h1>
     <p>Access the Professionals Databank securely. Sign in to manage your profile or continue to the admin console if you have permission.</p>
-    <form id="loginForm">
-      <label for="email">Email address</label>
-      <input id="email" type="email" autocomplete="username" required>
+    {% if error %}
+    <div class="form-error">{{ error }}</div>
+    {% endif %}
+    <form method="post" action="{% url 'login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">
+      {% csrf_token %}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      <label for="identifier">Email or National ID</label>
+      <input id="identifier" name="identifier" type="text" autocomplete="username" required value="{{ identifier }}">
       <label for="password">Password</label>
-      <input id="password" type="password" autocomplete="current-password" required>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
       <button type="submit">Sign in</button>
     </form>
     <div class="links">
-      <span>New here? <a href="/signup">Create an account</a></span>
+      <span>New here? <a href="{% url 'signup' %}">Create an account</a></span>
     </div>
   </div>
-  <script>
-    // ── App Overlay ──────────────────────────────
-    window.AppOverlay = (function() {
-      function getOverlay() {
-        let el = document.getElementById('appOverlay');
-        if (!el) {
-          el = document.createElement('div');
-          el.id = 'appOverlay';
-          el.className = 'app-overlay';
-          document.body.appendChild(el);
-        }
-        return el;
-      }
-      return {
-        show({ type, title, message, actions }) {
-          const el = getOverlay();
-          const icons = { success: '✓', error: '✕', confirm: '?' };
-          const iconLetters = icons[type] || '!';
-          const actionBtns = (actions || []).map((a, i) => {
-            const cls = a.class || (i === 0 ? 'primary' : 'secondary');
-            return `<button class="app-overlay-btn ${cls}" data-idx="${i}">${a.label}</button>`;
-          }).join('');
-          el.innerHTML = `<div class="app-overlay-card ${type}">
-            <div class="app-overlay-icon">${iconLetters}</div>
-            <h3>${title}</h3>
-            <p style="white-space:pre-wrap">${message}</p>
-            <div class="app-overlay-actions">${actionBtns}</div>
-          </div>`;
-          el.querySelectorAll('.app-overlay-btn').forEach(btn => {
-            const idx = parseInt(btn.dataset.idx);
-            btn.addEventListener('click', () => {
-              if (actions && actions[idx] && actions[idx].onClick) actions[idx].onClick();
-            });
-          });
-          // force reflow then show
-          void el.offsetWidth;
-          el.classList.add('show');
-          el.onclick = (e) => { if (e.target === el) this.hide(); };
-        },
-        hide() {
-          const el = document.getElementById('appOverlay');
-          if (el) el.classList.remove('show');
-        },
-        success(title, message, closeLabel) {
-          closeLabel = closeLabel || 'OK';
-          this.show({ type: 'success', title, message, actions: [{ label: closeLabel, onClick: () => this.hide() }] });
-        },
-        error(title, message, closeLabel) {
-          closeLabel = closeLabel || 'Dismiss';
-          this.show({ type: 'error', title, message, actions: [{ label: closeLabel, onClick: () => this.hide() }] });
-        },
-        confirm(title, message) {
-          return new Promise(resolve => {
-            this.show({
-              type: 'confirm', title, message,
-              actions: [
-                { label: 'Cancel', class: 'secondary', onClick: () => { this.hide(); resolve(false); } },
-                { label: 'Confirm', class: 'primary', onClick: () => { this.hide(); resolve(true); } },
-              ]
-            });
-          });
-        }
-      };
-    })();
-
-    // Redirect if already logged in
-    if (localStorage.getItem('authToken')) window.location.href = '/dashboard';
-
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      try {
-        const res = await fetch('/api/auth/login/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: document.getElementById('email').value.trim(),
-            password: document.getElementById('password').value,
-          }),
-        });
-        const body = await res.json();
-        if (!res.ok) throw new Error(body.error || 'Login failed');
-        localStorage.setItem('authToken', body.token);
-        window.location.href = '/dashboard';
-      } catch (err) {
-        AppOverlay.error('Login Failed', err.message);
-      }
-    });
-  </script>
 </body>
 </html>

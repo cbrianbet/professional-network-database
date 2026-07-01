@@ -15,18 +15,23 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.auth',
+    'django.contrib.sessions',
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
     'api',
+    'pages',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'pages.middleware.SessionAuthMiddleware',
 ]
 
 ROOT_URLCONF = 'urls'
@@ -36,7 +41,11 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': False,
-        'OPTIONS': {'context_processors': []},
+        'OPTIONS': {
+            'context_processors': [
+                'pages.context_processors.shell_context',
+            ],
+        },
     },
 ]
 
@@ -89,7 +98,8 @@ CACHE_MIDDLEWARE_KEY_PREFIX = 'professional_network'
 # ── REST Framework ───────────────────────────────────────────────────────────
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'api.auth_backend.CustomJWTAuthentication',
+        'api.auth_backend.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -123,6 +133,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Nairobi'
 USE_TZ = True
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 # ── Admin seeding ─────────────────────────────────────────────────────────────
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', '')

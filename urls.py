@@ -1,34 +1,32 @@
 from django.urls import path, include, re_path
-from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 
-# Clean URL routes matching the frontend links in shared-layout.js
-def tpl(name):
-    return TemplateView.as_view(template_name=name)
+from pages import views as page_views
 
 urlpatterns = [
     path('api/', include('api.urls')),
 
     # Auth pages
-    path('',          tpl('index.html')),
-    path('login',     tpl('login.html')),
-    path('signup',    tpl('signup.html')),
+    path('', page_views.index, name='index'),
+    path('login', page_views.login_page, name='login'),
+    path('signup', page_views.signup_page, name='signup'),
+    path('logout', page_views.logout_page, name='logout'),
 
     # Protected app pages
-    path('dashboard', tpl('dashboard.html')),
-    path('register',  tpl('data-form.html')),
-    path('admin-panel', tpl('admin.html')),
-    path('admin', tpl('admin.html')),
-    path('data-form', tpl('data-form.html')),
-    path('jobs',     tpl('jobs.html')),
+    path('dashboard', page_views.dashboard, name='dashboard'),
+    path('register', page_views.register, name='register'),
+    path('admin-panel', page_views.admin_panel, name='admin-panel'),
+    path('admin', page_views.admin_panel, name='admin'),
+    path('data-form', page_views.data_form, name='data-form'),
+    path('jobs', page_views.jobs, name='jobs'),
 
     # Legacy .html paths (backwards compat if any bookmarks exist)
-    path('dashboard.html',  tpl('dashboard.html')),
-    path('data-form.html',  tpl('data-form.html')),
-    path('admin.html',      tpl('admin.html')),
-    path('login.html',      tpl('login.html')),
-    path('signup.html',     tpl('signup.html')),
+    path('dashboard.html', page_views.dashboard, name='dashboard-legacy'),
+    path('data-form.html', page_views.data_form, name='data-form-legacy'),
+    path('admin.html', page_views.admin_panel, name='admin-legacy'),
+    path('login.html', page_views.login_page, name='login-legacy'),
+    path('signup.html', page_views.signup_page, name='signup-legacy'),
 ]
 
 if settings.DEBUG:

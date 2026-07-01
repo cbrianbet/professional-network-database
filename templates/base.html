@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Professionals Databank{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'shared-layout.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body{% if session_jwt %} data-session-token="{{ session_jwt }}"{% endif %}>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-name">Professionals Databank</div>
+        <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+      </div>
+      <nav class="sidebar-nav">
+        {% for link in shell_links %}
+        <a href="{{ link.href }}"
+           class="nav-item{% if active_path == link.href %} active{% endif %}"
+           data-route="{{ link.route }}">{{ link.label }}</a>
+        {% endfor %}
+      </nav>
+      <div class="sidebar-footer">Professionals Databank</div>
+    </aside>
+    <div class="main">
+      <div class="topbar">
+        <button class="topbar-hamburger" id="hamburgerBtn" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <line x1="3" y1="6"  x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <div class="page-title" id="pageTitle">{% block page_title %}Dashboard{% endblock %}</div>
+        {% block topbar_actions %}{% endblock %}
+        <div class="auth-user">
+          <span id="authUserName">{% if current_user %}{{ current_user.name|default:"Member" }}{% else %}Member{% endif %}</span>
+          <form method="post" action="{% url 'logout' %}" style="display:inline;margin:0">
+            {% csrf_token %}
+            <button id="logoutButton" type="submit">Log out</button>
+          </form>
+        </div>
+      </div>
+      <main class="page-content" id="pageContent">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script src="{% static 'shared-layout.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

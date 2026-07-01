@@ -1,110 +1,67 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jobs — Professionals Databank</title>
-  <link rel="stylesheet" href="{% static 'shared-layout.css' %}">
-  <style>
-    :root {
-      --bg: #0b0f14;
-      --surface: #131920;
-      --surface2: #1a2330;
-      --border: rgba(255, 255, 255, 0.07);
-      --gold: #d4a843;
-      --gold2: #f0c96a;
-      --teal: #2ec4b6;
-      --text: #e8edf3;
-      --muted: #6b7d8f;
-      --radius: 12px;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-    .page-pad { padding: 1.5rem clamp(1rem, 4vw, 3rem) 5rem; max-width: 1200px; margin: 0 auto; }
-    .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--gold); }
-    .jobs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
-    .job-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: transform 0.18s, border-color 0.18s; }
-    .job-card:hover { transform: translateY(-3px); border-color: rgba(212, 168, 67, 0.4); }
-    .job-type { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.72rem; font-weight: 600; background: rgba(212, 168, 67, 0.18); color: var(--gold); margin-bottom: 0.85rem; }
-    .job-title { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 0.35rem; }
-    .job-company { font-size: 0.95rem; color: var(--teal); margin-bottom: 0.85rem; }
-    .job-meta { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
-    .job-meta.deadline { color: var(--gold2); }
-    .job-view { display: inline-block; margin-top: 0.75rem; padding: 0.45rem 1.1rem; background: linear-gradient(135deg, var(--gold), var(--gold2)); color: #0b0f14; border-radius: 100px; text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: opacity 0.18s; }
-    .job-view:hover { opacity: 0.88; }
-    .empty { color: var(--muted); font-size: 0.95rem; padding: 3rem 0; text-align: center; }
-    .loading { color: var(--muted); font-size: 0.95rem; padding: 3rem 0; text-align: center; }
-  </style>
-</head>
-<body>
-  <div id="shared-shell"></div>
-  <template id="page-body-template">
-    <div class="page-pad">
-      <h1 class="page-title">Job Opportunities</h1>
-      <div id="jobsStatus" class="loading" style="display:none">Loading…</div>
-      <div id="jobsGrid" class="jobs-grid" style="display:none"></div>
-      <div id="jobsEmpty" class="empty" style="display:none">No job adverts have been posted yet.</div>
+
+{% block title %}Jobs — Professionals Databank{% endblock %}
+{% block page_title %}Job Opportunities{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --bg: #0b0f14;
+    --surface: #131920;
+    --surface2: #1a2330;
+    --border: rgba(255, 255, 255, 0.07);
+    --gold: #d4a843;
+    --gold2: #f0c96a;
+    --teal: #2ec4b6;
+    --text: #e8edf3;
+    --muted: #6b7d8f;
+    --radius: 12px;
+  }
+  .page-pad { padding: 1.5rem clamp(1rem, 4vw, 3rem) 5rem; max-width: 1200px; margin: 0 auto; }
+  .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--gold); }
+  .jobs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+  .job-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: transform 0.18s, border-color 0.18s; }
+  .job-card:hover { transform: translateY(-3px); border-color: rgba(212, 168, 67, 0.4); }
+  .job-type { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.72rem; font-weight: 600; background: rgba(212, 168, 67, 0.18); color: var(--gold); margin-bottom: 0.85rem; }
+  .job-title { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 0.35rem; }
+  .job-company { font-size: 0.95rem; color: var(--teal); margin-bottom: 0.85rem; }
+  .job-meta { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
+  .job-meta.deadline { color: var(--gold2); }
+  .job-view { display: inline-block; margin-top: 0.75rem; padding: 0.45rem 1.1rem; background: linear-gradient(135deg, var(--gold), var(--gold2)); color: #0b0f14; border-radius: 100px; text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: opacity 0.18s; }
+  .job-view:hover { opacity: 0.88; }
+  .job-view.teal { background: var(--teal); color: #0b0f14; margin-left: 0.5rem; }
+  .empty { color: var(--muted); font-size: 0.95rem; padding: 3rem 0; text-align: center; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-pad">
+  <h1 class="page-title">Job Opportunities</h1>
+  {% if job_adverts %}
+  <div class="jobs-grid">
+    {% for advert in job_adverts %}
+    <div class="job-card">
+      <span class="job-type">{{ advert.file_type|default:""|upper }}</span>
+      <div class="job-title">{{ advert.title }}</div>
+      <div class="job-company">{{ advert.company }}</div>
+      <div class="job-meta">Posted {{ advert.created_at|date:"Y-m-d" }}</div>
+      {% if advert.deadline %}
+      <div class="job-meta deadline">⏰ Deadline: {{ advert.deadline|date:"Y-m-d" }}</div>
+      {% else %}
+      <div class="job-meta">No deadline</div>
+      {% endif %}
+      {% if advert.file and advert.file.upload_path %}
+      <a class="job-view" href="/media/{{ advert.file.upload_path }}" target="_blank" rel="noopener">View {{ advert.file_type|upper }}</a>
+      {% endif %}
+      {% if advert.link %}
+      <a class="job-view teal" href="{{ advert.link }}" target="_blank" rel="noopener">Apply ↗</a>
+      {% endif %}
     </div>
-  </template>
-
-  <script src="{% static 'shared-layout.js' %}"></script>
-  <script>
-    async function loadJobAdverts() {
-      const statusEl = document.getElementById('jobsStatus');
-      const gridEl = document.getElementById('jobsGrid');
-      const emptyEl = document.getElementById('jobsEmpty');
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        statusEl.style.display = 'none';
-        return;
-      }
-      statusEl.style.display = 'block';
-      try {
-        const res = await fetch('/api/job-adverts/', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error('Unable to load job adverts');
-        const data = await res.json();
-        statusEl.style.display = 'none';
-        const adverts = data.job_adverts || [];
-        if (!adverts.length) {
-          emptyEl.style.display = 'block';
-          return;
-        }
-        gridEl.style.display = 'grid';
-        gridEl.innerHTML = adverts.map(a => {
-          const deadline = a.deadline
-            ? `<div class="job-meta deadline">⏰ Deadline: ${a.deadline}</div>`
-            : `<div class="job-meta">No deadline</div>`;
-          const type = (a.file_type || '').toUpperCase();
-          const fileUrl = a.file_url || '#';
-          return `
-            <div class="job-card">
-              <span class="job-type">${type}</span>
-              <div class="job-title">${a.title}</div>
-              <div class="job-company">${a.company}</div>
-              <div class="job-meta">Posted ${a.created_at ? a.created_at.substring(0, 10) : ''}</div>
-              ${deadline}
-              ${fileUrl ? `<a class="job-view" href="${fileUrl}" target="_blank" rel="noopener">View ${type}</a>` : ''}
-              ${a.link ? `<a class="job-view" href="${a.link}" target="_blank" rel="noopener" style="background:var(--teal)">Apply ↗</a>` : ''}
-            </div>
-          `;
-        }).join('');
-      } catch (err) {
-        statusEl.style.display = 'none';
-        AppOverlay.error('Unable to load jobs', err.message);
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      renderProtectedPage({
-        title: 'Jobs',
-        activeHref: 'jobs.html',
-        contentHtml: document.getElementById('page-body-template').innerHTML,
-        onMount: loadJobAdverts,
-      });
-    });
-  </script>
-</body>
-</html>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">No job adverts have been posted yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

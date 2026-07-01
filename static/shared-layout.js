@@ -5,6 +5,11 @@ const SHELL_LINKS = [
 	{ href: "jobs.html", label: "Jobs" },
 ];
 
+function syncSessionTokenFromBody() {
+	const token = document.body?.dataset?.sessionToken;
+	if (token) localStorage.setItem("authToken", token);
+}
+
 const counties = [
 	{
 		name: "Mombasa",
@@ -450,20 +455,19 @@ const countries = [
 ];
 
 async function ensureAuthenticated() {
+	syncSessionTokenFromBody();
+	const headers = {};
 	const token = localStorage.getItem("authToken");
-	if (!token) {
-		window.location.href = "/login";
-		return false;
-	}
+	if (token) headers.Authorization = `Bearer ${token}`;
 	try {
-		const res = await fetch("/api/auth/me/", { headers: { Authorization: `Bearer ${token}` } });
-		if (!res.ok) throw new Error("Unauthorized");
-		return true;
+		const res = await fetch("/api/auth/me/", { headers, credentials: "same-origin" });
+		if (res.ok) return true;
 	} catch {
-		localStorage.removeItem("authToken");
-		window.location.href = "/login";
-		return false;
+		/* fall through to redirect */
 	}
+	localStorage.removeItem("authToken");
+	window.location.href = "/login";
+	return false;
 }
 
 function renderSidebar(activeHref) {
@@ -514,10 +518,12 @@ function initMobileNav() {
 }
 
 async function loadCurrentUser() {
+	syncSessionTokenFromBody();
+	const headers = {};
 	const token = localStorage.getItem("authToken");
-	if (!token) return null;
+	if (token) headers.Authorization = `Bearer ${token}`;
 	try {
-		const res = await fetch("/api/auth/me/", { headers: { Authorization: `Bearer ${token}` } });
+		const res = await fetch("/api/auth/me/", { headers, credentials: "same-origin" });
 		if (!res.ok) throw new Error("Unauthorized");
 		const data = await res.json();
 		window.currentUser = data.user;
@@ -728,6 +734,17 @@ window.AppOverlay = (function () {
     },
   };
 })();
+
+function initServerShell() {
+	initMobileNav();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+	syncSessionTokenFromBody();
+	if (document.querySelector(".layout") && !document.getElementById("shared-shell")) {
+		initServerShell();
+	}
+});
 
 async function renderProtectedPage({ title, activeHref, contentHtml, onMount, topbarHtml }) {
 	document.title = `${title} — Professionals Databank`;

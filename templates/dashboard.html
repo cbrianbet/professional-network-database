@@ -1265,7 +1265,7 @@
   </style>
 </head>
 
-<body>
+<body{% if session_jwt %} data-session-token="{{ session_jwt }}"{% endif %}>
   <div id="shared-shell"></div>
 
   <template id="dashboard-content">

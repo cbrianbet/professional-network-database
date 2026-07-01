@@ -15,18 +15,24 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.auth',
+    'django.contrib.sessions',
+    'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
     'api',
+    'pages',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
 ROOT_URLCONF = 'urls'
@@ -36,13 +42,20 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': False,
-        'OPTIONS': {'context_processors': []},
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.request',
+                'django.contrib.messages.context_processors.messages',
+                'pages.context_processors.current_user',
+                'pages.context_processors.sidebar_links',
+            ]
+        },
     },
 ]
 
 WSGI_APPLICATION = 'wsgi.application'
 
-# ── Database ────────────────────────────────────────────────────────────────
+# ── Database ───────────────────────────────────────────────────────────────
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
 if DATABASE_URL:
@@ -71,20 +84,25 @@ else:
         }
     }
 
-# ── Cache ───────────────────────────────────────────────────────────────────
+# ── Cache ───────────────��────────────────────────────────────────────────
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'unique-snowflake',
-        'TIMEOUT': 300,  # 5 minutes default timeout
+        'TIMEOUT': 300,
         'OPTIONS': {
             'MAX_ENTRIES': 1000
         }
     }
 }
 
-# Cache key prefix for our app
 CACHE_MIDDLEWARE_KEY_PREFIX = 'professional_network'
+
+# ── Sessions ───────────────────────────────────────────────────────────────
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 7
+CSRF_COOKIE_HTTPONLY = False
 
 # ── REST Framework ───────────────────────────────────────────────────────────
 REST_FRAMEWORK = {
@@ -96,7 +114,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-# ── JWT ──────────────────────────────────────────────────────────────────────
+# ── JWT ──────────────────────────────────────────────────────────────────
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
@@ -106,16 +124,16 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
 }
 
-# ── CORS ─────────────────────────────────────────────────────────────────────
+# ── CORS ─────────────────────────────────────────────────────────────────
 CORS_ALLOW_ALL_ORIGINS = True
 
-# ── Static files ──────────────────────────────────────────────────────────────
+# ── Static files ─────────────────────────────────────────────────────────
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# ── Media (uploaded files) ────────────────────────────────────────────────
+# ── Media (uploaded files) ──────────────────────────────────────────────
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -124,28 +142,25 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Nairobi'
 USE_TZ = True
 
-# ── Admin seeding ─────────────────────────────────────────────────────────────
+# ── Admin seeding ─────────────────────────────────────────────────────────
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', '')
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '')
 
-# ── CSV Encryption ───────────────────────────────────────────────────────────
+# ── CSV Encryption ───────────────────────────────────────────────────────
 from cryptography.fernet import Fernet
 CSV_ENCRYPTION_KEY = os.environ.get('CSV_ENCRYPTION_KEY')
 if not CSV_ENCRYPTION_KEY:
     if DEBUG:
-        # Generate a key for development (NOT SECURE FOR PRODUCTION)
         CSV_ENCRYPTION_KEY = Fernet.generate_key()
-        # In a real deployment, you should set this via environment variable
         import warnings
         warnings.warn('Using generated CSV encryption key. Set CSV_ENCRYPTION_KEY environment variable for production.')
     else:
         raise ImproperlyConfigured('CSV_ENCRYPTION_KEY must be set in environment variables')
 else:
-    # Ensure it's bytes
     if isinstance(CSV_ENCRYPTION_KEY, str):
         CSV_ENCRYPTION_KEY = CSV_ENCRYPTION_KEY.encode()
 
-# ── Email Configuration ───────────────────────────────────────────────────────
+# ── Email Configuration ────────────────────────────────────────────────────
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))

@@ -1283,7 +1283,32 @@
       </div>
 
       <!-- KPIs -->
-      <div class="kpi-grid" id="kpiGrid"></div>
+      <div class="kpi-grid">
+        <div class="kpi-card gold">
+          <div class="kpi-icon">👥</div>
+          <div class="kpi-val">{{ kpi_total }}</div>
+          <div class="kpi-label">Total Members</div>
+          <div class="kpi-delta up">▲ {{ kpi_total }} overall</div>
+        </div>
+        <div class="kpi-card teal">
+          <div class="kpi-icon">💼</div>
+          <div class="kpi-val">{{ kpi_employed }}</div>
+          <div class="kpi-label">Employed</div>
+          <div class="kpi-delta up">▲ {% if kpi_total > 0 %}{{ kpi_employed_pct }}% of cohort{% else %}0% of cohort{% endif %}</div>
+        </div>
+        <div class="kpi-card rose">
+          <div class="kpi-icon">🔍</div>
+          <div class="kpi-val">{{ kpi_seeking }}</div>
+          <div class="kpi-label">Seeking Work</div>
+          <div class="kpi-delta down">▼ {% if kpi_total > 0 %}{{ kpi_seeking_pct }}% of cohort{% else %}0% of cohort{% endif %}</div>
+        </div>
+        <div class="kpi-card sky">
+          <div class="kpi-icon">🎓</div>
+          <div class="kpi-val">{{ kpi_interns }}</div>
+          <div class="kpi-label">Interns / Attachees</div>
+          <div class="kpi-delta up">▲ Active placements</div>
+        </div>
+      </div>
 
       <!-- Charts -->
       <div class="charts-row">
@@ -2561,7 +2586,6 @@
     async function initDashboardPage() {
       await loadMembers();
       const set = cohortSet();
-      buildKPI(set);
       buildEmploymentChart(set);
       buildDonut(set);
       buildSkillsCloud(set);

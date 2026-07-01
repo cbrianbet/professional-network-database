@@ -6,6 +6,10 @@ from api.serializers import SignupSerializer
 from .auth import authenticate_credentials, login_user, logout_user
 from .decorators import admin_required, login_required
 from .queries import visible_job_adverts
+from api.models import Member
+
+from django.db import models
+from django.db.models import Q
 
 
 def index(request):
@@ -81,8 +85,37 @@ def logout_page(request):
 
 @login_required
 def dashboard(request):
+    # Fetch all members for KPI calculations
+    members = Member.objects.all()
+    total = members.count()
+    employed = members.filter(
+        Q(status__istartswith='employed') |
+        Q(status__iexact='self-employed / business owner') |
+        Q(status__iexact='on contract terms') |
+        Q(status__iexact='on casual terms')
+    ).count()
+    seeking = members.filter(
+        Q(status__icontains='unemployed') |
+        Q(status__iexact='active application') |
+        Q(status__iexact='shortlisted') |
+        Q(status__iexact='attended interview') |
+        Q(status__iexact='tsc transfer request')
+    ).count()
+    interns = members.filter(
+        Q(status__icontains='internship') |
+        Q(status__icontains='attachment')
+    ).count()
+    employed_pct = round((employed / total * 100) if total > 0 else 0)
+    seeking_pct = round((seeking / total * 100) if total > 0 else 0)
+
     return render(request, 'dashboard.html', {
         'active_path': '/dashboard',
+        'kpi_total': total,
+        'kpi_employed': employed,
+        'kpi_seeking': seeking,
+        'kpi_interns': interns,
+        'kpi_employed_pct': employed_pct,
+        'kpi_seeking_pct': seeking_pct,
     })
 
 

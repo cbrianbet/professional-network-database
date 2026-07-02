@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
@@ -10,6 +11,7 @@ from api.models import Member
 
 from django.db import models
 from django.db.models import Q
+from django.core.cache import cache
 
 
 def index(request):
@@ -47,21 +49,19 @@ def login_page(request):
         'identifier': identifier,
         'next': request.GET.get('next', ''),
     })
-
-
-@require_http_methods(['GET', 'POST'])
+@require_http_methods(["GET", "POST"])
 def signup_page(request):
-    if getattr(request.user, 'is_authenticated', False):
-        return redirect('dashboard')
+    if getattr(request.user, "is_authenticated", False):
+        return redirect("dashboard")
 
     error = None
     form_data = {}
-    if request.method == 'POST':
+    if request.method == "POST":
         form_data = {
-            'name': request.POST.get('name', '').strip(),
-            'email': request.POST.get('email', '').strip(),
-            'national_id': request.POST.get('national_id', '').strip(),
-            'password': request.POST.get('password', ''),
+            "name": request.POST.get("name", "").strip(),
+            "email": request.POST.get("email", "").strip(),
+            "national_id": request.POST.get("national_id", "").strip(),
+            "password": request.POST.get("password", ""),
         }
         sz = SignupSerializer(data=form_data)
         if not sz.is_valid():
@@ -69,53 +69,63 @@ def signup_page(request):
         else:
             user = sz.save()
             login_user(request, user)
-            return redirect('dashboard')
+            # Clear dashboard KPI cache when new user registers
+            cache.delete("dashboard_kpis")
+            return redirect("dashboard")
 
-    return render(request, 'signup.html', {
-        'error': error,
-        'form': form_data,
+    return render(request, "signup.html", {
+        "error": error,
+        "form": form_data,
     })
 
 
-@require_http_methods(['GET', 'POST'])
 def logout_page(request):
     logout_user(request)
     return redirect('login')
 
-
 @login_required
 def dashboard(request):
-    # Fetch all members for KPI calculations
-    members = Member.objects.all()
-    total = members.count()
-    employed = members.filter(
-        Q(status__istartswith='employed') |
-        Q(status__iexact='self-employed / business owner') |
-        Q(status__iexact='on contract terms') |
-        Q(status__iexact='on casual terms')
-    ).count()
-    seeking = members.filter(
-        Q(status__icontains='unemployed') |
-        Q(status__iexact='active application') |
-        Q(status__iexact='shortlisted') |
-        Q(status__iexact='attended interview') |
-        Q(status__iexact='tsc transfer request')
-    ).count()
-    interns = members.filter(
-        Q(status__icontains='internship') |
-        Q(status__icontains='attachment')
-    ).count()
-    employed_pct = round((employed / total * 100) if total > 0 else 0)
-    seeking_pct = round((seeking / total * 100) if total > 0 else 0)
-
-    return render(request, 'dashboard.html', {
-        'active_path': '/dashboard',
-        'kpi_total': total,
-        'kpi_employed': employed,
-        'kpi_seeking': seeking,
-        'kpi_interns': interns,
-        'kpi_employed_pct': employed_pct,
-        'kpi_seeking_pct': seeking_pct,
+    # Try to get cached KPI data
+    cache_key = "dashboard_kpis"
+    cached_data = cache.get(cache_key)
+    
+    if cached_data is not None:
+        total, employed, seeking, interns, employed_pct, seeking_pct = cached_data
+    else:
+        # Fetch all members for KPI calculations
+        members = Member.objects.all()
+        total = members.count()
+        employed = members.filter(
+            Q(status__istartswith="employed") |
+            Q(status__iexact="self-employed / business owner") |
+            Q(status__iexact="on contract terms") |
+            Q(status__iexact="on casual terms")
+        ).count()
+        seeking = members.filter(
+            Q(status__icontains="unemployed") |
+            Q(status__iexact="active application") |
+            Q(status__iexact="shortlisted") |
+            Q(status__iexact="attended interview") |
+            Q(status__iexact="tsc transfer request")
+        ).count()
+        interns = members.filter(
+            Q(status__icontains="internship") |
+            Q(status__icontains="attachment")
+        ).count()
+        employed_pct = round((employed / total * 100) if total > 0 else 0)
+        seeking_pct = round((seeking / total * 100) if total > 0 else 0)
+        
+        # Cache the results for 20 minutes (1200 seconds)
+        cache.set(cache_key, (total, employed, seeking, interns, employed_pct, seeking_pct), 1200)
+    
+    return render(request, "dashboard.html", {
+        "active_path": "/dashboard",
+        "kpi_total": total,
+        "kpi_employed": employed,
+        "kpi_seeking": seeking,
+        "kpi_interns": interns,
+        "kpi_employed_pct": employed_pct,
+        "kpi_seeking_pct": seeking_pct,
     })
 
 

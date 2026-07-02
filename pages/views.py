@@ -49,6 +49,8 @@ def login_page(request):
         'identifier': identifier,
         'next': request.GET.get('next', ''),
     })
+
+
 @require_http_methods(["GET", "POST"])
 def signup_page(request):
     if getattr(request.user, "is_authenticated", False):
@@ -115,8 +117,8 @@ def dashboard(request):
         employed_pct = round((employed / total * 100) if total > 0 else 0)
         seeking_pct = round((seeking / total * 100) if total > 0 else 0)
         
-        # Cache the results for 20 minutes (1200 seconds)
-        cache.set(cache_key, (total, employed, seeking, interns, employed_pct, seeking_pct), 1200)
+        # Cache the results for 1hr (3600 seconds)
+        cache.set(cache_key, (total, employed, seeking, interns, employed_pct, seeking_pct), 3600)
     
     return render(request, "dashboard.html", {
         "active_path": "/dashboard",

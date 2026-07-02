@@ -11,6 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'replace-this-in-production')
 DEBUG = True
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', '*').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.contenttypes',

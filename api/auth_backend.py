@@ -22,6 +22,20 @@ def get_tokens_for_user(user: User) -> dict:
     }
 
 
+class SessionAuthentication(authentication.BaseAuthentication):
+    """Authenticate browser requests using the session user id."""
+
+    def authenticate(self, request):
+        user_id = request.session.get('_auth_user_id')
+        if not user_id:
+            return None
+        try:
+            user = User.objects.get(pk=user_id, status='active')
+        except User.DoesNotExist:
+            return None
+        return (user, None)
+
+
 class CustomJWTAuthentication(authentication.BaseAuthentication):
     """
     Reads Bearer token, verifies it with SimpleJWT, then loads our custom User.

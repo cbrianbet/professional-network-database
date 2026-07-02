@@ -19,6 +19,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .auth_backend import CustomJWTAuthentication, get_tokens_for_user
 from .models import User, Member, Profile, FileResource, JobAdvert
+from .queries import visible_job_adverts
 from .permissions import IsAdminUser
 from .serializers import (
     UserSerializer,
@@ -183,6 +184,8 @@ def members_list_create(request):
         err = next(iter(sz.errors.values()))[0]
         return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
     member = sz.save()
+    # Clear dashboard KPI cache when a new member is created
+    cache.delete("dashboard_kpis")
     return Response({'member': MemberSerializer(member).data})
 
 
@@ -204,6 +207,8 @@ def member_detail_update_delete(request, member_id):
 
     if request.method == 'DELETE':
         member.delete()
+        # Clear dashboard KPI cache when a member is deleted
+        cache.delete("dashboard_kpis")
         return Response({'success': True})
 
     # PATCH
@@ -212,6 +217,8 @@ def member_detail_update_delete(request, member_id):
         err = next(iter(sz.errors.values()))[0]
         return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
     member = sz.update(member, sz.validated_data)
+    # Clear dashboard KPI cache when a member is updated
+    cache.delete("dashboard_kpis")
     return Response({'member': MemberSerializer(member).data})
 
 
@@ -234,6 +241,8 @@ def admin_members_create(request):
         err = next(iter(sz.errors.values()))[0]
         return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
     member = sz.save()
+    # Clear dashboard KPI cache when a member is created via admin
+    cache.delete("dashboard_kpis")
     return Response({'member': MemberSerializer(member).data}, status=status.HTTP_201_CREATED)
 
 
@@ -441,6 +450,8 @@ def admin_members_bulk_upload(request):
         except Exception as e:
             errors.append({'row': row_num, 'error': f'Unexpected error: {str(e)}'})
 
+    # Clear dashboard KPI cache after bulk upload
+    cache.delete("dashboard_kpis")
     return Response({
         'created': created,
         'skipped': len(errors),
@@ -737,16 +748,7 @@ def job_adverts_list(request):
       - its deadline is in the future (or today), OR
       - it has no deadline AND was posted within the last 30 days.
     """
-    from django.utils import timezone
-    from datetime import timedelta
-
-    today = timezone.now().date()
-    thirty_days_ago = today - timedelta(days=30)
-
-    adverts = JobAdvert.objects.select_related('file', 'created_by').filter(
-        models.Q(deadline__gte=today)
-        | models.Q(deadline__isnull=True, created_at__date__gte=thirty_days_ago)
-    )
+    adverts = visible_job_adverts()
     return Response({'job_adverts': JobAdvertSerializer(adverts, many=True).data})
 
 

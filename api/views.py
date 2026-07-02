@@ -42,6 +42,12 @@ AUTHED = [IsAuthenticated]
 ADMIN  = [IsAdminUser]
 
 
+def invalidate_members_cache():
+    # Central place for members-related cache invalidation
+    cache.delete("dashboard_kpis")
+    cache.delete("members_list_admin")
+    cache.delete_pattern("members_list_user_*")
+
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
@@ -193,9 +199,7 @@ def members_list_create(request):
         return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
     member = sz.save()
     # Clear dashboard KPI & members list cache when a new member is created
-    cache.delete("dashboard_kpis")
-    cache.delete("members_list_admin")
-    cache.delete_pattern("members_list_user_*")
+    invalidate_members_cache()
     return Response({'member': MemberSerializer(member).data})
 
 
@@ -218,9 +222,7 @@ def member_detail_update_delete(request, member_id):
     if request.method == 'DELETE':
         member.delete()
         # Clear dashboard KPI cache when a member is deleted
-        cache.delete("dashboard_kpis")
-        cache.delete("members_list_admin")
-        cache.delete_pattern("members_list_user_*")
+        invalidate_members_cache()
         return Response({'success': True})
 
     # PATCH
@@ -230,9 +232,7 @@ def member_detail_update_delete(request, member_id):
         return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
     member = sz.update(member, sz.validated_data)
     # Clear dashboard KPI cache when a member is updated
-    cache.delete("dashboard_kpis")
-    cache.delete("members_list_admin")
-    cache.delete_pattern("members_list_user_*")
+    invalidate_members_cache()
     return Response({'member': MemberSerializer(member).data})
 
 
@@ -256,9 +256,7 @@ def admin_members_create(request):
         return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
     member = sz.save()
     # Clear dashboard KPI cache when a member is created via admin
-    cache.delete("dashboard_kpis")
-    cache.delete("members_list_admin")
-    cache.delete_pattern("members_list_user_*")
+    invalidate_members_cache()
     return Response({'member': MemberSerializer(member).data}, status=status.HTTP_201_CREATED)
 
 
@@ -467,9 +465,7 @@ def admin_members_bulk_upload(request):
             errors.append({'row': row_num, 'error': f'Unexpected error: {str(e)}'})
 
     # Clear dashboard KPI cache after bulk upload
-    cache.delete("dashboard_kpis")
-    cache.delete("members_list_admin")
-    cache.delete_pattern("members_list_user_*")
+    invalidate_members_cache()
     return Response({
         'created': created,
         'skipped': len(errors),

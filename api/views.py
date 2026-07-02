@@ -172,7 +172,16 @@ def admin_users_update(request, user_id):
 @permission_classes(AUTHED)
 def members_list_create(request):
     if request.method == 'GET':
-        qs = Member.objects.all() if request.user.role == 'admin' else Member.objects.filter(user=request.user)
+        print(cache.get("members_list"))
+        cache_key = "members_list"
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            print("members_list")
+            qs = cached_data
+        else:
+            qs = Member.objects.all() if request.user.role == 'admin' else Member.objects.filter(user=request.user)
+            cache.set(cache_key, qs, 3600)  # Cache for 1 hour
+        
         return Response({'members': MemberSerializer(qs, many=True).data})
 
     # POST — admin only
@@ -184,8 +193,9 @@ def members_list_create(request):
         err = next(iter(sz.errors.values()))[0]
         return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
     member = sz.save()
-    # Clear dashboard KPI cache when a new member is created
+    # Clear dashboard KPI & members list cache when a new member is created
     cache.delete("dashboard_kpis")
+    cache.delete("members_list")
     return Response({'member': MemberSerializer(member).data})
 
 

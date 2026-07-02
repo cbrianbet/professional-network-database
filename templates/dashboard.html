@@ -2018,7 +2018,8 @@
       sortKey = sf; sortDir = (sd === 'desc' ? -1 : 1);
 
       filtered = MEMBERS.filter(m => {
-        const txt = (m.name + m.career + m.skills.join(' ') + m.location + m.subLocation + m.institution + m.email + ' ' + m.profession_bodies.join(' ') + ' ' + m.national_id).toLowerCase();
+        const txt = (m.name + m.career + m.skills.join(' ') + m.location + m.subLocation + m.institution + m.email + ' ' + m.profession_bodies.join(' ') + ' ' + m.nationalId).toLowerCase();
+
         if (q && !txt.includes(q)) return false;
         if (status && m.status !== status) return false;
         if (gender && m.gender !== gender) return false;

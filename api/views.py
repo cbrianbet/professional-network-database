@@ -46,7 +46,7 @@ def invalidate_members_cache():
     # Central place for members-related cache invalidation
     cache.delete("dashboard_kpis")
     cache.delete("members_list_admin")
-    cache.delete_pattern("members_list_user_*")
+    cache.delete("members_list_user.*")
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────

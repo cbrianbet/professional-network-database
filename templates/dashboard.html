@@ -1583,7 +1583,7 @@
           </svg>
           <input type="text" id="searchInput" placeholder="Search members…" oninput="applyFilters()">
         </div>
-        <button class="topbar-btn" onclick="exportMembersCSV().catch(err => AppOverlay.error('Export Failed', err.message))">
+        <button class="topbar-btn" onclick="showColumnSelectionModal()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
@@ -1635,6 +1635,31 @@
             onclick="document.getElementById('modalOverlay').classList.remove('show')">✕</button>
         </div>
         <div class="modal-body" id="modalBody"></div>
+      </div>
+    </div>
+    <!-- Column selection modal -->
+    <div class="modal-overlay" id="columnModalOverlay" onclick="closeColumnModal(event)">
+      <div class="modal" id="columnModal">
+        <div class="modal-header">
+          <div class="modal-title">Export Columns</div>
+          <button class="modal-close"
+            onclick="document.getElementById('columnModalOverlay').classList.remove('show')">✕</button>
+        </div>
+        <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+          <div class="column-selection">
+            <div class="column-select-actions">
+              <button class="column-select-btn" onclick="selectAllColumns()">Select All</button>
+              <button class="column-select-btn" onclick="deselectAllColumns()">Select None</button>
+            </div>
+            <div class="column-checkboxes" id="columnCheckboxes">
+              <!-- Checkboxes will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="row-btn" onclick="exportSelectedColumns()">Export</button>
+          <button class="row-btn" onclick="document.getElementById('columnModalOverlay').classList.remove('show')">Cancel</button>
+        </div>
       </div>
     </div>
   </template>
@@ -2494,10 +2519,15 @@
     /* ═══════════════════════════════════════════════════════
        EXPORT
     ══════════════════════════════════════════════════════════ */
-    async function exportMembersCSV() {
+    async function exportMembersCSV(columns = null) {
       try {
         const token = localStorage.getItem('authToken');
-        const response = await fetch('/api/admin/export/members', {
+        const exportUrl = new URL('/api/admin/export/members', window.location.origin);
+        console.log('Exporting members with columns:', columns);
+        if (columns && columns.length > 0) {
+          exportUrl.searchParams.set('columns', columns.join(','));
+        }
+        const response = await fetch(exportUrl.toString(), {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -2612,14 +2642,128 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      await renderProtectedPage({
-        title: 'Dashboard',
-        activeHref: 'dashboard.html',
-        contentHtml: document.getElementById('dashboard-content').innerHTML,
-        onMount: async () => { await initDashboardPage(); },
-      });
+        await renderProtectedPage({
+          title: 'Dashboard',
+          activeHref: 'dashboard.html',
+          contentHtml: document.getElementById('dashboard-content').innerHTML,
+          onMount: async () => { await initDashboardPage(); },
+        });
     });
+
+    /* ==========================================================
+       COLUMN SELECTION FOR EXPORT
+       ========================================================== */
+    
+    // Store selected columns (null means all columns)
+    let selectedColumns = null;
+    
+    // Available columns for export (matching backend defaults)
+    const AVAILABLE_COLUMNS = [
+      { value: 'id', label: 'ID' },
+      { value: 'name', label: 'Name' },
+      { value: 'email', label: 'Email' },
+      { value: 'phone', label: 'Phone' },
+      { value: 'age', label: 'Age' },
+      { value: 'national_id', label: 'National ID' },
+      { value: 'sub_location', label: 'Sub-Location' },
+      { value: 'education', label: 'Education' },
+      { value: 'kcse', label: 'KCSE' },
+      { value: 'institution', label: 'Institution' },
+      { value: 'course', label: 'Course' },
+      { value: 'graduation', label: 'Graduation Year' },
+      { value: 'status', label: 'Status' },
+      { value: 'employer', label: 'Employer' },
+      { value: 'career', label: 'Career' },
+      { value: 'skills', label: 'Skills' },
+      { value: 'created_at', label: 'Created At' },
+      { value: 'country', label: 'Country' },
+      { value: 'county', label: 'County' },
+      { value: 'profession_bodies', label: 'Professional Bodies' }
+    ];
+
+    // Show column selection modal
+    function showColumnSelectionModal() {
+      // Reset to all columns selected by default
+      selectedColumns = null;
+      populateColumnCheckboxes();
+      document.getElementById('columnModalOverlay').classList.add('show');
+    }
+
+    // Export with selected columns
+    function exportSelectedColumns() {
+      if (selectedColumns !== null && selectedColumns.length === 0) {
+        AppOverlay.error('No columns selected', 'Please select at least one column to export.');
+        return;
+      }
+      console.log(selectedColumns)
+      document.getElementById('columnModalOverlay').classList.remove('show');
+      exportMembersCSV(selectedColumns).catch(err =>
+        AppOverlay.error('Export Failed', err.message)
+      );
+    }
+
+    // Close column selection modal
+    function closeColumnModal(e) {
+      if (e.target === document.getElementById('columnModalOverlay')) {
+        document.getElementById('columnModalOverlay').classList.remove('show');
+      }
+    }
+
+    // Select all columns
+    function selectAllColumns() {
+      selectedColumns = null;
+      populateColumnCheckboxes();
+    }
+
+    // Deselect all columns
+    function deselectAllColumns() {
+      selectedColumns = [];
+      populateColumnCheckboxes();
+    }
+
+    // Populate column checkboxes
+    function populateColumnCheckboxes() {
+      const container = document.getElementById('columnCheckboxes');
+      container.innerHTML = AVAILABLE_COLUMNS.map(col => {
+        const isSelected = selectedColumns === null || selectedColumns.includes(col.value);
+        return `
+          <label class="column-checkbox-label">
+            <input type="checkbox" class="column-checkbox" 
+                   value="${col.value}" 
+                   ${isSelected ? 'checked' : ''}>
+            ${col.label}
+          </label>
+        `;
+      }).join('');
+      
+      // Add event listeners to checkboxes
+      document.querySelectorAll('.column-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+          if (this.checked) {
+            if (selectedColumns === null) {
+              selectedColumns = [];
+            }
+            if (!selectedColumns.includes(this.value)) {
+              selectedColumns.push(this.value);
+            }
+          } else {
+            if (selectedColumns === null) {
+              // We're transitioning from "all selected" to specific selection
+              // Start with all options, then remove the unchecked one
+              selectedColumns = AVAILABLE_COLUMNS.map(c => c.value)
+                                              .filter(v => v !== this.value);
+            } else {
+              // We're already tracking specific selections
+              selectedColumns = selectedColumns.filter(c => c !== this.value);
+              // If all checkboxes are now unchecked, reset to null (meaning all)
+              if (selectedColumns.length === 0) {
+                selectedColumns = null;
+              }
+            }
+          }
+        });
+      });
+    }
   </script>
 </body>
-
 </html>

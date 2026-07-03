@@ -11,7 +11,7 @@ from cryptography.fernet import Fernet
 from django.conf import settings
 from django.core.cache import cache
 from django.db import models, transaction, IntegrityError
-from django.http import StreamingHttpResponse, HttpResponse
+from django.http import StreamingHttpResponse, HttpResponse, HttpResponseBadRequest
 from rest_framework import status, exceptions
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
@@ -562,46 +562,64 @@ def _encrypt_and_stream_csv(rows, columns, filename):
 @authentication_classes(AUTH)
 @permission_classes(ADMIN)
 def export_members(request):
-    columns = [
+    # Default columns for export
+    DEFAULT_COLUMNS = [
         'id', 'user_id', 'name', 'email', 'phone', 'age', 'national_id',
         'sub_location', 'education', 'kcse', 'institution', 'course',
         'graduation', 'status', 'employer', 'career', 'skills', 'created_at',
         'country', 'county', 'profession_bodies',
     ]
+    # Get columns from query parameters
+    columns_param = request.GET.get('columns')
+    if columns_param:
+        requested_columns = [col.strip() for col in columns_param.split(',')]
+        # Validate columns
+        invalid_columns = [col for col in requested_columns if col not in DEFAULT_COLUMNS]
+        if invalid_columns:
+            return HttpResponseBadRequest(f"Invalid columns: {', '.join(invalid_columns)}. Valid columns are: {', '.join(DEFAULT_COLUMNS)}")
+        columns = requested_columns
+    else:
+        columns = DEFAULT_COLUMNS
 
     def generate_rows():
         for member in Member.objects.all().iterator():
-            yield {
-                'id': member.id, 'user_id': member.user_id, 'name': member.name, 'email': member.email,
-                'phone': member.phone, 'age': member.age, 'national_id': member.national_id,
-                'sub_location': member.sub_location, 'education': member.education,
-                'kcse': member.kcse, 'institution': member.institution, 'course': member.course,
-                'graduation': member.graduation, 'status': member.status, 'employer': member.employer,
-                'career': member.career, 'skills': ';'.join(member.skills or []),
-                'country': str(member.country.name) if member.country else '',
-                'county': str(member.county) if member.county else '',
-                'profession_bodies': ';'.join(member.profession_bodies or []),
-                'created_at': member.created_at.isoformat(),
-            }
+            row = {}
+            for col in columns:
+                if col == 'skills':
+                    row[col] = ';'.join(member.skills or [])
+                elif col == 'country':
+                    row[col] = str(member.country.name) if member.country else ''
+                elif col == 'county':
+                    row[col] = str(member.county) if member.county else ''
+                elif col == 'profession_bodies':
+                    row[col] = ';'.join(member.profession_bodies or [])
+                else:
+                    row[col] = getattr(member, col, '')
+            yield row
 
     return _encrypt_and_stream_csv(generate_rows(), columns, 'members-export.csv')
-
-
 @authentication_classes(AUTH)
 @permission_classes(ADMIN)
 def export_users(request):
-    columns = ['id', 'name', 'email', 'role', 'status', 'created_at']
+    # Default columns for export
+    DEFAULT_COLUMNS = ['id', 'name', 'email', 'role', 'status', 'created_at']
+    # Get columns from query parameters
+    columns_param = request.GET.get('columns')
+    if columns_param:
+        requested_columns = [col.strip() for col in columns_param.split(',')]
+        # Validate columns
+        invalid_columns = [col for col in requested_columns if col not in DEFAULT_COLUMNS]
+        if invalid_columns:
+            return HttpResponseBadRequest(f"Invalid columns: {', '.join(invalid_columns)}. Valid columns are: {', '.join(DEFAULT_COLUMNS)}")
+        columns = requested_columns
+    else:
+        columns = DEFAULT_COLUMNS
 
     def generate_rows():
         for user in User.objects.all().iterator():
-            yield {
-                'id': user.id, 'name': user.name, 'email': user.email,
-                'role': user.role, 'status': user.status,
-                'created_at': user.created_at.isoformat(),
-            }
+            yield {col: getattr(user, col, '') for col in columns}
 
     return _encrypt_and_stream_csv(generate_rows(), columns, 'users-export.csv')
-
 
 @api_view(['GET'])
 @authentication_classes(AUTH)

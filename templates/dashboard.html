@@ -1657,7 +1657,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="row-btn" onclick="exportSelectedColumns()">Export</button>
+          <button class="row-btn primary-btn" onclick="exportSelectedColumns()">Export</button>
           <button class="row-btn" onclick="document.getElementById('columnModalOverlay').classList.remove('show')">Cancel</button>
         </div>
       </div>
@@ -2739,6 +2739,7 @@
       // Add event listeners to checkboxes
       document.querySelectorAll('.column-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
+          console.log(`Checkbox ${this.value} changed to ${this.checked}`);
           if (this.checked) {
             if (selectedColumns === null) {
               selectedColumns = [];

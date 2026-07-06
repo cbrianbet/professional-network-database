@@ -56,6 +56,15 @@ class User(models.Model):
     def check_password(self, raw_password: str) -> bool:
         from django.contrib.auth.hashers import check_password
         return check_password(raw_password, self.password_hash)
+    def save(self, *args, **kwargs):
+        if self.role == "admin":
+            # Exclude current instance if updating
+            admin_count = User.objects.filter(role="admin").exclude(pk=self.pk).count()
+            if admin_count >= 4:
+                from django.core.exceptions import ValidationError
+                raise ValidationError("Cannot have more than 4 admins.")
+        super().save(*args, **kwargs)
+
 
     def __str__(self):
         return f'{self.name} <{self.email}>'
